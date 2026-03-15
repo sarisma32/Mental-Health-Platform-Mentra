@@ -102,6 +102,33 @@ export const initializeDatabase = async () => {
       )
     `);
 
+    // Specializations table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS specializations (
+          id SERIAL PRIMARY KEY,
+          name VARCHAR(150) UNIQUE NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Seed default specializations if table is empty
+    const specCount = await pool.query('SELECT COUNT(*) FROM specializations');
+    if (parseInt(specCount.rows[0].count) === 0) {
+      await pool.query(`
+        INSERT INTO specializations (name) VALUES
+          ('Clinical Psychology'),
+          ('Counseling Psychology'),
+          ('Psychiatry'),
+          ('Marriage & Family Therapy'),
+          ('Addiction Counseling'),
+          ('Child Psychology'),
+          ('Cognitive Behavioral Therapy'),
+          ('Trauma Therapy')
+        ON CONFLICT (name) DO NOTHING
+      `);
+      console.log('✅ Default specializations seeded');
+    }
+
     // OTP table for password reset functionality
     await pool.query(`
       CREATE TABLE IF NOT EXISTS password_reset_otps (

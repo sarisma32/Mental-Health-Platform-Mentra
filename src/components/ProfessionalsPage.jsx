@@ -9,6 +9,7 @@ const ProfessionalsPage = () => {
   const [selectedSpecialization, setSelectedSpecialization] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [professionals, setProfessionals] = useState([]);
+  const [specializations, setSpecializations] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -16,7 +17,18 @@ const ProfessionalsPage = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
     fetchApprovedDoctors();
+    fetchSpecializations();
   }, []);
+
+  const fetchSpecializations = async () => {
+    try {
+      const res = await fetch(buildApiUrl('/api/admin/specializations'));
+      const data = await res.json();
+      if (data.success) setSpecializations(data.specializations.map(s => s.name));
+    } catch (e) {
+      // fallback to empty — filter will still work
+    }
+  };
 
   const fetchApprovedDoctors = async () => {
     try {
@@ -64,18 +76,6 @@ const ProfessionalsPage = () => {
       navigate(`/book-appointment/${professionalId}`);
     }
   };
-
-  const specializations = [
-    'All Specializations',
-    'Clinical Psychology',
-    'Counseling Psychology',
-    'Psychiatry',
-    'Marriage & Family Therapy',
-    'Addiction Counseling',
-    'Child Psychology',
-    'Cognitive Behavioral Therapy',
-    'Trauma Therapy'
-  ];
 
   const filteredProfessionals = professionals.filter(prof => {
     const matchesSpecialization = selectedSpecialization === 'all' || 
@@ -163,10 +163,9 @@ const ProfessionalsPage = () => {
                 onChange={(e) => setSelectedSpecialization(e.target.value)}
                 className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mentra-primary focus:border-transparent"
               >
+                <option value="all">All Specializations</option>
                 {specializations.map((spec, index) => (
-                  <option key={index} value={index === 0 ? 'all' : spec}>
-                    {spec}
-                  </option>
+                  <option key={index} value={spec}>{spec}</option>
                 ))}
               </select>
             </div>

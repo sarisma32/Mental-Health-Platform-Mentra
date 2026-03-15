@@ -380,3 +380,76 @@ export const getAllAppointments = async (req, res) => {
     });
   }
 };
+
+// ── Specializations ──────────────────────────────────────────────────────────
+
+export const getSpecializations = async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM specializations ORDER BY name ASC');
+    res.json({ success: true, specializations: result.rows });
+  } catch (error) {
+    console.error('Error fetching specializations:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch specializations' });
+  }
+};
+
+export const createSpecialization = async (req, res) => {
+  try {
+    const { name } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, message: 'Name is required' });
+    }
+    const result = await pool.query(
+      'INSERT INTO specializations (name) VALUES ($1) RETURNING *',
+      [name.trim()]
+    );
+    res.status(201).json({ success: true, specialization: result.rows[0] });
+  } catch (error) {
+    if (error.code === '23505') {
+      return res.status(409).json({ success: false, message: 'Specialization already exists' });
+    }
+    console.error('Error creating specialization:', error);
+    res.status(500).json({ success: false, message: 'Failed to create specialization' });
+  }
+};
+
+export const updateSpecialization = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, message: 'Name is required' });
+    }
+    const result = await pool.query(
+      'UPDATE specializations SET name = $1 WHERE id = $2 RETURNING *',
+      [name.trim(), id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Specialization not found' });
+    }
+    res.json({ success: true, specialization: result.rows[0] });
+  } catch (error) {
+    if (error.code === '23505') {
+      return res.status(409).json({ success: false, message: 'Specialization already exists' });
+    }
+    console.error('Error updating specialization:', error);
+    res.status(500).json({ success: false, message: 'Failed to update specialization' });
+  }
+};
+
+export const deleteSpecialization = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const result = await pool.query(
+      'DELETE FROM specializations WHERE id = $1 RETURNING *',
+      [id]
+    );
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'Specialization not found' });
+    }
+    res.json({ success: true, message: `"${result.rows[0].name}" deleted` });
+  } catch (error) {
+    console.error('Error deleting specialization:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete specialization' });
+  }
+};

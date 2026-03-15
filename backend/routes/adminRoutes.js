@@ -20,7 +20,11 @@ import {
   getDoctorById,
   getAdminStats,
   deleteDoctor,
-  getAllAppointments
+  getAllAppointments,
+  getSpecializations,
+  createSpecialization,
+  updateSpecialization,
+  deleteSpecialization
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -39,6 +43,12 @@ router.get("/users", getAllPatients);
 router.put("/users/:patientId/status", updatePatientStatus);
 router.get("/stats", getAdminStats);
 router.get("/appointments", getAllAppointments);
+
+// Specializations
+router.get("/specializations", getSpecializations);
+router.post("/specializations", createSpecialization);
+router.put("/specializations/:id", updateSpecialization);
+router.delete("/specializations/:id", deleteSpecialization);
 
 console.log('✅ Admin routes configured:', router.stack.map(r => r.route?.path).filter(Boolean));
 

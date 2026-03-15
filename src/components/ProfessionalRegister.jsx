@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import Header from './Header';
 import { buildApiUrl, API_ENDPOINTS } from '../config/api.js';
@@ -21,6 +21,14 @@ const ProfessionalRegister = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [specializations, setSpecializations] = useState([]);
+
+  useEffect(() => {
+    fetch(buildApiUrl('/api/admin/specializations'))
+      .then(r => r.json())
+      .then(data => { if (data.success) setSpecializations(data.specializations.map(s => s.name)); })
+      .catch(() => {});
+  }, []);
 
   const validateForm = () => {
     const newErrors = {};
@@ -219,18 +227,6 @@ const ProfessionalRegister = () => {
     
     setIsSubmitting(false);
   };
-
-  const specializations = [
-    'Clinical Psychology',
-    'Counseling Psychology',
-    'Psychiatry',
-    'Marriage & Family Therapy',
-    'Addiction Counseling',
-    'Child Psychology',
-    'Cognitive Behavioral Therapy',
-    'Trauma Therapy',
-    'Other'
-  ];
 
   return (
     <div className="min-h-screen bg-mentra-white">
