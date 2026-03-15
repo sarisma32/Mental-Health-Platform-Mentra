@@ -244,3 +244,201 @@ export const sendPasswordResetConfirmation = async (email, userName = '') => {
     return { success: false, message: 'Failed to send confirmation email' };
   }
 };
+
+// ── Appointment Booked Email ─────────────────────────────────────────────────
+export const sendAppointmentBookedEmail = async (appointment) => {
+  try {
+    const transporter = createTransporter();
+
+    const {
+      patient_email, patient_first_name, patient_last_name,
+      doctor_name, doctor_specialization, doctor_location,
+      appointment_date, appointment_time, appointment_type,
+      session_fee, duration_minutes, confirmation_number
+    } = appointment;
+
+    const patientName = `${patient_first_name} ${patient_last_name}`;
+    const formattedDate = new Date(appointment_date).toLocaleDateString('en-US', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+    const [h, m] = appointment_time.split(':');
+    const hour = parseInt(h);
+    const formattedTime = `${hour % 12 || 12}:${m} ${hour >= 12 ? 'PM' : 'AM'}`;
+    const sessionType = appointment_type === 'initial' ? 'Initial Consultation' : 'Follow-up Session';
+
+    const mailOptions = {
+      from: `"Mentra - Mental Health Platform" <${process.env.EMAIL_USER}>`,
+      to: patient_email,
+      subject: `Appointment Confirmed - ${confirmation_number} | Mentra`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }
+            .header { background: linear-gradient(135deg, #A3B18A, #8FA076); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+            .header h1 { margin: 0; font-size: 24px; }
+            .header p { margin: 8px 0 0; opacity: 0.9; font-size: 14px; }
+            .content { background-color: white; padding: 30px; border-radius: 0 0 8px 8px; }
+            .confirmation-box { background-color: #DCE4D4; border: 2px solid #A3B18A; border-radius: 8px; padding: 16px; text-align: center; margin: 20px 0; }
+            .confirmation-box .label { font-size: 12px; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+            .confirmation-box .number { font-size: 22px; font-weight: bold; color: #A3B18A; letter-spacing: 3px; margin-top: 4px; }
+            .details-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            .details-table tr { border-bottom: 1px solid #f0f0f0; }
+            .details-table td { padding: 10px 8px; font-size: 14px; }
+            .details-table td:first-child { color: #666; width: 40%; }
+            .details-table td:last-child { font-weight: 600; color: #333; }
+            .info-box { background-color: #F5F5F0; border-left: 4px solid #A3B18A; padding: 14px; margin: 20px 0; border-radius: 0 6px 6px 0; font-size: 14px; }
+            .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #888; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>✅ Appointment Confirmed</h1>
+              <p>Your session has been successfully booked</p>
+            </div>
+            <div class="content">
+              <p>Hi <strong>${patientName}</strong>,</p>
+              <p>Your appointment has been confirmed. Here are your booking details:</p>
+
+              <div class="confirmation-box">
+                <div class="label">Confirmation Number</div>
+                <div class="number">${confirmation_number}</div>
+              </div>
+
+              <table class="details-table">
+                <tr><td>Doctor</td><td>Dr. ${doctor_name}</td></tr>
+                <tr><td>Specialization</td><td>${doctor_specialization}</td></tr>
+                <tr><td>Location</td><td>${doctor_location}</td></tr>
+                <tr><td>Date</td><td>${formattedDate}</td></tr>
+                <tr><td>Time</td><td>${formattedTime}</td></tr>
+                <tr><td>Session Type</td><td>${sessionType}</td></tr>
+                <tr><td>Duration</td><td>${duration_minutes} minutes</td></tr>
+                <tr><td>Session Fee</td><td>Rs ${session_fee}</td></tr>
+              </table>
+
+              <div class="info-box">
+                💡 <strong>Reminder:</strong> Please arrive a few minutes early and bring any relevant medical records or previous therapy notes.
+              </div>
+
+              <p>If you need to reschedule or have any questions, please contact us through the Mentra platform.</p>
+              <p>Best regards,<br><strong>The Mentra Team</strong></p>
+            </div>
+            <div class="footer">
+              <p>This is an automated email. Please do not reply to this message.</p>
+              <p>&copy; 2026 Mentra - Mental Health Platform. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Appointment booked email sent to:', patient_email, '| ID:', info.messageId);
+    return { success: true };
+  } catch (error) {
+    console.error('❌ Error sending appointment booked email:', error);
+    return { success: false };
+  }
+};
+
+// ── Session Completed Email ──────────────────────────────────────────────────
+export const sendSessionCompletedEmail = async (appointment) => {
+  try {
+    const transporter = createTransporter();
+
+    const {
+      patient_email, patient_first_name, patient_last_name,
+      doctor_name, doctor_specialization,
+      appointment_date, appointment_time,
+      session_notes, confirmation_number
+    } = appointment;
+
+    const patientName = `${patient_first_name} ${patient_last_name}`;
+    const formattedDate = new Date(appointment_date).toLocaleDateString('en-US', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+    const [h, m] = appointment_time.split(':');
+    const hour = parseInt(h);
+    const formattedTime = `${hour % 12 || 12}:${m} ${hour >= 12 ? 'PM' : 'AM'}`;
+
+    const mailOptions = {
+      from: `"Mentra - Mental Health Platform" <${process.env.EMAIL_USER}>`,
+      to: patient_email,
+      subject: `Session Completed - Notes from Dr. ${doctor_name} | Mentra`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }
+            .header { background: linear-gradient(135deg, #A3B18A, #8FA076); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+            .header h1 { margin: 0; font-size: 24px; }
+            .header p { margin: 8px 0 0; opacity: 0.9; font-size: 14px; }
+            .content { background-color: white; padding: 30px; border-radius: 0 0 8px 8px; }
+            .details-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            .details-table tr { border-bottom: 1px solid #f0f0f0; }
+            .details-table td { padding: 10px 8px; font-size: 14px; }
+            .details-table td:first-child { color: #666; width: 40%; }
+            .details-table td:last-child { font-weight: 600; color: #333; }
+            .notes-box { background-color: #F0F4EC; border: 1px solid #A3B18A; border-radius: 8px; padding: 20px; margin: 20px 0; }
+            .notes-box h3 { margin: 0 0 12px; color: #A3B18A; font-size: 16px; }
+            .notes-box p { margin: 0; font-size: 14px; color: #444; white-space: pre-line; }
+            .info-box { background-color: #F5F5F0; border-left: 4px solid #A3B18A; padding: 14px; margin: 20px 0; border-radius: 0 6px 6px 0; font-size: 14px; }
+            .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #888; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🎯 Session Completed</h1>
+              <p>Your session notes are ready</p>
+            </div>
+            <div class="content">
+              <p>Hi <strong>${patientName}</strong>,</p>
+              <p>Your session with <strong>Dr. ${doctor_name}</strong> has been marked as completed. Please find your session summary below.</p>
+
+              <table class="details-table">
+                <tr><td>Doctor</td><td>Dr. ${doctor_name}</td></tr>
+                <tr><td>Specialization</td><td>${doctor_specialization}</td></tr>
+                <tr><td>Session Date</td><td>${formattedDate}</td></tr>
+                <tr><td>Session Time</td><td>${formattedTime}</td></tr>
+                <tr><td>Confirmation #</td><td>${confirmation_number}</td></tr>
+              </table>
+
+              ${session_notes ? `
+              <div class="notes-box">
+                <h3>📋 Session Notes from Dr. ${doctor_name}</h3>
+                <p>${session_notes}</p>
+              </div>
+              ` : ''}
+
+              <div class="info-box">
+                💡 You can also view these notes anytime by logging into your Mentra account and checking your appointment history.
+              </div>
+
+              <p>Thank you for trusting Mentra with your mental health journey. We hope your session was helpful.</p>
+              <p>Best regards,<br><strong>The Mentra Team</strong></p>
+            </div>
+            <div class="footer">
+              <p>This is an automated email. Please do not reply to this message.</p>
+              <p>&copy; 2026 Mentra - Mental Health Platform. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Session completed email sent to:', patient_email, '| ID:', info.messageId);
+    return { success: true };
+  } catch (error) {
+    console.error('❌ Error sending session completed email:', error);
+    return { success: false };
+  }
+};

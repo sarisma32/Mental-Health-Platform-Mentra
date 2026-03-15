@@ -1,4 +1,5 @@
 import pool from "../db/index.js";
+import { sendAppointmentBookedEmail, sendSessionCompletedEmail } from "../utils/emailService.js";
 
 // Generate unique confirmation number
 const generateConfirmationNumber = () => {
@@ -79,6 +80,11 @@ export const createAppointment = async (req, res) => {
         specialRequests, doctorName, doctorSpecialization, doctorLocation,
         doctorAddress, doctorPhone, confirmationNumber
       ]
+    );
+
+    // Send booking confirmation email (non-blocking)
+    sendAppointmentBookedEmail(newAppointment.rows[0]).catch(e =>
+      console.error('Booking email error:', e)
     );
 
     res.status(201).json({
@@ -314,6 +320,11 @@ export const completeSession = async (req, res) => {
        WHERE id = $2 
        RETURNING *`,
       [sessionNotes, appointmentId]
+    );
+
+    // Send session completed email with notes (non-blocking)
+    sendSessionCompletedEmail(updatedAppointment.rows[0]).catch(e =>
+      console.error('Session completed email error:', e)
     );
 
     res.json({
