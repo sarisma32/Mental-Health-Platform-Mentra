@@ -1,0 +1,129 @@
+/* App.css - Custom styles for Mentra */
+
+/* Custom Mentra Colors */
+:root {
+  --mentra-primary: #A3B18A;
+  --mentra-secondary: #DCE4D4;
+  --mentra-white: #F5F5F0;
+  --mentra-primary-hover: #8fa076;
+  --mentra-primary-dark: #7a8c61;
+}
+
+/* Custom color classes */
+.bg-mentra-primary {
+  background-color: var(--mentra-primary);
+}
+
+.bg-mentra-secondary {
+  background-color: var(--mentra-secondary);
+}
+
+.bg-mentra-white {
+  background-color: var(--mentra-white);
+}
+
+.text-mentra-primary {
+  color: var(--mentra-primary);
+}
+
+.text-mentra-secondary {
+  color: var(--mentra-secondary);
+}
+
+.border-mentra-primary {
+  border-color: var(--mentra-primary);
+}
+
+.border-mentra-secondary {
+  border-color: var(--mentra-secondary);
+}
+
+.hover\:bg-mentra-primary-hover:hover {
+  background-color: var(--mentra-primary-hover);
+}
+
+.hover\:bg-mentra-primary-dark:hover {
+  background-color: var(--mentra-primary-dark);
+}
+
+.hover\:text-mentra-primary:hover {
+  color: var(--mentra-primary);
+}
+
+.hover\:border-mentra-secondary:hover {
+  border-color: var(--mentra-secondary);
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Custom gradient backgrounds */
+.bg-gradient-mentra {
+  background: linear-gradient(135deg, var(--mentra-secondary) 0%, var(--mentra-white) 100%);
+}
+
+.bg-gradient-mentra-hero {
+  background: linear-gradient(135deg, var(--mentra-white) 0%, var(--mentra-secondary) 50%, var(--mentra-white) 100%);
+}
+
+/* Custom shadows */
+.shadow-mentra {
+  box-shadow: 0 10px 25px -5px rgba(163, 177, 138, 0.15), 0 10px 10px -5px rgba(163, 177, 138, 0.08);
+}
+
+/* Print styles */
+@media print {
+  body {
+    margin: 0;
+    padding: 20px;
+    background: white !important;
+  }
+  
+  #printable-content {
+    box-shadow: none !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  .print\:hidden {
+    display: none !important;
+  }
+  
+  /* Ensure colors print correctly */
+  .bg-mentra-primary {
+    background-color: var(--mentra-primary) !important;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+  }
+  
+  .bg-mentra-secondary {
+    background-color: var(--mentra-secondary) !important;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+  }
+  
+  .text-mentra-primary {
+    color: var(--mentra-primary) !important;
+    -webkit-print-color-adjust: exact;
+    color-adjust: exact;
+  }
+}
