@@ -4,6 +4,21 @@ import Header from './Header';
 import Footer from './Footer';
 import { buildApiUrl, API_ENDPOINTS } from '../config/api.js';
 
+const StarRating = ({ rating, onRate, readonly = false }) => (
+  <div className="flex space-x-1">
+    {[1, 2, 3, 4, 5].map((star) => (
+      <button
+        key={star}
+        type="button"
+        onClick={() => !readonly && onRate && onRate(star)}
+        className={`text-2xl transition-colors ${readonly ? 'cursor-default' : 'cursor-pointer hover:scale-110'} ${star <= rating ? 'text-yellow-400' : 'text-gray-300'}`}
+      >
+        ★
+      </button>
+    ))}
+  </div>
+);
+
 const Dashboard = () => {
   const [user, setUser] = useState(null);
   const [userRole, setUserRole] = useState(null);
@@ -15,6 +30,11 @@ const Dashboard = () => {
     completed: 0
   });
   const [activeTab, setActiveTab] = useState('upcoming'); // upcoming, past, all
+  const [reviewModal, setReviewModal] = useState(null); // appointment object
+  const [reviewRating, setReviewRating] = useState(0);
+  const [reviewText, setReviewText] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewedAppointments, setReviewedAppointments] = useState(new Set());
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -78,12 +98,51 @@ const Dashboard = () => {
             upcoming,
             completed
           });
+
+          // Check which completed appointments already have reviews
+          const completedApts = data.appointments.filter(a => a.status === 'completed');
+          const reviewChecks = await Promise.all(
+            completedApts.map(a =>
+              fetch(buildApiUrl(`${API_ENDPOINTS.CHECK_REVIEW}/${a.id}`))
+                .then(r => r.json())
+                .then(d => d.hasReview ? a.id : null)
+                .catch(() => null)
+            )
+          );
+          setReviewedAppointments(new Set(reviewChecks.filter(Boolean)));
         }
       }
     } catch (error) {
       console.error('Error fetching appointments:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSubmitReview = async () => {
+    if (!reviewRating || !reviewModal) return;
+    setSubmittingReview(true);
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(buildApiUrl(API_ENDPOINTS.SUBMIT_REVIEW), {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ appointmentId: reviewModal.id, rating: reviewRating, reviewText })
+      });
+      const data = await response.json();
+      if (data.success) {
+        setReviewedAppointments(prev => new Set([...prev, reviewModal.id]));
+        setReviewModal(null);
+        setReviewRating(0);
+        setReviewText('');
+        alert('Review submitted! It will appear after admin approval.');
+      } else {
+        alert(data.message || 'Failed to submit review');
+      }
+    } catch (err) {
+      alert('Failed to submit review');
+    } finally {
+      setSubmittingReview(false);
     }
   };
 
@@ -437,6 +496,23 @@ const Dashboard = () => {
                               </button>
                             </div>
                           )}
+
+                          {appointment.status === 'completed' && (
+                            <div>
+                              {reviewedAppointments.has(appointment.id) ? (
+                                <span className="text-xs text-green-600 font-medium flex items-center">
+                                  <span className="mr-1">★</span> Reviewed
+                                </span>
+                              ) : (
+                                <button
+                                  onClick={() => { setReviewModal(appointment); setReviewRating(0); setReviewText(''); }}
+                                  className="text-xs text-[#A3B18A] hover:text-[#8FA076] font-medium border border-[#A3B18A] px-2 py-1 rounded"
+                                >
+                                  Leave a Review
+                                </button>
+                              )}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -513,6 +589,59 @@ const Dashboard = () => {
       </div>
 
       <Footer />
+
+      {/* Review Modal */}
+      {reviewModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-bold text-gray-900">Leave a Review</h3>
+              <button onClick={() => setReviewModal(null)} className="text-gray-400 hover:text-gray-600">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-3 mb-4 text-sm text-gray-700">
+              <p className="font-medium">Dr. {reviewModal.doctor_name}</p>
+              <p className="text-gray-500">{reviewModal.doctor_specialization} • {formatDate(reviewModal.appointment_date)}</p>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Your Rating</label>
+              <StarRating rating={reviewRating} onRate={setReviewRating} />
+            </div>
+
+            <div className="mb-5">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Your Review (optional)</label>
+              <textarea
+                value={reviewText}
+                onChange={(e) => setReviewText(e.target.value)}
+                rows={4}
+                placeholder="Share your experience with this therapist..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent resize-none"
+              />
+            </div>
+
+            <div className="flex space-x-3">
+              <button
+                onClick={() => setReviewModal(null)}
+                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 text-sm font-medium hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSubmitReview}
+                disabled={!reviewRating || submittingReview}
+                className="flex-1 px-4 py-2 bg-[#A3B18A] hover:bg-[#8FA076] text-white rounded-lg text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submittingReview ? 'Submitting...' : 'Submit Review'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

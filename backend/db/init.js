@@ -129,6 +129,22 @@ export const initializeDatabase = async () => {
       console.log('✅ Default specializations seeded');
     }
 
+    // Reviews table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS reviews (
+          id SERIAL PRIMARY KEY,
+          appointment_id INTEGER NOT NULL REFERENCES appointments(id) ON DELETE CASCADE,
+          patient_id INTEGER NOT NULL REFERENCES patients(id) ON DELETE CASCADE,
+          doctor_id INTEGER NOT NULL REFERENCES doctors(id) ON DELETE CASCADE,
+          rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+          review_text TEXT,
+          is_visible BOOLEAN DEFAULT FALSE,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+          UNIQUE(appointment_id)
+      )
+    `);
+
     // OTP table for password reset functionality
     await pool.query(`
       CREATE TABLE IF NOT EXISTS password_reset_otps (

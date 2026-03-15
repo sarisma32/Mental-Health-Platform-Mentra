@@ -440,6 +440,15 @@ const DoctorDashboardNew = () => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
         </svg>
       )
+    },
+    {
+      id: 'reviews',
+      name: 'My Reviews',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+        </svg>
+      )
     }
   ];
 
@@ -902,6 +911,10 @@ const DoctorDashboardNew = () => {
                 <p className="text-xs text-gray-400 mt-4">Coming soon</p>
               </div>
             </div>
+          )}
+
+          {activeSection === 'reviews' && doctor && (
+            <DoctorReviewsSection doctorId={doctor.id} />
           )}
 
           {activeSection === 'profile' && (
@@ -1392,3 +1405,100 @@ const DoctorDashboardNew = () => {
 };
 
 export default DoctorDashboardNew;
+
+const DoctorReviewsSection = ({ doctorId }) => {
+  const [reviews, setReviews] = useState([]);
+  const [stats, setStats] = useState({ total_reviews: 0, avg_rating: null });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      try {
+        const res = await fetch(buildApiUrl(`${API_ENDPOINTS.DOCTOR_REVIEWS}/${doctorId}`));
+        const data = await res.json();
+        if (data.success) {
+          setReviews(data.reviews);
+          setStats(data.stats);
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReviews();
+  }, [doctorId]);
+
+  const renderStars = (rating) => (
+    <span className="text-yellow-400">
+      {'★'.repeat(rating)}{'☆'.repeat(5 - rating)}
+    </span>
+  );
+
+  return (
+    <div className="space-y-6">
+      {/* Stats */}
+      <div className="grid grid-cols-2 gap-4">
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 text-center">
+          <p className="text-3xl font-bold text-gray-800">{stats.total_reviews || 0}</p>
+          <p className="text-sm text-gray-500 mt-1">Total Reviews</p>
+        </div>
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 text-center">
+          <p className="text-3xl font-bold text-yellow-500">{stats.avg_rating || '—'}</p>
+          <p className="text-sm text-gray-500 mt-1">Average Rating</p>
+          {stats.avg_rating && <p className="text-yellow-400 text-lg mt-1">{'★'.repeat(Math.round(stats.avg_rating))}</p>}
+        </div>
+      </div>
+
+      {/* Reviews List */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100">
+          <h3 className="font-semibold text-gray-800">Patient Reviews (Approved)</h3>
+          <p className="text-xs text-gray-400 mt-1">Only reviews approved by admin are shown here</p>
+        </div>
+
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A3B18A] mx-auto"></div>
+          </div>
+        ) : reviews.length === 0 ? (
+          <div className="text-center py-12 text-gray-400">
+            <svg className="w-12 h-12 mx-auto mb-3 text-gray-200" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+            </svg>
+            <p className="text-sm">No approved reviews yet</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-50">
+            {reviews.map((review) => (
+              <div key={review.id} className="px-6 py-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                      {review.patient_first_name?.charAt(0)}{review.patient_last_name?.charAt(0)}
+                    </div>
+                    <div>
+                      <p className="font-medium text-gray-900 text-sm">
+                        {review.patient_first_name} {review.patient_last_name}
+                      </p>
+                      <p className="text-xs text-gray-400">
+                        {new Date(review.appointment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    {renderStars(review.rating)}
+                    <p className="text-xs text-gray-400 mt-1">{review.rating}/5</p>
+                  </div>
+                </div>
+                {review.review_text && (
+                  <p className="mt-3 text-sm text-gray-700 ml-13 pl-1">{review.review_text}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};

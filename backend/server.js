@@ -11,6 +11,7 @@ import authRoutes from "./routes/authRoutes.js";
 import appointmentRoutes from "./routes/appointmentRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import scheduleRoutes from "./routes/scheduleRoutes.js";
+import reviewRoutes from "./routes/reviewRoutes.js";
 console.log('📦 Schedule routes imported:', typeof scheduleRoutes, scheduleRoutes ? 'OK' : 'UNDEFINED');
 import { testConnection, initializeDatabase } from "./db/init.js";
 
@@ -64,6 +65,8 @@ app.use("/api/dashboard", dashboardRoutes);
 console.log('✅ Dashboard routes mounted at /api/dashboard');
 app.use("/api/schedules", scheduleRoutes);
 console.log('✅ Schedule routes mounted at /api/schedules');
+app.use("/api/reviews", reviewRoutes);
+console.log('✅ Review routes mounted at /api/reviews');
 
 // Health check route
 app.get("/api/health", (req, res) => {

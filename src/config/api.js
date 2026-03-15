@@ -44,7 +44,15 @@ export const API_ENDPOINTS = {
   ADD_SCHEDULE_SLOT: '/api/schedules',
   UPDATE_SCHEDULE_SLOT: '/api/schedules',
   DELETE_SCHEDULE_SLOT: '/api/schedules',
-  AVAILABLE_TIME_SLOTS: '/api/schedules/doctor'
+  AVAILABLE_TIME_SLOTS: '/api/schedules/doctor',
+
+  // Review endpoints
+  SUBMIT_REVIEW: '/api/reviews/submit',
+  CHECK_REVIEW: '/api/reviews/check',
+  ADMIN_REVIEWS: '/api/reviews/admin/all',
+  ADMIN_REVIEW_VISIBILITY: '/api/reviews/admin',
+  ADMIN_DELETE_REVIEW: '/api/reviews/admin',
+  DOCTOR_REVIEWS: '/api/reviews/doctor'
 };
 
 // Helper function to build full URL
