@@ -129,6 +129,20 @@ export const initializeDatabase = async () => {
       console.log('✅ Default specializations seeded');
     }
 
+    // Notifications table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS notifications (
+          id SERIAL PRIMARY KEY,
+          recipient_type VARCHAR(20) NOT NULL CHECK (recipient_type IN ('doctor', 'admin')),
+          recipient_id INTEGER,
+          type VARCHAR(50) NOT NULL,
+          title VARCHAR(255) NOT NULL,
+          message TEXT NOT NULL,
+          is_read BOOLEAN DEFAULT FALSE,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     // Reviews table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS reviews (

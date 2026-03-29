@@ -2,6 +2,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import pool from "../db/index.js";
 import path from "path";
+import { createNotification } from "./notificationController.js";
 
 // REGISTER DOCTOR
 export const registerDoctor = async (req, res) => {
@@ -73,6 +74,14 @@ export const registerDoctor = async (req, res) => {
       success: true,
       message: "Registration submitted successfully! Your profile will be reviewed within 24-72 hours. You'll receive an email notification once approved.",
       doctor: newDoctor.rows[0]
+    });
+
+    // Notify admin about new doctor registration
+    createNotification({
+      recipientType: 'admin',
+      type: 'new_doctor',
+      title: 'New Doctor Registration',
+      message: `Dr. ${fullName} (${specialization}) submitted a registration and is awaiting approval.`
     });
 
   } catch (error) {

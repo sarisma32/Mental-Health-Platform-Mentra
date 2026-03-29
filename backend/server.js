@@ -12,7 +12,7 @@ import appointmentRoutes from "./routes/appointmentRoutes.js";
 import dashboardRoutes from "./routes/dashboardRoutes.js";
 import scheduleRoutes from "./routes/scheduleRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
-console.log('📦 Schedule routes imported:', typeof scheduleRoutes, scheduleRoutes ? 'OK' : 'UNDEFINED');
+import notificationRoutes from "./routes/notificationRoutes.js";
 import { testConnection, initializeDatabase } from "./db/init.js";
 
 // ES6 module compatibility
@@ -67,6 +67,8 @@ app.use("/api/schedules", scheduleRoutes);
 console.log('✅ Schedule routes mounted at /api/schedules');
 app.use("/api/reviews", reviewRoutes);
 console.log('✅ Review routes mounted at /api/reviews');
+app.use("/api/notifications", notificationRoutes);
+console.log('✅ Notification routes mounted at /api/notifications');
 
 // Health check route
 app.get("/api/health", (req, res) => {

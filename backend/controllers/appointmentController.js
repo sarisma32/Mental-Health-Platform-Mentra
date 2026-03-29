@@ -1,5 +1,6 @@
 import pool from "../db/index.js";
 import { sendAppointmentBookedEmail, sendSessionCompletedEmail } from "../utils/emailService.js";
+import { createNotification } from "./notificationController.js";
 
 // Generate unique confirmation number
 const generateConfirmationNumber = () => {
@@ -86,6 +87,23 @@ export const createAppointment = async (req, res) => {
     sendAppointmentBookedEmail(newAppointment.rows[0]).catch(e =>
       console.error('Booking email error:', e)
     );
+
+    // Notify the doctor about new appointment
+    createNotification({
+      recipientType: 'doctor',
+      recipientId: doctorId,
+      type: 'new_appointment',
+      title: 'New Appointment Booked',
+      message: `${patientFirstName} ${patientLastName} booked a ${appointmentType} session on ${appointmentDate} at ${appointmentTime}.`
+    });
+
+    // Notify admin about new appointment
+    createNotification({
+      recipientType: 'admin',
+      type: 'new_appointment',
+      title: 'New Appointment Booked',
+      message: `${patientFirstName} ${patientLastName} booked a session with Dr. ${doctorName} on ${appointmentDate}.`
+    });
 
     res.status(201).json({
       success: true,
@@ -326,6 +344,15 @@ export const completeSession = async (req, res) => {
     sendSessionCompletedEmail(updatedAppointment.rows[0]).catch(e =>
       console.error('Session completed email error:', e)
     );
+
+    // Notify admin about completed session
+    const apt = updatedAppointment.rows[0];
+    createNotification({
+      recipientType: 'admin',
+      type: 'session_completed',
+      title: 'Session Completed',
+      message: `Dr. ${apt.doctor_name} completed a session with ${apt.patient_first_name} ${apt.patient_last_name}.`
+    });
 
     res.json({
       success: true,

@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import pool from "../db/index.js";
+import { createNotification } from "./notificationController.js";
 
 // REGISTER PATIENT
 export const registerPatient = async (req, res) => {
@@ -46,6 +47,14 @@ export const registerPatient = async (req, res) => {
       message: "Account created successfully! Welcome to Mentra.",
       user: newPatient.rows[0],
       token
+    });
+
+    // Notify admin about new user registration (non-blocking)
+    createNotification({
+      recipientType: 'admin',
+      type: 'new_user',
+      title: 'New User Registered',
+      message: `${fullName} (${email}) just created a new patient account.`
     });
 
   } catch (err) {

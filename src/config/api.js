@@ -52,7 +52,10 @@ export const API_ENDPOINTS = {
   ADMIN_REVIEWS: '/api/reviews/admin/all',
   ADMIN_REVIEW_VISIBILITY: '/api/reviews/admin',
   ADMIN_DELETE_REVIEW: '/api/reviews/admin',
-  DOCTOR_REVIEWS: '/api/reviews/doctor'
+  DOCTOR_REVIEWS: '/api/reviews/doctor',
+
+  // Notification endpoints
+  NOTIFICATIONS: '/api/notifications'
 };
 
 // Helper function to build full URL

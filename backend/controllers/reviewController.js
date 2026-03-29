@@ -1,4 +1,5 @@
 import pool from "../db/index.js";
+import { createNotification } from "./notificationController.js";
 
 // Patient submits a review after a completed appointment
 export const submitReview = async (req, res) => {
@@ -42,6 +43,14 @@ export const submitReview = async (req, res) => {
     );
 
     res.status(201).json({ success: true, message: "Review submitted successfully. It will be visible after admin approval.", review: result.rows[0] });
+
+    // Notify admin about new review
+    createNotification({
+      recipientType: 'admin',
+      type: 'new_review',
+      title: 'New Review Submitted',
+      message: `A patient left a ${rating}-star review for Dr. ${apt.doctor_name}. Pending your approval.`
+    });
   } catch (err) {
     console.error("Submit review error:", err);
     res.status(500).json({ success: false, message: "Failed to submit review" });
@@ -111,6 +120,27 @@ export const updateReviewVisibility = async (req, res) => {
     }
 
     res.json({ success: true, message: `Review ${isVisible ? 'approved and visible' : 'hidden'}`, review: result.rows[0] });
+
+    // If admin approved the review, notify the doctor
+    if (isVisible) {
+      const review = result.rows[0];
+      // Get patient name from the appointment
+      const aptResult = await pool.query(
+        "SELECT patient_first_name, patient_last_name FROM appointments WHERE id = $1",
+        [review.appointment_id]
+      );
+      const patientName = aptResult.rows.length > 0
+        ? `${aptResult.rows[0].patient_first_name} ${aptResult.rows[0].patient_last_name}`
+        : 'A patient';
+
+      createNotification({
+        recipientType: 'doctor',
+        recipientId: review.doctor_id,
+        type: 'new_review',
+        title: 'New Review Approved',
+        message: `${patientName} left you a ${review.rating}-star review. It is now visible on your profile.`
+      });
+    }
   } catch (err) {
     console.error("Update review visibility error:", err);
     res.status(500).json({ success: false, message: "Failed to update review" });
