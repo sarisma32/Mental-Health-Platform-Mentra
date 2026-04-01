@@ -1,304 +1,186 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Header from './Header';
 import { buildApiUrl, API_ENDPOINTS } from '../config/api.js';
 
 const UserLogin = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateForm = () => {
     const newErrors = {};
-
-    // Email validation
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = 'Please enter a valid email address';
-    }
-
-    // Password validation
-    if (!formData.password) {
-      newErrors.password = 'Password is required';
-    }
-
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Invalid email';
+    if (!formData.password) newErrors.password = 'Password is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleGoBack = () => {
-    navigate(-1);
-  };
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
-    }
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
     if (validateForm()) {
       try {
         const response = await fetch(buildApiUrl(API_ENDPOINTS.LOGIN), {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: formData.email,
-            password: formData.password
-          })
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: formData.email, password: formData.password })
         });
-
         const data = await response.json();
-
-        // Check if account is deactivated (403 status)
-        if (response.status === 403 && data.status === 'inactive') {
-          navigate('/account-deactivated');
-          return;
-        }
-
+        if (response.status === 403 && data.status === 'inactive') { navigate('/account-deactivated'); return; }
         if (data.success) {
-          // Store token and user data in localStorage
           localStorage.setItem('token', data.token);
           localStorage.setItem('user', JSON.stringify(data.user));
           localStorage.setItem('userRole', data.role);
-          
-          // Trigger storage event to update Header component
           window.dispatchEvent(new Event('storage'));
-          
-          // Handle doctor login based on approval status
           if (data.role === 'doctor') {
-            if (data.user.approval_status === 'pending') {
-              // Redirect to pending page
-              navigate('/doctor-pending');
-            } else if (data.user.approval_status === 'approved') {
-              // Redirect to doctor dashboard
-              navigate('/doctor-dashboard');
-            }
+            navigate(data.user.approval_status === 'pending' ? '/doctor-pending' : '/doctor-dashboard');
           } else {
-            // Patient login - redirect to home/dashboard
             navigate('/dashboard');
           }
         } else {
           alert(data.message || 'Login failed. Please check your credentials.');
         }
-      } catch (error) {
-        console.error('Login error:', error);
+      } catch {
         alert('Login failed. Please check your connection and try again.');
       }
     }
-    
     setIsSubmitting(false);
   };
 
   return (
-    <div className="min-h-screen bg-mentra-white">
-      {/* Reuse Header Component */}
-      <Header />
+    <div className="h-screen overflow-hidden bg-white flex flex-col">
 
-      {/* Main Content */}
-      <div className="py-12">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Back Button */}
-          <div className="mb-8">
-            <button 
-              onClick={handleGoBack}
-              className="flex items-center space-x-2 text-gray-600 hover:text-mentra-primary transition-colors group"
-            >
-              <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              <span className="font-medium">Back</span>
-            </button>
+      {/* Nav */}
+      <nav className="flex items-center justify-between px-8 py-5 border-b border-gray-100">
+        <Link to="/" className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-[#A3B18A] rounded-lg flex items-center justify-center">
+            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
           </div>
+          <span className="font-bold text-gray-900 text-lg">MENTRA</span>
+        </Link>
+        <div className="flex items-center gap-4 text-sm">
+          <span className="text-gray-400">Don't have an account?</span>
+          <Link to="/register-user" className="bg-[#A3B18A] hover:bg-[#8FA076] text-white px-4 py-2 rounded-lg font-medium transition-colors">
+            Sign up
+          </Link>
+        </div>
+      </nav>
 
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left Side - Illustration and Text */}
-            <div className="space-y-8">
-              <div className="text-center lg:text-left">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                  Welcome back to your mental wellness journey.
-                </h2>
-              </div>
+      {/* Main */}
+      <div className="flex-1 flex overflow-hidden">
 
-              {/* Illustration */}
-              <div className="flex justify-center lg:justify-start">
-                <div className="relative">
-                  <img 
-                    src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?w=400&h=400&fit=crop&crop=face" 
-                    alt="Person in peaceful meditation" 
-                    className="w-80 h-80 object-cover rounded-3xl"
-                  />
-                  <div className="absolute inset-0 bg-mentra-secondary/20 rounded-3xl"></div>
-                </div>
-              </div>
+        {/* Decorative side — LEFT */}
+        <div className="hidden lg:flex lg:w-1/2 bg-[#F5F5F0] items-center justify-center relative overflow-hidden">
+          {/* Circles */}
+          <div className="absolute top-10 right-10 w-64 h-64 bg-[#DCE4D4] rounded-full opacity-60" />
+          <div className="absolute bottom-10 left-10 w-48 h-48 bg-[#A3B18A]/20 rounded-full" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#DCE4D4]/40 rounded-full" />
 
-              {/* Bottom Text */}
-              <div className="space-y-4 text-gray-600 leading-relaxed">
-                <p>
-                  Continue your path to mental wellness. Access your personalized 
-                  therapy sessions, track your progress, and connect with your 
-                  mental health professionals.
-                </p>
-                <p className="font-medium">
-                  Your mental health journey continues here.
-                </p>
-              </div>
+          {/* Center content */}
+          <div className="relative z-10 text-center px-12">
+            <div className="w-20 h-20 bg-[#A3B18A] rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+              <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
             </div>
+            <h3 className="text-2xl font-bold text-gray-800 mb-3">Your wellness, our priority</h3>
+            <p className="text-gray-500 text-sm leading-relaxed max-w-xs mx-auto">
+              Connect with licensed professionals and take control of your mental health journey.
+            </p>
 
-            {/* Right Side - Login Form */}
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-              <div className="text-center mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                  Welcome Back
-                </h1>
-                <p className="text-gray-600">
-                  Sign in to your Mentra account - for both users and professionals
-                </p>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Email Address */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Email Address
-                  </label>
-                  <div className="relative">
-                    <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                    </svg>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="Enter your email address"
-                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-mentra-primary focus:border-transparent transition-colors ${
-                        errors.email ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      required
-                    />
-                  </div>
-                  {errors.email && (
-                    <p className="mt-1 text-sm text-red-600">{errors.email}</p>
-                  )}
+            <div className="mt-8 grid grid-cols-3 gap-4">
+              {[
+                { n: '10K+', l: 'Users' },
+                { n: '500+', l: 'Therapists' },
+                { n: '24/7', l: 'Support' },
+              ].map(({ n, l }) => (
+                <div key={l} className="bg-white rounded-2xl p-4 shadow-sm">
+                  <p className="text-lg font-bold text-[#A3B18A]">{n}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{l}</p>
                 </div>
-
-                {/* Password */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Password
-                  </label>
-                  <div className="relative">
-                    <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                    </svg>
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      value={formData.password}
-                      onChange={handleInputChange}
-                      placeholder="Enter your password"
-                      className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-mentra-primary focus:border-transparent transition-colors ${
-                        errors.password ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showPassword ? (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
-                        </svg>
-                      ) : (
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                      )}
-                    </button>
-                  </div>
-                  {errors.password && (
-                    <p className="mt-1 text-sm text-red-600">{errors.password}</p>
-                  )}
-                </div>
-
-                {/* Forgot Password Link */}
-                <div className="text-right">
-                  <Link to="/forgot-password" className="text-sm text-mentra-primary hover:text-mentra-primary-hover underline">
-                    Forgot your password?
-                  </Link>
-                </div>
-
-                {/* Submit Button */}
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className={`w-full py-3 rounded-full font-semibold transition-all duration-300 transform shadow-lg ${
-                    isSubmitting 
-                      ? 'bg-gray-400 cursor-not-allowed' 
-                      : 'bg-mentra-primary hover:bg-mentra-primary-hover text-white hover:scale-105'
-                  }`}
-                >
-                  {isSubmitting ? 'Signing In...' : 'Sign In'}
-                </button>
-
-                {/* Register Link */}
-                <div className="text-center">
-                  <p className="text-gray-600">
-                    Don't have an account? 
-                    <Link to="/register-user" className="text-mentra-primary hover:text-mentra-primary-hover ml-1 underline font-medium">
-                      Sign up here
-                    </Link>
-                  </p>
-                </div>
-
-                {/* Divider */}
-                <div className="relative my-6">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300"></div>
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500">Or</span>
-                  </div>
-                </div>
-
-                {/* Professional Registration Link */}
-                <div className="text-center">
-                  <p className="text-gray-600 text-sm">
-                    Are you a mental health professional?
-                  </p>
-                  <Link to="/register-professional" className="text-mentra-primary hover:text-mentra-primary-hover font-medium underline">
-                    Register as Professional
-                  </Link>
-                </div>
-              </form>
+              ))}
             </div>
           </div>
         </div>
+
+        {/* Form side — RIGHT */}
+        <div className="w-full lg:w-1/2 flex items-center justify-center px-8 py-16">
+          <div className="w-full max-w-sm">
+
+            <button onClick={() => navigate(-1)}
+              className="flex items-center gap-1.5 text-gray-400 hover:text-gray-700 text-sm mb-10 transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back
+            </button>
+
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-gray-900">Welcome back</h1>
+              <p className="text-gray-500 text-sm mt-2">Sign in to your Mentra account</p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">Email address</label>
+                <input
+                  type="email" name="email" value={formData.email}
+                  onChange={handleInputChange} placeholder="you@example.com"
+                  className={`w-full px-4 py-3 rounded-xl border-2 text-sm outline-none transition-all focus:border-[#A3B18A] ${errors.email ? 'border-red-300' : 'border-gray-100 hover:border-gray-200'}`}
+                />
+                {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-1.5">
+                  <label className="text-sm font-medium text-gray-700">Password</label>
+                  <Link to="/forgot-password" className="text-xs text-[#A3B18A] hover:underline">Forgot password?</Link>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'} name="password" value={formData.password}
+                    onChange={handleInputChange} placeholder="Enter your password"
+                    className={`w-full px-4 py-3 pr-10 rounded-xl border-2 text-sm outline-none transition-all focus:border-[#A3B18A] ${errors.password ? 'border-red-300' : 'border-gray-100 hover:border-gray-200'}`}
+                  />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      {showPassword
+                        ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.878 9.878L3 3m6.878 6.878L21 21" />
+                        : <><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></>
+                      }
+                    </svg>
+                  </button>
+                </div>
+                {errors.password && <p className="mt-1 text-xs text-red-500">{errors.password}</p>}
+              </div>
+
+              <button type="submit" disabled={isSubmitting}
+                className={`w-full py-3.5 rounded-xl font-semibold text-sm transition-all mt-2 ${isSubmitting ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#A3B18A] hover:bg-[#8FA076] text-white'}`}>
+                {isSubmitting ? 'Signing in...' : 'Sign In'}
+              </button>
+            </form>
+
+            <div className="mt-6 pt-6 border-t border-gray-100 text-center">
+              <p className="text-xs text-gray-400">
+                Mental health professional?{' '}
+                <Link to="/register-professional" className="text-[#A3B18A] hover:underline font-medium">Register here</Link>
+              </p>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );

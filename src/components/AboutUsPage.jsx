@@ -50,7 +50,11 @@ const AboutUsPage = () => {
     {
       title: "Accessibility",
       description: "Mental health care should be available to everyone, regardless of location, schedule, or financial situation.",
-      icon: "🌍",
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      ),
       color: "bg-blue-50 border-blue-200"
     },
     {
@@ -66,13 +70,21 @@ const AboutUsPage = () => {
     {
       title: "Evidence-Based Care",
       description: "All our treatments and interventions are grounded in scientific research and proven therapeutic methods.",
-      icon: "🔬",
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+        </svg>
+      ),
       color: "bg-purple-50 border-purple-200"
     },
     {
       title: "Compassionate Support",
       description: "We approach every interaction with empathy, understanding, and genuine care for your wellbeing.",
-      icon: "💝",
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+      ),
       color: "bg-pink-50 border-pink-200"
     },
     {
@@ -88,7 +100,11 @@ const AboutUsPage = () => {
     {
       title: "Holistic Wellness",
       description: "We address mental health as part of overall wellness, considering all aspects of your life.",
-      icon: "🌱",
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+      ),
       color: "bg-teal-50 border-teal-200"
     }
   ];
@@ -226,7 +242,7 @@ const AboutUsPage = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
               <div key={index} className="bg-white rounded-xl p-8 text-center hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 group">
-                <div className="text-4xl mb-4 group-hover:scale-110 transition-transform duration-300">{stat.icon}</div>
+                <div className="w-12 h-12 bg-mentra-secondary rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-mentra-primary group-hover:text-white transition-all duration-300">{stat.icon}</div>
                 <div className="text-3xl font-bold text-mentra-primary mb-2 group-hover:text-mentra-primary-hover transition-colors">{stat.number}</div>
                 <div className="text-gray-600 font-medium">{stat.label}</div>
               </div>
@@ -253,39 +269,6 @@ const AboutUsPage = () => {
                 <div className="text-mentra-primary mb-4">{value.icon}</div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">{value.title}</h3>
                 <p className="text-gray-600 leading-relaxed">{value.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Team Section */}
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              Meet Our Leadership Team
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Our team combines decades of clinical experience with innovative technology expertise.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {teamMembers.map((member, index) => (
-              <div key={index} className="bg-white rounded-2xl p-6 text-center hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 group">
-                <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden ring-4 ring-mentra-secondary group-hover:ring-mentra-primary transition-all duration-300">
-                  <img 
-                    src={member.image} 
-                    alt={member.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                  />
-                </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-1 group-hover:text-mentra-primary transition-colors">{member.name}</h3>
-                <p className="text-mentra-primary font-medium mb-2">{member.role}</p>
-                <p className="text-sm text-gray-600 mb-3">{member.specialization}</p>
-                <p className="text-sm text-gray-600 leading-relaxed mb-3">{member.bio}</p>
-                <p className="text-xs text-gray-500 italic">{member.credentials}</p>
               </div>
             ))}
           </div>
@@ -363,7 +346,9 @@ const AboutUsPage = () => {
 
             <div className="bg-white rounded-xl p-6 text-center hover:shadow-lg transition-all duration-300">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🔐</span>
+                <svg className="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
               </div>
               <h3 className="text-lg font-bold text-gray-900 mb-3">HIPAA Compliant</h3>
               <p className="text-gray-600">Your privacy and data security are our top priorities.</p>
@@ -382,7 +367,7 @@ const AboutUsPage = () => {
         </div>
       </section>
 
-      <CallToAction />
+      {/* <CallToAction /> */}
 
       <Footer />
     </div>
