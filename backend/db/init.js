@@ -129,6 +129,18 @@ export const initializeDatabase = async () => {
       console.log('✅ Default specializations seeded');
     }
 
+    // Doctor Videos table
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS doctor_videos (
+          id SERIAL PRIMARY KEY,
+          doctor_id INTEGER NOT NULL REFERENCES doctors(id) ON DELETE CASCADE,
+          title VARCHAR(255) NOT NULL,
+          description TEXT,
+          video_path VARCHAR(500) NOT NULL,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
     // Notifications table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS notifications (

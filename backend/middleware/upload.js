@@ -101,3 +101,30 @@ const profileUpload = multer({
 
 // Middleware for profile photo upload
 export const uploadProfileImage = profileUpload.single('profilePhoto');
+
+// Configure storage for doctor videos
+const videoStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, '../uploads/videos/'));
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'video-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const videoFilter = (req, file, cb) => {
+  const allowedTypes = /mp4|mov|avi|webm|mkv/;
+  const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = /video\//.test(file.mimetype);
+  if (mimetype && extname) return cb(null, true);
+  cb(new Error('Only video files (mp4, mov, avi, webm, mkv) are allowed!'));
+};
+
+const videoUpload = multer({
+  storage: videoStorage,
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB
+  fileFilter: videoFilter
+});
+
+export const uploadVideo = videoUpload.single('video');

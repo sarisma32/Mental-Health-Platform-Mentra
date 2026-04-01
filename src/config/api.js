@@ -55,7 +55,12 @@ export const API_ENDPOINTS = {
   DOCTOR_REVIEWS: '/api/reviews/doctor',
 
   // Notification endpoints
-  NOTIFICATIONS: '/api/notifications'
+  NOTIFICATIONS: '/api/notifications',
+
+  // Video endpoints
+  DOCTOR_VIDEOS: '/api/doctors',
+  UPLOAD_VIDEO: '/api/doctors/videos',
+  DELETE_VIDEO: '/api/doctors/videos'
 };
 
 // Helper function to build full URL

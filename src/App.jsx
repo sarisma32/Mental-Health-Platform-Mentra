@@ -22,6 +22,7 @@ import AdminLogin from './components/AdminLogin'
 import AdminDashboard from './components/AdminDashboard'
 import AdminDashboardNew from './components/AdminDashboardNew'
 import AccountDeactivated from './components/AccountDeactivated'
+import DoctorProfilePage from './components/DoctorProfilePage'
 import './App.css'
 
 function App() {
@@ -51,6 +52,7 @@ function App() {
           <Route path="/admin" element={<AdminDashboardNew />} />
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/account-deactivated" element={<AccountDeactivated />} />
+          <Route path="/doctor-profile/:doctorId" element={<DoctorProfilePage />} />
         </Routes>
       </div>
     </Router>
@@ -60,28 +62,3 @@ function App() {
 export default App
 
 
-
-// import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-
-// import LandingPage from "./LandingPage/LandingPage.jsx";
-
-// import ChooseAccountType from "./ChooseAccountType/ChooseAccountType";
-// import DoctorRegister from "./DoctorRegister/DoctorRegister";
-// import UserRegister from "./UserRegister/UserRegister";
-// import AboutUs from "./AboutUs/AboutUs";   // NEW IMPORT
-
-// function App() {
-//   return (
-//     <Router>
-//       <Routes>
-//         <Route path="/" element={<LandingPage />} />
-//         <Route path="/choose-account" element={<ChooseAccountType />} />
-//         <Route path="/register-doctor" element={<DoctorRegister />} />
-//         <Route path="/register-user" element={<UserRegister />} />
-//         <Route path="/about-us" element={<AboutUs />} />  {/* NEW ROUTE */}
-//       </Routes>
-//     </Router>
-//   );
-// }
-
-// export default App;

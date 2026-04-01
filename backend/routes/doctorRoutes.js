@@ -49,28 +49,35 @@ import {
   updateDoctorProfileInfo,
   uploadProfilePhoto,
   getDoctorById,
-  updateCompleteProfile
+  updateCompleteProfile,
+  uploadDoctorVideo,
+  getDoctorVideos,
+  deleteDoctorVideo
 } from "../controllers/doctorController.js";
 import { validateDoctorRegistration, validateLogin } from "../middleware/validation.js";
 import { verifyToken, verifyDoctor } from "../middleware/auth.js";
-import { uploadDocument, uploadProfileImage, handleUploadError } from "../middleware/upload.js";
+import { uploadDocument, uploadProfileImage, uploadVideo, handleUploadError } from "../middleware/upload.js";
 
 const router = express.Router();
 
-// Public routes - specific routes MUST come before dynamic routes
+// Public routes
 router.post("/register", uploadDocument, handleUploadError, validateDoctorRegistration, registerDoctor);
-// router.post("/login", validateLogin, loginDoctor); // Disabled - using unified auth
-router.get("/approved", getApprovedDoctors); // For patients to browse doctors
+router.get("/approved", getApprovedDoctors);
 
-// Protected routes - specific routes BEFORE dynamic routes
+// Protected routes
 router.get("/profile", verifyToken, verifyDoctor, getDoctorProfile);
 router.put("/profile", verifyToken, verifyDoctor, updateDoctorProfile);
 router.put("/profile/info", verifyToken, verifyDoctor, updateDoctorProfileInfo);
 router.put("/profile/complete", verifyToken, verifyDoctor, updateCompleteProfile);
 router.post("/profile/photo", verifyToken, verifyDoctor, uploadProfileImage, handleUploadError, uploadProfilePhoto);
 
-// Dynamic routes - MUST be last
-router.get("/:doctorId", getDoctorById); // Get single doctor for booking page
+// Video routes
+router.post("/videos", verifyToken, verifyDoctor, uploadVideo, handleUploadError, uploadDoctorVideo);
+router.delete("/videos/:videoId", verifyToken, verifyDoctor, deleteDoctorVideo);
+router.get("/:doctorId/videos", getDoctorVideos); // public
+
+// Dynamic routes — MUST be last
+router.get("/:doctorId", getDoctorById);
 
 export default router;
 

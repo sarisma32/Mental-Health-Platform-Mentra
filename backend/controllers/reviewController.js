@@ -4,7 +4,7 @@ import { createNotification } from "./notificationController.js";
 // Patient submits a review after a completed appointment
 export const submitReview = async (req, res) => {
   try {
-    const { appointmentId, rating, reviewText } = req.body;
+    const { appointmentId, rating, reviewText, ratingProfessionalism, ratingCommunication, ratingWaitTime } = req.body;
 
     if (!appointmentId || !rating) {
       return res.status(400).json({ success: false, message: "Appointment ID and rating are required" });
@@ -37,9 +37,10 @@ export const submitReview = async (req, res) => {
     }
 
     const result = await pool.query(
-      `INSERT INTO reviews (appointment_id, patient_id, doctor_id, rating, review_text, is_visible)
-       VALUES ($1, $2, $3, $4, $5, false) RETURNING *`,
-      [appointmentId, apt.patient_id, apt.doctor_id, rating, reviewText || null]
+      `INSERT INTO reviews (appointment_id, patient_id, doctor_id, rating, review_text, rating_professionalism, rating_communication, rating_wait_time, is_visible)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, false) RETURNING *`,
+      [appointmentId, apt.patient_id, apt.doctor_id, rating, reviewText || null,
+       ratingProfessionalism || null, ratingCommunication || null, ratingWaitTime || null]
     );
 
     res.status(201).json({ success: true, message: "Review submitted successfully. It will be visible after admin approval.", review: result.rows[0] });
@@ -174,6 +175,9 @@ export const getDoctorReviews = async (req, res) => {
         r.id,
         r.rating,
         r.review_text,
+        r.rating_professionalism,
+        r.rating_communication,
+        r.rating_wait_time,
         r.created_at,
         a.patient_first_name,
         a.patient_last_name,

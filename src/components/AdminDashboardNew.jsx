@@ -1397,7 +1397,9 @@ const ReviewsSection = () => {
   const [reviews, setReviews] = useState([]);
   const [stats, setStats] = useState({ total: 0, visible: 0, hidden: 0, avg_rating: 0 });
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all'); // all, visible, hidden
+  const [filter, setFilter] = useState('all');
+  const [selectedReview, setSelectedReview] = useState(null);
+  const ratingLabel = { 1: 'Poor', 2: 'Fair', 3: 'Good', 4: 'Very Good', 5: 'Excellent' };
 
   const fetchReviews = async () => {
     try {
@@ -1417,7 +1419,8 @@ const ReviewsSection = () => {
 
   useEffect(() => { fetchReviews(); }, []);
 
-  const toggleVisibility = async (reviewId, currentVisibility) => {
+  const toggleVisibility = async (e, reviewId, currentVisibility) => {
+    e && e.stopPropagation();
     try {
       const res = await fetch(buildApiUrl(`/api/reviews/admin/${reviewId}/visibility`), {
         method: 'PUT',
@@ -1431,12 +1434,13 @@ const ReviewsSection = () => {
     }
   };
 
-  const handleDelete = async (reviewId) => {
+  const handleDelete = async (e, reviewId) => {
+    e && e.stopPropagation();
     if (!window.confirm('Delete this review? This cannot be undone.')) return;
     try {
       const res = await fetch(buildApiUrl(`/api/reviews/admin/${reviewId}`), { method: 'DELETE' });
       const data = await res.json();
-      if (data.success) fetchReviews();
+      if (data.success) { fetchReviews(); if (selectedReview?.id === reviewId) setSelectedReview(null); }
     } catch (e) {
       console.error(e);
     }
@@ -1503,6 +1507,7 @@ const ReviewsSection = () => {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100">
           <h3 className="font-semibold text-gray-900">Reviews ({filteredReviews.length})</h3>
+          <p className="text-xs text-gray-400 mt-0.5">Click a review to see full details</p>
         </div>
 
         {loading ? (
@@ -1519,53 +1524,40 @@ const ReviewsSection = () => {
         ) : (
           <div className="divide-y divide-gray-50">
             {filteredReviews.map((review) => (
-              <div key={review.id} className="px-6 py-5 hover:bg-gray-50 transition-colors">
+              <div key={review.id} onClick={() => setSelectedReview(review)}
+                className="px-6 py-5 hover:bg-[#F5F5F0] transition-colors cursor-pointer group">
                 <div className="flex items-start justify-between gap-4">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 flex-wrap mb-1">
-                      <span className="font-semibold text-gray-900 text-sm">
-                        {review.patient_first_name} {review.patient_last_name}
-                      </span>
+                      <span className="font-semibold text-gray-900 text-sm">{review.patient_first_name} {review.patient_last_name}</span>
                       <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                       </svg>
                       <span className="font-semibold text-[#A3B18A] text-sm">Dr. {review.doctor_full_name}</span>
                       <span className="text-xs text-gray-400">({review.doctor_specialization})</span>
                     </div>
-                    <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-2 mb-1">
                       {renderStars(review.rating)}
-                      <span className="text-xs text-gray-400">
-                        {new Date(review.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                      </span>
+                      <span className="text-xs text-gray-400">{new Date(review.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                     </div>
-                    {review.review_text && (
-                      <p className="text-sm text-gray-700 mt-1">{review.review_text}</p>
-                    )}
+                    {review.review_text && <p className="text-sm text-gray-600 line-clamp-1">{review.review_text}</p>}
                   </div>
-
                   <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                      review.is_visible ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-                    }`}>
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${review.is_visible ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
                       {review.is_visible ? 'Approved' : 'Pending'}
                     </span>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => toggleVisibility(review.id, review.is_visible)}
-                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
-                          review.is_visible
-                            ? 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
-                            : 'bg-green-50 text-green-700 hover:bg-green-100'
-                        }`}
-                      >
+                    <div className="flex gap-2 items-center">
+                      <button onClick={(e) => toggleVisibility(e, review.id, review.is_visible)}
+                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${review.is_visible ? 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100' : 'bg-green-50 text-green-700 hover:bg-green-100'}`}>
                         {review.is_visible ? 'Hide' : 'Approve'}
                       </button>
-                      <button
-                        onClick={() => handleDelete(review.id)}
-                        className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors"
-                      >
+                      <button onClick={(e) => handleDelete(e, review.id)}
+                        className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
                         Delete
                       </button>
+                      <svg className="w-4 h-4 text-gray-300 group-hover:text-[#A3B18A] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
                     </div>
                   </div>
                 </div>
@@ -1574,6 +1566,88 @@ const ReviewsSection = () => {
           </div>
         )}
       </div>
+
+      {/* Detail Modal */}
+      {selectedReview && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-gray-900">Review Details</h3>
+              <button onClick={() => setSelectedReview(null)} className="text-gray-400 hover:text-gray-600 p-1">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="px-6 py-5 space-y-5">
+              <div className="bg-[#F5F5F0] rounded-xl p-4 text-sm">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-semibold text-gray-900">{selectedReview.patient_first_name} {selectedReview.patient_last_name}</span>
+                  <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                  <span className="font-semibold text-[#A3B18A]">Dr. {selectedReview.doctor_full_name}</span>
+                </div>
+                <p className="text-gray-400 text-xs mt-1">{selectedReview.doctor_specialization} • {new Date(selectedReview.created_at).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+              </div>
+              <div className="bg-gray-50 rounded-xl p-4">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Overall Rating</p>
+                <div className="flex items-center gap-3">
+                  <span className="text-yellow-400 text-2xl">{'★'.repeat(selectedReview.rating)}{'☆'.repeat(5 - selectedReview.rating)}</span>
+                  <span className="text-lg font-bold text-gray-800">{selectedReview.rating}/5</span>
+                  <span className="text-sm text-[#A3B18A] font-medium">{ratingLabel[selectedReview.rating]}</span>
+                </div>
+              </div>
+              {(selectedReview.rating_professionalism || selectedReview.rating_communication || selectedReview.rating_wait_time) && (
+                <div className="bg-gray-50 rounded-xl p-4">
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Detailed Ratings</p>
+                  <div className="grid grid-cols-3 gap-4">
+                    {[
+                      { label: 'Professionalism', value: selectedReview.rating_professionalism },
+                      { label: 'Communication', value: selectedReview.rating_communication },
+                      { label: 'Wait Time', value: selectedReview.rating_wait_time },
+                    ].map(({ label, value }) => (
+                      <div key={label} className="text-center">
+                        <p className="text-xs text-gray-500 mb-1">{label}</p>
+                        {value ? (
+                          <><p className="text-yellow-400 text-lg leading-none">{'★'.repeat(value)}{'☆'.repeat(5 - value)}</p><p className="text-xs text-gray-500 mt-1">{value}/5</p></>
+                        ) : <p className="text-gray-300 text-lg">—</p>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {selectedReview.review_text && (
+                <div>
+                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Written Review</p>
+                  <p className="text-sm text-gray-700 leading-relaxed bg-white border border-gray-100 rounded-xl p-4">{selectedReview.review_text}</p>
+                </div>
+              )}
+              <div className="flex items-center justify-between">
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${selectedReview.is_visible ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                  {selectedReview.is_visible ? 'Approved & Visible' : 'Pending Approval'}
+                </span>
+                <div className="flex gap-2">
+                  <button onClick={(e) => { toggleVisibility(e, selectedReview.id, selectedReview.is_visible); setSelectedReview(null); }}
+                    className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${selectedReview.is_visible ? 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100' : 'bg-green-50 text-green-700 hover:bg-green-100'}`}>
+                    {selectedReview.is_visible ? 'Hide' : 'Approve'}
+                  </button>
+                  <button onClick={(e) => handleDelete(e, selectedReview.id)}
+                    className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
+                    Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-100">
+              <button onClick={() => setSelectedReview(null)}
+                className="w-full py-2.5 bg-[#A3B18A] hover:bg-[#8FA076] text-white rounded-xl font-medium text-sm transition-colors">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

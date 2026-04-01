@@ -295,7 +295,9 @@ const ProfessionalsPage = () => {
                     >
                       Book Session
                     </button>
-                    <button className="w-full border border-mentra-primary text-mentra-primary hover:bg-mentra-primary hover:text-white py-2 px-4 rounded-lg font-medium transition-all duration-300 text-sm">
+                    <button
+                      onClick={() => navigate(`/doctor-profile/${professional.id}`)}
+                      className="w-full border border-mentra-primary text-mentra-primary hover:bg-mentra-primary hover:text-white py-2 px-4 rounded-lg font-medium transition-all duration-300 text-sm">
                       View Profile
                     </button>
                   </div>

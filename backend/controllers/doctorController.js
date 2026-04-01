@@ -514,3 +514,68 @@ export const updateCompleteProfile = async (req, res) => {
     });
   }
 };
+
+// UPLOAD DOCTOR VIDEO
+export const uploadDoctorVideo = async (req, res) => {
+  try {
+    const doctorId = req.user.id;
+    const { title, description } = req.body;
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No video file uploaded." });
+    }
+    if (!title || !title.trim()) {
+      return res.status(400).json({ success: false, message: "Video title is required." });
+    }
+
+    const videoPath = `uploads/videos/${req.file.filename}`;
+
+    const result = await pool.query(
+      `INSERT INTO doctor_videos (doctor_id, title, description, video_path)
+       VALUES ($1, $2, $3, $4) RETURNING *`,
+      [doctorId, title.trim(), description || null, videoPath]
+    );
+
+    res.status(201).json({ success: true, message: "Video uploaded successfully!", video: result.rows[0] });
+  } catch (err) {
+    console.error("Upload video error:", err);
+    res.status(500).json({ success: false, message: "Failed to upload video." });
+  }
+};
+
+// GET DOCTOR VIDEOS (by doctorId — public)
+export const getDoctorVideos = async (req, res) => {
+  try {
+    const { doctorId } = req.params;
+    const result = await pool.query(
+      "SELECT * FROM doctor_videos WHERE doctor_id = $1 ORDER BY created_at DESC",
+      [doctorId]
+    );
+    res.json({ success: true, videos: result.rows });
+  } catch (err) {
+    console.error("Get videos error:", err);
+    res.status(500).json({ success: false, message: "Failed to fetch videos." });
+  }
+};
+
+// DELETE DOCTOR VIDEO
+export const deleteDoctorVideo = async (req, res) => {
+  try {
+    const doctorId = req.user.id;
+    const { videoId } = req.params;
+
+    const result = await pool.query(
+      "DELETE FROM doctor_videos WHERE id = $1 AND doctor_id = $2 RETURNING *",
+      [videoId, doctorId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Video not found." });
+    }
+
+    res.json({ success: true, message: "Video deleted successfully." });
+  } catch (err) {
+    console.error("Delete video error:", err);
+    res.status(500).json({ success: false, message: "Failed to delete video." });
+  }
+};
