@@ -442,3 +442,114 @@ export const sendSessionCompletedEmail = async (appointment) => {
     return { success: false };
   }
 };
+
+// ── Appointment Reminder Email (1 hour before) ───────────────────────────────
+export const sendAppointmentReminderEmail = async (appointment) => {
+  try {
+    const transporter = createTransporter();
+
+    const {
+      patient_email, patient_first_name, patient_last_name,
+      doctor_name, doctor_specialization, doctor_location, doctor_address,
+      appointment_date, appointment_time, appointment_type,
+      session_fee, duration_minutes, confirmation_number
+    } = appointment;
+
+    const patientName = `${patient_first_name} ${patient_last_name}`;
+    const formattedDate = new Date(appointment_date).toLocaleDateString('en-US', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+    });
+    const [h, m] = appointment_time.split(':');
+    const hour = parseInt(h);
+    const formattedTime = `${hour % 12 || 12}:${m} ${hour >= 12 ? 'PM' : 'AM'}`;
+    const sessionType = appointment_type === 'initial' ? 'Initial Consultation' : 'Follow-up Session';
+
+    const mailOptions = {
+      from: `"Mentra - Mental Health Platform" <${process.env.EMAIL_USER}>`,
+      to: patient_email,
+      subject: `⏰ Reminder: Your appointment in 1 hour — Dr. ${doctor_name} | Mentra`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }
+            .header { background: linear-gradient(135deg, #A3B18A, #8FA076); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+            .header h1 { margin: 0; font-size: 24px; }
+            .header p { margin: 8px 0 0; opacity: 0.9; font-size: 14px; }
+            .content { background-color: white; padding: 30px; border-radius: 0 0 8px 8px; }
+            .reminder-banner { background-color: #FFF8E1; border: 2px solid #FFC107; border-radius: 8px; padding: 16px; text-align: center; margin: 20px 0; }
+            .reminder-banner .icon { font-size: 36px; }
+            .reminder-banner .text { font-size: 18px; font-weight: bold; color: #E65100; margin-top: 8px; }
+            .details-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+            .details-table tr { border-bottom: 1px solid #f0f0f0; }
+            .details-table td { padding: 10px 8px; font-size: 14px; }
+            .details-table td:first-child { color: #666; width: 40%; }
+            .details-table td:last-child { font-weight: 600; color: #333; }
+            .checklist { background-color: #F5F5F0; border-left: 4px solid #A3B18A; padding: 16px; margin: 20px 0; border-radius: 0 6px 6px 0; }
+            .checklist h4 { margin: 0 0 10px; color: #A3B18A; }
+            .checklist ul { margin: 0; padding-left: 20px; font-size: 14px; }
+            .checklist li { margin-bottom: 6px; }
+            .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #888; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>⏰ Appointment Reminder</h1>
+              <p>Your session is coming up soon</p>
+            </div>
+            <div class="content">
+              <p>Hi <strong>${patientName}</strong>,</p>
+              <p>This is a friendly reminder that you have an appointment scheduled in <strong>1 hour</strong>.</p>
+
+              <div class="reminder-banner">
+                <div class="icon">🕐</div>
+                <div class="text">Your appointment starts in 1 hour!</div>
+              </div>
+
+              <table class="details-table">
+                <tr><td>Doctor</td><td>Dr. ${doctor_name}</td></tr>
+                <tr><td>Specialization</td><td>${doctor_specialization}</td></tr>
+                <tr><td>Location</td><td>${doctor_location}</td></tr>
+                ${doctor_address ? `<tr><td>Address</td><td>${doctor_address}</td></tr>` : ''}
+                <tr><td>Date</td><td>${formattedDate}</td></tr>
+                <tr><td>Time</td><td>${formattedTime}</td></tr>
+                <tr><td>Session Type</td><td>${sessionType}</td></tr>
+                <tr><td>Duration</td><td>${duration_minutes} minutes</td></tr>
+                <tr><td>Session Fee</td><td>Rs ${session_fee}</td></tr>
+                <tr><td>Confirmation #</td><td>${confirmation_number}</td></tr>
+              </table>
+
+              <div class="checklist">
+                <h4>✅ Before You Go — Quick Checklist</h4>
+                <ul>
+                  <li>Arrive 10–15 minutes early</li>
+                  <li>Bring a valid ID</li>
+                  <li>Bring any relevant medical records or previous therapy notes</li>
+                  <li>Have your confirmation number ready: <strong>${confirmation_number}</strong></li>
+                </ul>
+              </div>
+
+              <p>We look forward to seeing you. Take care!</p>
+              <p>Best regards,<br><strong>The Mentra Team</strong></p>
+            </div>
+            <div class="footer">
+              <p>This is an automated reminder. Please do not reply to this message.</p>
+              <p>&copy; 2026 Mentra - Mental Health Platform. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+    };
+
+    const info = await transporter.sendMail(mailOptions);
+    console.log('✅ Reminder email sent to:', patient_email, '| ID:', info.messageId);
+    return { success: true };
+  } catch (error) {
+    console.error('❌ Error sending reminder email:', error);
+    return { success: false };
+  }
+};

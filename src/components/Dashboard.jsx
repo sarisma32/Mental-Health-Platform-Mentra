@@ -59,7 +59,8 @@ const Dashboard = () => {
   const [stats, setStats] = useState({
     total: 0,
     upcoming: 0,
-    completed: 0
+    completed: 0,
+    past: 0
   });
   const [activeTab, setActiveTab] = useState('upcoming'); // upcoming, past, all
   const [reviewModal, setReviewModal] = useState(null);
@@ -131,7 +132,11 @@ const Dashboard = () => {
           setStats({
             total: data.appointments.length,
             upcoming,
-            completed
+            completed,
+            past: data.appointments.filter(apt => {
+              const aptDate = new Date(apt.appointment_date);
+              return aptDate < now || apt.status === 'completed' || apt.status === 'cancelled';
+            }).length
           });
 
           // Check which completed appointments already have reviews
@@ -230,6 +235,7 @@ const Dashboard = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
+      case 'pending': return 'bg-orange-100 text-orange-800';
       case 'confirmed': return 'bg-green-100 text-green-800';
       case 'scheduled': return 'bg-blue-100 text-blue-800';
       case 'completed': return 'bg-gray-100 text-gray-800';
@@ -420,7 +426,7 @@ const Dashboard = () => {
                       : 'text-gray-600 hover:text-gray-900'
                   }`}
                 >
-                  Past
+                  Past ({stats.past})
                 </button>
                 <button
                   onClick={() => setActiveTab('all')}
@@ -454,111 +460,129 @@ const Dashboard = () => {
                   </button>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {filteredAppointments.map((appointment) => (
-                    <div
-                      key={appointment.id}
-                      className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                    >
-                      <div className="flex items-start justify-between">
+                <div className="space-y-6">
+                  {/* Group appointments by doctor, sorted newest first */}
+                  {Object.entries(
+                    filteredAppointments
+                      .slice()
+                      .sort((a, b) => {
+                        const dateA = new Date(`${a.appointment_date}T${a.appointment_time}`);
+                        const dateB = new Date(`${b.appointment_date}T${b.appointment_time}`);
+                        return dateB - dateA; // newest first
+                      })
+                      .reduce((groups, apt) => {
+                        const key = apt.doctor_id;
+                        if (!groups[key]) groups[key] = { doctorName: apt.doctor_name, doctorSpecialization: apt.doctor_specialization, doctorLocation: apt.doctor_location, appointments: [] };
+                        groups[key].appointments.push(apt);
+                        return groups;
+                      }, {})
+                  ).map(([doctorId, group]) => (
+                    <div key={doctorId} className="border border-gray-200 rounded-xl overflow-hidden">
+                      {/* Doctor header */}
+                      <div className="bg-[#F5F5F0] px-4 py-3 flex items-center gap-3 border-b border-gray-200">
+                        <div className="w-10 h-10 bg-gradient-to-br from-mentra-primary to-mentra-primary-hover rounded-full flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
+                          {group.doctorName.charAt(0)}
+                        </div>
                         <div className="flex-1">
-                          <div className="flex items-center space-x-3 mb-2">
-                            <div className="w-12 h-12 bg-gradient-to-br from-mentra-primary to-mentra-primary-hover rounded-full flex items-center justify-center text-white font-semibold">
-                              {appointment.doctor_name.charAt(0)}
-                            </div>
-                            <div>
-                              <h3 className="font-semibold text-gray-900">
-                                Dr. {appointment.doctor_name}
-                              </h3>
-                              <p className="text-sm text-gray-600">
-                                {appointment.doctor_specialization}
-                              </p>
-                            </div>
-                          </div>
-                          
-                          <div className="ml-15 space-y-1 text-sm">
-                            <div className="flex items-center text-gray-700">
-                              <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                              </svg>
-                              {formatDate(appointment.appointment_date)}
-                            </div>
-                            <div className="flex items-center text-gray-700">
-                              <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                              {formatTime(appointment.appointment_time)} • {appointment.duration_minutes} min
-                            </div>
-                            <div className="flex items-center text-gray-700">
-                              <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                              </svg>
-                              {appointment.doctor_location}
-                            </div>
-                            <div className="flex items-center text-gray-700">
-                              <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                              </svg>
-                              Rs {appointment.session_fee} • {appointment.appointment_type}
-                            </div>
-                            {appointment.confirmation_number && (
-                              <div className="flex items-center text-gray-600 text-xs mt-2">
-                                <svg className="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                Confirmation: {appointment.confirmation_number}
-                              </div>
-                            )}
-                            {appointment.session_notes && appointment.status === 'completed' && (
-                              <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                                <div className="flex items-start">
-                                  <svg className="w-5 h-5 text-blue-600 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                  </svg>
-                                  <div className="flex-1">
-                                    <h5 className="text-sm font-semibold text-blue-900 mb-1">Session Notes from Dr. {appointment.doctor_name.split(' ')[1] || appointment.doctor_name}</h5>
-                                    <p className="text-sm text-blue-800 whitespace-pre-wrap">{appointment.session_notes}</p>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
+                          <p className="font-semibold text-gray-900">Dr. {group.doctorName}</p>
+                          <p className="text-xs text-gray-500">{group.doctorSpecialization} • {group.doctorLocation}</p>
                         </div>
-                        
-                        <div className="text-right space-y-2">
-                          <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(appointment.status)}`}>
-                            {appointment.status}
-                          </span>
-                          
-                          {appointment.status !== 'cancelled' && appointment.status !== 'completed' && (
-                            <div>
-                              <button
-                                onClick={() => handleCancelAppointment(appointment.id)}
-                                className="text-xs text-red-600 hover:text-red-800 font-medium"
-                              >
-                                Cancel
-                              </button>
-                            </div>
-                          )}
+                        <span className="text-xs text-gray-400 font-medium">{group.appointments.length} session{group.appointments.length !== 1 ? 's' : ''}</span>
+                      </div>
 
-                          {appointment.status === 'completed' && (
-                            <div>
-                              {reviewedAppointments.has(appointment.id) ? (
-                                <span className="text-xs text-green-600 font-medium flex items-center">
-                                  <span className="mr-1">★</span> Reviewed
+                      {/* Appointments under this doctor */}
+                      <div className="divide-y divide-gray-100">
+                        {group.appointments.map((appointment) => (
+                          <div key={appointment.id} className="p-4 hover:bg-gray-50 transition-colors">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1 space-y-1 text-sm">
+                                <div className="flex items-center text-gray-700">
+                                  <svg className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                                  {formatDate(appointment.appointment_date)}
+                                </div>
+                                <div className="flex items-center text-gray-700">
+                                  <svg className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  {formatTime(appointment.appointment_time)} • {appointment.duration_minutes} min
+                                </div>
+                                <div className="flex items-center text-gray-700">
+                                  <svg className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+                                  </svg>
+                                  Rs {appointment.session_fee} • <span className="capitalize ml-1">{appointment.appointment_type}</span>
+                                </div>
+                                {appointment.confirmation_number && (
+                                  <div className="flex items-center text-gray-500 text-xs">
+                                    <svg className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    Confirmation: {appointment.confirmation_number}
+                                  </div>
+                                )}
+                                {appointment.session_notes && appointment.status === 'completed' && (
+                                  <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <div className="flex items-start">
+                                      <svg className="w-4 h-4 text-blue-600 mr-2 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                      </svg>
+                                      <div>
+                                        <p className="text-xs font-semibold text-blue-900 mb-1">Session Notes from Dr. {group.doctorName.split(' ').pop()}</p>
+                                        <p className="text-xs text-blue-800 whitespace-pre-wrap">{appointment.session_notes}</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
+                              <div className="text-right space-y-2 ml-4 flex-shrink-0">
+                                <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(appointment.status)}`}>
+                                  {appointment.status}
                                 </span>
-                              ) : (
-                                <button
-                                  onClick={() => { setReviewModal(appointment); setReviewRating(0); setReviewText(''); setRatingProfessionalism(0); setRatingCommunication(0); setRatingWaitTime(0); }}
-                                  className="text-xs text-[#A3B18A] hover:text-[#8FA076] font-medium border border-[#A3B18A] px-2 py-1 rounded"
-                                >
-                                  Leave a Review
-                                </button>
-                              )}
+                                {appointment.status !== 'cancelled' && appointment.status !== 'completed' && (() => {
+                                  // Allow cancel only if appointment is more than 5 hours away
+                                  const aptDateTime = new Date(`${appointment.appointment_date}T${appointment.appointment_time}`);
+                                  const hoursUntil = (aptDateTime - new Date()) / (1000 * 60 * 60);
+                                  const canCancel = hoursUntil > 5;
+                                  return (
+                                    <div>
+                                      {canCancel ? (
+                                        <button
+                                          onClick={() => handleCancelAppointment(appointment.id)}
+                                          className="text-xs text-red-600 hover:text-red-800 font-medium"
+                                        >
+                                          Cancel
+                                        </button>
+                                      ) : (
+                                        <span className="text-xs text-gray-400" title="Cannot cancel within 5 hours of appointment">
+                                          Cannot cancel
+                                        </span>
+                                      )}
+                                    </div>
+                                  );
+                                })()}
+                                {appointment.status === 'completed' && (
+                                  <div>
+                                    {reviewedAppointments.has(appointment.id) ? (
+                                      <span className="text-xs text-green-600 font-medium flex items-center justify-end">
+                                        <span className="mr-1">★</span> Reviewed
+                                      </span>
+                                    ) : (
+                                      <button
+                                        onClick={() => { setReviewModal(appointment); setReviewRating(0); setReviewText(''); setRatingProfessionalism(0); setRatingCommunication(0); setRatingWaitTime(0); }}
+                                        className="text-xs text-[#A3B18A] hover:text-[#8FA076] font-medium border border-[#A3B18A] px-2 py-1 rounded"
+                                      >
+                                        Leave a Review
+                                      </button>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
                             </div>
-                          )}
-                        </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
                   ))}

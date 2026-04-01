@@ -14,6 +14,7 @@ import scheduleRoutes from "./routes/scheduleRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import { testConnection, initializeDatabase } from "./db/init.js";
+import { startAppointmentScheduler } from "./utils/appointmentScheduler.js";
 
 // ES6 module compatibility
 const __filename = fileURLToPath(import.meta.url);
@@ -126,6 +127,9 @@ const startServer = async () => {
 
     // Initialize database tables
     await initializeDatabase();
+
+    // Start appointment auto-confirm scheduler
+    startAppointmentScheduler();
 
     // Start server
     const PORT = process.env.PORT || 5002;

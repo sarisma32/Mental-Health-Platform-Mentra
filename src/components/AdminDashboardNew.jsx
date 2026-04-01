@@ -10,7 +10,8 @@ const AdminDashboardNew = () => {
     totalUsers: 0,
     totalDoctors: 0,
     pendingDoctors: 0,
-    totalAppointments: 0
+    totalAppointments: 0,
+    pendingReviews: 0
   });
   const [doctors, setDoctors] = useState([]);
   const [patients, setPatients] = useState([]);
@@ -19,6 +20,8 @@ const AdminDashboardNew = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [patientSearchTerm, setPatientSearchTerm] = useState('');
   const [userFilter, setUserFilter] = useState('all');
+  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [selectedPatient, setSelectedPatient] = useState(null);
 
   useEffect(() => {
     // Check if user is admin
@@ -36,24 +39,33 @@ const AdminDashboardNew = () => {
   const fetchDashboardStats = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(buildApiUrl('/api/admin/stats'), {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
+
+      // Fetch doctor/patient stats
+      const statsRes = await fetch(buildApiUrl('/api/admin/stats'), {
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success) {
-          setStats({
-            totalUsers: data.stats.patients?.total_patients || 0,
-            totalDoctors: parseInt(data.stats.doctors?.total_doctors) || 0,
-            pendingDoctors: parseInt(data.stats.doctors?.pending_doctors) || 0,
-            totalAppointments: 0
-          });
-        }
-      }
+      // Fetch appointments count
+      const aptsRes = await fetch(buildApiUrl('/api/admin/appointments'), {
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+      });
+
+      // Fetch pending reviews count
+      const reviewsRes = await fetch(buildApiUrl('/api/reviews/admin/all'));
+
+      const [statsData, aptsData, reviewsData] = await Promise.all([
+        statsRes.json(), aptsRes.json(), reviewsRes.json()
+      ]);
+
+      setStats({
+        totalUsers: statsData.stats?.patients?.total_patients || 0,
+        totalDoctors: parseInt(statsData.stats?.doctors?.total_doctors) || 0,
+        pendingDoctors: parseInt(statsData.stats?.doctors?.pending_doctors) || 0,
+        totalAppointments: aptsData.success ? aptsData.appointments.length : 0,
+        pendingReviews: reviewsData.success
+          ? reviewsData.reviews.filter(r => !r.is_visible).length
+          : 0
+      });
     } catch (error) {
       console.error('Error fetching stats:', error);
     } finally {
@@ -202,6 +214,15 @@ const AdminDashboardNew = () => {
         </svg>
       )
     },
+    {
+      id: 'analytics',
+      name: 'Analytics',
+      icon: (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+        </svg>
+      )
+    },
     { 
       id: 'settings', 
       name: 'Settings', 
@@ -320,6 +341,7 @@ const AdminDashboardNew = () => {
                 {activeSection === 'doctors' && 'Manage doctor applications and profiles'}
                 {activeSection === 'appointments' && 'Monitor and manage all appointments'}
                 {activeSection === 'specializations' && 'Add, edit, or remove specializations'}
+                {activeSection === 'analytics' && 'Platform insights and performance metrics'}
                 {activeSection === 'reviews' && 'Moderate patient reviews and ratings'}
                 {activeSection === 'settings' && 'Configure system settings'}
               </p>
@@ -378,8 +400,8 @@ const AdminDashboardNew = () => {
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-gray-500 font-medium mb-1">Pending Review</p>
-                      <p className="text-3xl font-bold text-gray-800">{stats.pendingDoctors}</p>
+                      <p className="text-sm text-gray-500 font-medium mb-1">Pending Reviews</p>
+                      <p className="text-3xl font-bold text-gray-800">{stats.pendingReviews}</p>
                       <p className="text-xs text-gray-400 mt-1">Awaiting approval</p>
                     </div>
                     <div className="w-12 h-12 bg-yellow-50 rounded-lg flex items-center justify-center">
@@ -570,106 +592,65 @@ const AdminDashboardNew = () => {
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
                   <h3 className="text-lg font-semibold text-gray-800">Doctor Applications</h3>
-                  <p className="text-sm text-gray-500 mt-1">Review and manage doctor registrations</p>
+                  <p className="text-sm text-gray-500 mt-1">Click a doctor to view full registration details</p>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Doctor Information
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Contact & Credentials
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Professional Details
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Registration Date
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Actions
-                        </th>
+                  <table className="min-w-full">
+                    <thead>
+                      <tr className="border-b border-gray-100">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Doctor</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Specialization</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Hospital</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Registered</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="divide-y divide-gray-50">
                       {filteredDoctors.map((doctor) => (
-                        <tr key={doctor.id} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div>
-                              <div className="text-sm font-medium text-gray-900">{doctor.full_name}</div>
-                              <div className="text-sm text-gray-500">{doctor.email}</div>
-                              <div className="text-sm text-gray-500">{doctor.phone_number}</div>
+                        <tr key={doctor.id} onClick={() => setSelectedDoctor(doctor)}
+                          className="hover:bg-[#F5F5F0] transition-colors cursor-pointer group">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#A3B18A] to-[#8FA076] flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
+                                {doctor.full_name.charAt(0)}
+                              </div>
+                              <div>
+                                <p className="text-sm font-semibold text-gray-900">{doctor.full_name}</p>
+                                <p className="text-xs text-gray-400">{doctor.email}</p>
+                              </div>
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="text-sm text-gray-900">
-                              <div><strong>License:</strong> {doctor.license_number}</div>
-                              <div><strong>Experience:</strong> {doctor.experience}</div>
-                              {doctor.document_path && (
-                                <div className="mt-1">
-                                  <a 
-                                    href={`http://localhost:5002/uploads/documents/${doctor.document_path.split('\\').pop()}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-[#A3B18A] hover:text-[#8FA076] text-sm underline"
-                                  >
-                                    View Document
-                                  </a>
-                                </div>
-                              )}
-                            </div>
+                            <p className="text-sm text-gray-700">{doctor.specialization}</p>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="text-sm text-gray-900">
-                              <div><strong>Specialization:</strong> {doctor.specialization}</div>
-                              <div><strong>Hospital:</strong> {doctor.hospital_name}</div>
-                              <div><strong>Location:</strong> {doctor.location || 'Not specified'}</div>
-                            </div>
+                            <p className="text-sm text-gray-700">{doctor.hospital_name}</p>
+                            <p className="text-xs text-gray-400">{doctor.location || '—'}</p>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
+                          <td className="px-6 py-4">
+                            <p className="text-sm text-gray-500">{new Date(doctor.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                          </td>
+                          <td className="px-6 py-4">
                             {getStatusBadge(doctor.approval_status)}
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {formatDate(doctor.created_at)}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div className="flex space-x-2">
+                          <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex gap-2">
                               {doctor.approval_status === 'pending' && (
                                 <>
-                                  <button
-                                    onClick={() => updateDoctorStatus(doctor.id, 'approved')}
-                                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                                  >
-                                    Approve
-                                  </button>
-                                  <button
-                                    onClick={() => updateDoctorStatus(doctor.id, 'rejected')}
-                                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                                  >
-                                    Reject
-                                  </button>
+                                  <button onClick={() => updateDoctorStatus(doctor.id, 'approved')}
+                                    className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs transition-colors">Approve</button>
+                                  <button onClick={() => updateDoctorStatus(doctor.id, 'rejected')}
+                                    className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs transition-colors">Reject</button>
                                 </>
                               )}
                               {doctor.approval_status === 'approved' && (
-                                <button
-                                  onClick={() => updateDoctorStatus(doctor.id, 'rejected')}
-                                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                                >
-                                  Revoke
-                                </button>
+                                <button onClick={() => updateDoctorStatus(doctor.id, 'rejected')}
+                                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs transition-colors">Revoke</button>
                               )}
                               {doctor.approval_status === 'rejected' && (
-                                <button
-                                  onClick={() => updateDoctorStatus(doctor.id, 'approved')}
-                                  className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm transition-colors"
-                                >
-                                  Approve
-                                </button>
+                                <button onClick={() => updateDoctorStatus(doctor.id, 'approved')}
+                                  className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs transition-colors">Approve</button>
                               )}
                             </div>
                           </td>
@@ -681,18 +662,126 @@ const AdminDashboardNew = () => {
 
                 {filteredDoctors.length === 0 && (
                   <div className="text-center py-12">
-                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2M4 13h2m13-8V4a1 1 0 00-1-1H7a1 1 0 00-1 1v1m8 0V4a1 1 0 00-1-1H9a1 1 0 00-1 1v1" />
-                    </svg>
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">No doctors found</h3>
-                    <p className="mt-1 text-sm text-gray-500">
-                      {searchTerm || filter !== 'all' 
-                        ? 'Try adjusting your search or filter criteria.' 
-                        : 'No doctors have registered yet.'}
-                    </p>
+                    <p className="text-sm text-gray-500">{searchTerm || filter !== 'all' ? 'Try adjusting your search or filter criteria.' : 'No doctors have registered yet.'}</p>
                   </div>
                 )}
               </div>
+
+              {/* Doctor Detail Modal */}
+              {selectedDoctor && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                  <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+                    {/* Header */}
+                    <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 sticky top-0 bg-white">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center text-white font-bold text-lg">
+                          {selectedDoctor.full_name.charAt(0)}
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-gray-900">{selectedDoctor.full_name}</h3>
+                          <div className="flex items-center gap-2 mt-0.5">
+                            {getStatusBadge(selectedDoctor.approval_status)}
+                            <span className="text-xs text-gray-400">{selectedDoctor.specialization}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <button onClick={() => setSelectedDoctor(null)} className="text-gray-400 hover:text-gray-600 p-1">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <div className="px-6 py-5 space-y-5">
+                      {/* Contact Info */}
+                      <div className="bg-[#F5F5F0] rounded-xl p-4">
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Contact Information</p>
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                          <div><span className="text-gray-500">Email:</span><span className="font-medium ml-1">{selectedDoctor.email}</span></div>
+                          <div><span className="text-gray-500">Phone:</span><span className="font-medium ml-1">{selectedDoctor.phone_number}</span></div>
+                        </div>
+                      </div>
+
+                      {/* Professional Details */}
+                      <div className="bg-gray-50 rounded-xl p-4">
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Professional Details</p>
+                        <div className="grid grid-cols-2 gap-3 text-sm">
+                          <div><span className="text-gray-500">Specialization:</span><span className="font-medium ml-1">{selectedDoctor.specialization}</span></div>
+                          <div><span className="text-gray-500">Experience:</span><span className="font-medium ml-1">{selectedDoctor.experience}</span></div>
+                          <div><span className="text-gray-500">License No:</span><span className="font-medium ml-1">{selectedDoctor.license_number}</span></div>
+                          <div><span className="text-gray-500">Hospital:</span><span className="font-medium ml-1">{selectedDoctor.hospital_name}</span></div>
+                          <div><span className="text-gray-500">Location:</span><span className="font-medium ml-1">{selectedDoctor.location || '—'}</span></div>
+                          <div><span className="text-gray-500">Registered:</span><span className="font-medium ml-1">{formatDate(selectedDoctor.created_at)}</span></div>
+                        </div>
+                      </div>
+
+                      {/* Bio */}
+                      {selectedDoctor.bio && (
+                        <div>
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Bio</p>
+                          <p className="text-sm text-gray-700 bg-white border border-gray-100 rounded-lg p-3">{selectedDoctor.bio}</p>
+                        </div>
+                      )}
+
+                      {/* Credentials */}
+                      {selectedDoctor.credentials && (
+                        <div>
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Credentials</p>
+                          <p className="text-sm text-gray-700 bg-white border border-gray-100 rounded-lg p-3">{selectedDoctor.credentials}</p>
+                        </div>
+                      )}
+
+                      {/* Document */}
+                      {selectedDoctor.document_path && (
+                        <div>
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">License Document</p>
+                          <a href={`http://localhost:5002/uploads/documents/${selectedDoctor.document_path.split('\\').pop()}`}
+                            target="_blank" rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-4 py-2 bg-[#DCE4D4] text-[#A3B18A] hover:bg-[#A3B18A] hover:text-white rounded-lg text-sm font-medium transition-colors">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            View Document
+                          </a>
+                        </div>
+                      )}
+
+                      {/* Session Fees */}
+                      {(selectedDoctor.initial_session_fee || selectedDoctor.followup_session_fee) && (
+                        <div className="bg-gray-50 rounded-xl p-4">
+                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Session Fees</p>
+                          <div className="grid grid-cols-2 gap-3 text-sm">
+                            {selectedDoctor.initial_session_fee && <div><span className="text-gray-500">Initial:</span><span className="font-medium ml-1">Rs {selectedDoctor.initial_session_fee}</span></div>}
+                            {selectedDoctor.followup_session_fee && <div><span className="text-gray-500">Follow-up:</span><span className="font-medium ml-1">Rs {selectedDoctor.followup_session_fee}</span></div>}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Footer Actions */}
+                    <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
+                      {selectedDoctor.approval_status === 'pending' && (
+                        <>
+                          <button onClick={() => { updateDoctorStatus(selectedDoctor.id, 'approved'); setSelectedDoctor(null); }}
+                            className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium text-sm transition-colors">Approve</button>
+                          <button onClick={() => { updateDoctorStatus(selectedDoctor.id, 'rejected'); setSelectedDoctor(null); }}
+                            className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium text-sm transition-colors">Reject</button>
+                        </>
+                      )}
+                      {selectedDoctor.approval_status === 'approved' && (
+                        <button onClick={() => { updateDoctorStatus(selectedDoctor.id, 'rejected'); setSelectedDoctor(null); }}
+                          className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium text-sm transition-colors">Revoke Approval</button>
+                      )}
+                      {selectedDoctor.approval_status === 'rejected' && (
+                        <button onClick={() => { updateDoctorStatus(selectedDoctor.id, 'approved'); setSelectedDoctor(null); }}
+                          className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium text-sm transition-colors">Approve</button>
+                      )}
+                      <button onClick={() => setSelectedDoctor(null)}
+                        className="flex-1 py-2.5 bg-[#A3B18A] hover:bg-[#8FA076] text-white rounded-xl font-medium text-sm transition-colors">Close</button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -800,93 +889,54 @@ const AdminDashboardNew = () => {
               <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
                   <h3 className="text-lg font-semibold text-gray-800">User Management</h3>
-                  <p className="text-sm text-gray-500 mt-1">Manage patient accounts and permissions</p>
+                  <p className="text-sm text-gray-500 mt-1">Click a user to view full details</p>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          User
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Contact
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Joined
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Actions
-                        </th>
+                  <table className="min-w-full">
+                    <thead>
+                      <tr className="border-b border-gray-100">
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">User</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Email</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Joined</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
+                    <tbody className="divide-y divide-gray-50">
                       {filteredPatients.map((patient) => (
-                        <tr key={patient.id} className="hover:bg-gray-50 transition-colors">
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <div className="flex-shrink-0 h-10 w-10 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center shadow-sm">
-                                <span className="text-white font-semibold text-sm">
-                                  {patient.full_name.charAt(0).toUpperCase()}
-                                </span>
+                        <tr key={patient.id} onClick={() => setSelectedPatient(patient)}
+                          className="hover:bg-[#F5F5F0] transition-colors cursor-pointer group">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <div className="w-9 h-9 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
+                                {patient.full_name.charAt(0).toUpperCase()}
                               </div>
-                              <div className="ml-4">
-                                <div className="text-sm font-medium text-gray-900">{patient.full_name}</div>
-                                <div className="text-xs text-gray-500">ID: {patient.id}</div>
-                              </div>
+                              <p className="text-sm font-semibold text-gray-900">{patient.full_name}</p>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-900">{patient.email}</div>
-                            <div className="text-xs text-gray-500">{patient.phone_number || 'No phone'}</div>
+                          <td className="px-6 py-4">
+                            <p className="text-sm text-gray-600">{patient.email}</p>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="text-sm text-gray-500">
-                              {new Date(patient.created_at).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                                year: 'numeric'
-                              })}
-                            </div>
+                          <td className="px-6 py-4">
+                            <p className="text-sm text-gray-500">{new Date(patient.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              patient.status === 'active' 
-                                ? 'bg-green-100 text-green-800' 
-                                : 'bg-red-100 text-red-800'
-                            }`}>
+                          <td className="px-6 py-4">
+                            <span className={`px-3 py-1 text-xs font-semibold rounded-full ${patient.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                               {patient.status === 'active' ? 'Active' : 'Inactive'}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                            <div className="flex space-x-2">
-                              {patient.status === 'active' ? (
-                                <button
-                                  onClick={() => updatePatientStatus(patient.id, 'inactive')}
-                                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-red-700 bg-red-100 hover:bg-red-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors"
-                                >
-                                  Deactivate
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={() => updatePatientStatus(patient.id, 'active')}
-                                  className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
-                                >
-                                  Activate
-                                </button>
-                              )}
-                              <button
-                                onClick={() => {
-                                  alert(`View Details for ${patient.full_name}\n\nID: ${patient.id}\nEmail: ${patient.email}\nPhone: ${patient.phone_number || 'N/A'}\nAge: ${patient.age || 'N/A'}\nStatus: ${patient.status}`);
-                                }}
-                                className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-                              >
-                                View Details
+                          <td className="px-6 py-4" onClick={(e) => e.stopPropagation()}>
+                            {patient.status === 'active' ? (
+                              <button onClick={() => updatePatientStatus(patient.id, 'inactive')}
+                                className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 hover:bg-red-200 rounded-lg transition-colors">
+                                Deactivate
                               </button>
-                            </div>
+                            ) : (
+                              <button onClick={() => updatePatientStatus(patient.id, 'active')}
+                                className="px-3 py-1.5 text-xs font-medium text-green-700 bg-green-100 hover:bg-green-200 rounded-lg transition-colors">
+                                Activate
+                              </button>
+                            )}
                           </td>
                         </tr>
                       ))}
@@ -896,18 +946,90 @@ const AdminDashboardNew = () => {
 
                 {filteredPatients.length === 0 && (
                   <div className="text-center py-12">
-                    <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                    </svg>
-                    <h3 className="mt-2 text-sm font-medium text-gray-900">No users found</h3>
-                    <p className="mt-1 text-sm text-gray-500">
-                      {patientSearchTerm || userFilter !== 'all'
-                        ? 'Try adjusting your search or filter criteria.' 
-                        : 'No users have registered yet.'}
-                    </p>
+                    <p className="text-sm text-gray-500">{patientSearchTerm || userFilter !== 'all' ? 'Try adjusting your search or filter criteria.' : 'No users have registered yet.'}</p>
                   </div>
                 )}
               </div>
+
+              {/* Patient Detail Modal */}
+              {selectedPatient && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                  <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden">
+                    {/* Header */}
+                    <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center text-white font-bold text-lg">
+                          {selectedPatient.full_name.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-gray-900">{selectedPatient.full_name}</h3>
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${selectedPatient.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                            {selectedPatient.status === 'active' ? 'Active' : 'Inactive'}
+                          </span>
+                        </div>
+                      </div>
+                      <button onClick={() => setSelectedPatient(null)} className="text-gray-400 hover:text-gray-600 p-1">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <div className="px-6 py-5 space-y-4">
+                      <div className="bg-[#F5F5F0] rounded-xl p-4">
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Account Details</p>
+                        <div className="space-y-2 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Full Name</span>
+                            <span className="font-medium text-gray-900">{selectedPatient.full_name}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Email</span>
+                            <span className="font-medium text-gray-900">{selectedPatient.email}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Phone</span>
+                            <span className="font-medium text-gray-900">{selectedPatient.phone_number || '—'}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Age</span>
+                            <span className="font-medium text-gray-900">{selectedPatient.age || '—'}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Member Since</span>
+                            <span className="font-medium text-gray-900">
+                              {new Date(selectedPatient.created_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">User ID</span>
+                            <span className="font-medium text-gray-400 text-xs">#{selectedPatient.id}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Footer Actions */}
+                    <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
+                      {selectedPatient.status === 'active' ? (
+                        <button onClick={() => { updatePatientStatus(selectedPatient.id, 'inactive'); setSelectedPatient(null); }}
+                          className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium text-sm transition-colors">
+                          Deactivate Account
+                        </button>
+                      ) : (
+                        <button onClick={() => { updatePatientStatus(selectedPatient.id, 'active'); setSelectedPatient(null); }}
+                          className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium text-sm transition-colors">
+                          Activate Account
+                        </button>
+                      )}
+                      <button onClick={() => setSelectedPatient(null)}
+                        className="flex-1 py-2.5 bg-[#A3B18A] hover:bg-[#8FA076] text-white rounded-xl font-medium text-sm transition-colors">
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -922,6 +1044,10 @@ const AdminDashboardNew = () => {
               {activeSection === 'reviews' && (
                 <ReviewsSection />
               )}
+
+          {activeSection === 'analytics' && (
+            <AnalyticsSection />
+          )}
 
           {activeSection === 'settings' && (
             <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
@@ -941,6 +1067,7 @@ const AppointmentsSection = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [stats, setStats] = useState({ total: 0, upcoming: 0, completed: 0, cancelled: 0 });
+  const [selectedApt, setSelectedApt] = useState(null);
 
   const fetchAppointments = async () => {
     try {
@@ -1085,14 +1212,11 @@ const AppointmentsSection = () => {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-center">
           <h3 className="font-semibold text-gray-900">All Appointments ({appointments.length})</h3>
-          <button
-            onClick={fetchAppointments}
-            className="flex items-center space-x-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
-          >
+          <button onClick={fetchAppointments} className="flex items-center gap-2 text-sm text-gray-500 hover:text-gray-800 transition-colors">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
             </svg>
-            <span>Refresh</span>
+            Refresh
           </button>
         </div>
 
@@ -1110,82 +1234,65 @@ const AppointmentsSection = () => {
             <p className="text-gray-400 text-sm mt-1">Try adjusting your filters</p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-50">
-            {appointments.map((apt) => (
-              <div key={apt.id} className="px-6 py-4 hover:bg-gray-50 transition-colors">
-                <div className="flex items-center justify-between gap-4">
-                  {/* Patient + Doctor Info */}
-                  <div className="flex items-center space-x-4 flex-1 min-w-0">
-                    {/* Patient Avatar */}
-                    <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[#A3B18A] to-[#8FA076] flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
-                      {apt.patient_first_name?.charAt(0)}{apt.patient_last_name?.charAt(0)}
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      {/* Patient → Doctor */}
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-gray-900 text-sm">
-                          {apt.patient_first_name} {apt.patient_last_name}
-                        </span>
-                        <svg className="w-4 h-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                        </svg>
-                        <span className="font-semibold text-[#A3B18A] text-sm">
-                          {apt.doctor_name}
-                        </span>
-                        <span className="text-xs text-gray-400">({apt.doctor_specialization})</span>
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead>
+                <tr className="border-b border-gray-100">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Patient</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Doctor</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Specialty</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Date & Time</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Type</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Fee</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {appointments.map((apt) => (
+                  <tr key={apt.id} className="hover:bg-[#F5F5F0] transition-colors">
+                    {/* Patient */}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#A3B18A] to-[#8FA076] flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
+                          {apt.patient_first_name?.charAt(0)}{apt.patient_last_name?.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">{apt.patient_first_name} {apt.patient_last_name}</p>
+                          <p className="text-xs text-gray-400">{apt.patient_email}</p>
+                        </div>
                       </div>
-
-                      {/* Date, Time, Type */}
-                      <div className="flex items-center gap-3 mt-1 flex-wrap">
-                        <span className="flex items-center text-xs text-gray-500">
-                          <svg className="w-3.5 h-3.5 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          {formatDate(apt.appointment_date)}
-                        </span>
-                        <span className="flex items-center text-xs text-gray-500">
-                          <svg className="w-3.5 h-3.5 mr-1 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          {formatTime(apt.appointment_time)} • {apt.duration_minutes} min
-                        </span>
-                        <span className="text-xs text-gray-400 capitalize">{apt.appointment_type} session</span>
-                      </div>
-
-                      {/* Patient contact */}
-                      <div className="flex items-center gap-3 mt-1 flex-wrap">
-                        <span className="text-xs text-gray-400">{apt.patient_email}</span>
-                        {apt.patient_phone && (
-                          <span className="text-xs text-gray-400">{apt.patient_phone}</span>
-                        )}
-                        {apt.confirmation_number && (
-                          <span className="text-xs text-gray-400">#{apt.confirmation_number}</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Status + Fee */}
-                  <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                    {getStatusBadge(apt.status)}
-                    <span className="text-sm font-semibold text-gray-900">
-                      Rs {apt.session_fee || 0}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Session Notes (if completed) */}
-                {apt.session_notes && apt.status === 'completed' && (
-                  <div className="mt-3 ml-15 pl-15">
-                    <div className="ml-[60px] bg-green-50 border border-green-200 rounded-lg p-3">
-                      <p className="text-xs font-semibold text-green-800 mb-1">Session Notes</p>
-                      <p className="text-xs text-green-700 line-clamp-2">{apt.session_notes}</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                    </td>
+                    {/* Doctor */}
+                    <td className="px-6 py-4">
+                      <p className="text-sm font-medium text-gray-800">Dr. {apt.doctor_name}</p>
+                    </td>
+                    {/* Specialty */}
+                    <td className="px-6 py-4">
+                      <p className="text-sm text-gray-600">{apt.doctor_specialization}</p>
+                    </td>
+                    {/* Date & Time */}
+                    <td className="px-6 py-4">
+                      <p className="text-sm font-medium text-gray-800">
+                        {new Date(apt.appointment_date).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric', year: 'numeric' })}
+                      </p>
+                      <p className="text-xs text-gray-400">{formatTime(apt.appointment_time)}</p>
+                    </td>
+                    {/* Type */}
+                    <td className="px-6 py-4">
+                      <p className="text-sm text-gray-600 capitalize">{apt.appointment_type}</p>
+                    </td>
+                    {/* Fee */}
+                    <td className="px-6 py-4">
+                      <p className="text-sm font-medium text-gray-800">Rs {apt.session_fee || 0}</p>
+                    </td>
+                    {/* Status */}
+                    <td className="px-6 py-4">
+                      {getStatusBadge(apt.status)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
@@ -1194,6 +1301,393 @@ const AppointmentsSection = () => {
 };
 
 export default AdminDashboardNew;
+
+const AnalyticsSection = () => {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [regTab, setRegTab] = useState('patients');
+
+  useEffect(() => {
+    const fetchAll = async () => {
+      try {
+        const [aptsRes, reviewsRes, doctorsRes, usersRes] = await Promise.all([
+          fetch(buildApiUrl('/api/admin/appointments')),
+          fetch(buildApiUrl('/api/reviews/admin/all')),
+          fetch(buildApiUrl('/api/admin/doctors')),
+          fetch(buildApiUrl('/api/admin/users')),
+        ]);
+        const [apts, reviews, doctors, users] = await Promise.all([
+          aptsRes.json(), reviewsRes.json(), doctorsRes.json(), usersRes.json()
+        ]);
+
+        const appointments = apts.success ? apts.appointments : [];
+        const allReviews = reviews.success ? reviews.reviews : [];
+        const allDoctors = doctors.success ? doctors.doctors : [];
+        const allUsers = users.success ? users.patients : [];
+
+        // Appointment stats
+        const completed = appointments.filter(a => a.status === 'completed').length;
+        const upcoming = appointments.filter(a => a.status === 'confirmed' || a.status === 'scheduled').length;
+        const cancelled = appointments.filter(a => a.status === 'cancelled').length;
+        const totalRevenue = appointments
+          .filter(a => a.status === 'completed')
+          .reduce((sum, a) => sum + parseFloat(a.session_fee || 0), 0);
+
+        // Doctor stats
+        const approvedDoctors = allDoctors.filter(d => d.approval_status === 'approved').length;
+        const pendingDoctors = allDoctors.filter(d => d.approval_status === 'pending').length;
+        const rejectedDoctors = allDoctors.filter(d => d.approval_status === 'rejected').length;
+
+        // Specialization breakdown
+        const specMap = {};
+        allDoctors.filter(d => d.approval_status === 'approved').forEach(d => {
+          specMap[d.specialization] = (specMap[d.specialization] || 0) + 1;
+        });
+        const topSpecializations = Object.entries(specMap)
+          .sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+        // Review stats
+        const approvedReviews = allReviews.filter(r => r.is_visible).length;
+        const pendingReviews = allReviews.filter(r => !r.is_visible).length;
+        const avgRating = allReviews.length
+          ? (allReviews.reduce((s, r) => s + r.rating, 0) / allReviews.length).toFixed(1)
+          : 0;
+
+        // User stats
+        const activeUsers = allUsers.filter(u => u.status === 'active').length;
+
+        // Monthly data (last 6 months)
+        const now = new Date();
+        const months = [];
+        for (let i = 5; i >= 0; i--) {
+          const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+          const label = d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+          const patients = allUsers.filter(u => { const c = new Date(u.created_at); return c.getMonth() === d.getMonth() && c.getFullYear() === d.getFullYear(); }).length;
+          const docs = allDoctors.filter(doc => { const c = new Date(doc.created_at); return c.getMonth() === d.getMonth() && c.getFullYear() === d.getFullYear(); }).length;
+          const apts_count = appointments.filter(a => { const c = new Date(a.created_at); return c.getMonth() === d.getMonth() && c.getFullYear() === d.getFullYear(); }).length;
+          months.push({ label, patients, doctors: docs, appointments: apts_count });
+        }
+
+        setData({
+          appointments: { total: appointments.length, completed, upcoming, cancelled },
+          revenue: totalRevenue,
+          doctors: { total: allDoctors.length, approved: approvedDoctors, pending: pendingDoctors, rejected: rejectedDoctors },
+          reviews: { total: allReviews.length, approved: approvedReviews, pending: pendingReviews, avgRating },
+          users: { total: allUsers.length, active: activeUsers },
+          topSpecializations,
+          months,
+        });
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAll();
+  }, []);
+
+  if (loading) return (
+    <div className="text-center py-20">
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#A3B18A] mx-auto mb-3"></div>
+      <p className="text-gray-500 text-sm">Loading analytics...</p>
+    </div>
+  );
+
+  if (!data) return null;
+
+  const maxSpec = Math.max(...data.topSpecializations.map(s => s[1]), 1);
+
+  return (
+    <div className="space-y-6">
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        {[
+          { label: 'Total Revenue', value: `Rs ${data.revenue.toLocaleString()}`, sub: 'From completed sessions', color: 'bg-[#A3B18A]', icon: (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
+          )},
+          { label: 'Total Appointments', value: data.appointments.total, sub: `${data.appointments.completed} completed`, color: 'bg-blue-500', icon: (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          )},
+          { label: 'Active Patients', value: data.users.active, sub: `${data.users.total} total registered`, color: 'bg-purple-500', icon: (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+          )},
+          { label: 'Total Doctors', value: data.doctors.total, sub: `${data.doctors.approved} approved`, color: 'bg-[#8FA076]', icon: (
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          )},
+        ].map(card => (
+          <div key={card.label} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
+            <div className="flex items-start justify-between">
+              <div>
+                <p className="text-xs text-gray-500 font-medium mb-1">{card.label}</p>
+                <p className="text-2xl font-bold text-gray-900">{card.value}</p>
+                <p className="text-xs text-gray-400 mt-1">{card.sub}</p>
+              </div>
+              <div className={`${card.color} p-2.5 rounded-lg flex-shrink-0`}>
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  {card.icon}
+                </svg>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Appointment Breakdown */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+          <h3 className="font-semibold text-gray-800 mb-5">Appointment Breakdown</h3>
+          <div className="space-y-4">
+            {[
+              { label: 'Completed', value: data.appointments.completed, total: data.appointments.total, color: 'bg-green-500' },
+              { label: 'Upcoming', value: data.appointments.upcoming, total: data.appointments.total, color: 'bg-blue-500' },
+              { label: 'Cancelled', value: data.appointments.cancelled, total: data.appointments.total, color: 'bg-red-400' },
+            ].map(item => (
+              <div key={item.label}>
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-gray-600">{item.label}</span>
+                  <span className="font-semibold text-gray-900">{item.value} <span className="text-gray-400 font-normal">/ {item.total}</span></span>
+                </div>
+                <div className="w-full bg-gray-100 rounded-full h-2">
+                  <div className={`${item.color} h-2 rounded-full transition-all`}
+                    style={{ width: item.total > 0 ? `${(item.value / item.total) * 100}%` : '0%' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Doctor Status */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+          <h3 className="font-semibold text-gray-800 mb-5">Doctor Status</h3>
+          <div className="space-y-4">
+            {[
+              { label: 'Approved', value: data.doctors.approved, total: data.doctors.total, color: 'bg-[#A3B18A]' },
+              { label: 'Pending', value: data.doctors.pending, total: data.doctors.total, color: 'bg-yellow-400' },
+              { label: 'Rejected', value: data.doctors.rejected, total: data.doctors.total, color: 'bg-red-400' },
+            ].map(item => (
+              <div key={item.label}>
+                <div className="flex justify-between text-sm mb-1">
+                  <span className="text-gray-600">{item.label}</span>
+                  <span className="font-semibold text-gray-900">{item.value} <span className="text-gray-400 font-normal">/ {item.total}</span></span>
+                </div>
+                <div className="w-full bg-gray-100 rounded-full h-2">
+                  <div className={`${item.color} h-2 rounded-full transition-all`}
+                    style={{ width: item.total > 0 ? `${(item.value / item.total) * 100}%` : '0%' }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Top Specializations */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+          <h3 className="font-semibold text-gray-800 mb-5">Top Specializations</h3>
+          {data.topSpecializations.length === 0 ? (
+            <p className="text-gray-400 text-sm">No data yet</p>
+          ) : (
+            <div className="space-y-3">
+              {data.topSpecializations.map(([name, count]) => (
+                <div key={name}>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-gray-700 truncate mr-2">{name}</span>
+                    <span className="font-semibold text-gray-900 flex-shrink-0">{count} doctor{count !== 1 ? 's' : ''}</span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-2">
+                    <div className="bg-[#A3B18A] h-2 rounded-full"
+                      style={{ width: `${(count / maxSpec) * 100}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Review Stats */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+          <h3 className="font-semibold text-gray-800 mb-5">Review Overview</h3>
+          <div className="grid grid-cols-3 gap-4 mb-5">
+            {[
+              { label: 'Total', value: data.reviews.total, color: 'text-gray-900' },
+              { label: 'Approved', value: data.reviews.approved, color: 'text-green-600' },
+              { label: 'Pending', value: data.reviews.pending, color: 'text-yellow-600' },
+            ].map(item => (
+              <div key={item.label} className="text-center bg-gray-50 rounded-xl p-3">
+                <p className={`text-2xl font-bold ${item.color}`}>{item.value}</p>
+                <p className="text-xs text-gray-500 mt-1">{item.label}</p>
+              </div>
+            ))}
+          </div>
+          <div className="flex items-center justify-center gap-2 bg-yellow-50 rounded-xl p-4">
+            <span className="text-yellow-400 text-2xl">★</span>
+            <span className="text-2xl font-bold text-gray-900">{data.reviews.avgRating}</span>
+            <span className="text-sm text-gray-500">average rating</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Appointment Trends — smooth SVG area chart */}
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <h3 className="font-semibold text-gray-800">Appointment Trends</h3>
+            <p className="text-xs text-gray-400 mt-0.5">Last 6 months</p>
+          </div>
+          <div className="text-right">
+            <p className="text-2xl font-bold text-gray-900">{data.appointments.total}</p>
+            <p className="text-xs text-gray-400">total appointments</p>
+          </div>
+        </div>
+
+        {(() => {
+          const pts = data.months.map(m => m.appointments);
+          const maxVal = Math.max(...pts, 1);
+          const W = 600; const H = 160; const PAD = 8;
+          const xStep = (W - PAD * 2) / (pts.length - 1);
+          const xs = pts.map((_, i) => PAD + i * xStep);
+          const ys = pts.map(p => H - PAD - ((p / maxVal) * (H - PAD * 2)));
+
+          // Smooth cubic bezier path
+          const smooth = (points) => {
+            if (points.length < 2) return '';
+            let d = `M${points[0][0]},${points[0][1]}`;
+            for (let i = 1; i < points.length; i++) {
+              const [x0, y0] = points[i - 1];
+              const [x1, y1] = points[i];
+              const cpx = (x0 + x1) / 2;
+              d += ` C${cpx},${y0} ${cpx},${y1} ${x1},${y1}`;
+            }
+            return d;
+          };
+
+          const coords = xs.map((x, i) => [x, ys[i]]);
+          const linePath = smooth(coords);
+          const areaPath = linePath
+            ? `${linePath} L${xs[xs.length-1]},${H} L${xs[0]},${H} Z`
+            : '';
+
+          const yTicks = [maxVal, Math.round(maxVal * 0.5), 0];
+
+          return (
+            <div className="flex gap-4 mt-4">
+              {/* Y axis */}
+              <div className="flex flex-col justify-between text-xs text-gray-300 text-right pb-6" style={{minWidth:'24px', height:`${H}px`}}>
+                {yTicks.map(v => <span key={v}>{v}</span>)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{height:`${H}px`}} preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="aptAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#A3B18A" stopOpacity="0.25"/>
+                      <stop offset="100%" stopColor="#A3B18A" stopOpacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  {/* Horizontal grid lines */}
+                  {yTicks.map((v, i) => {
+                    const y = H - PAD - ((v / maxVal) * (H - PAD * 2));
+                    return <line key={i} x1={PAD} y1={y} x2={W - PAD} y2={y} stroke="#f3f4f6" strokeWidth="1" strokeDasharray="4,4"/>;
+                  })}
+                  {/* Area fill */}
+                  {areaPath && <path d={areaPath} fill="url(#aptAreaGrad)"/>}
+                  {/* Line */}
+                  {linePath && <path d={linePath} fill="none" stroke="#A3B18A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>}
+                  {/* Dots */}
+                  {coords.map(([x, y], i) => (
+                    <g key={i}>
+                      <circle cx={x} cy={y} r="5" fill="white" stroke="#A3B18A" strokeWidth="2.5"/>
+                      {pts[i] > 0 && (
+                        <text x={x} y={y - 10} textAnchor="middle" fontSize="10" fill="#6b7280" fontWeight="600">{pts[i]}</text>
+                      )}
+                    </g>
+                  ))}
+                </svg>
+                {/* X labels */}
+                <div className="flex justify-between text-xs text-gray-400 mt-1 px-1">
+                  {data.months.map(m => <span key={m.label}>{m.label}</span>)}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+      </div>
+
+      {/* New Registrations — improved bar chart */}
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <h3 className="font-semibold text-gray-800">New Registrations</h3>
+            <p className="text-xs text-gray-400 mt-0.5">Last 6 months</p>
+          </div>
+          <div className="flex border border-gray-200 rounded-lg overflow-hidden text-xs font-medium">
+            {['patients','doctors'].map(tab => (
+              <button key={tab} onClick={() => setRegTab(tab)}
+                className={`px-4 py-1.5 capitalize transition-colors ${regTab === tab ? 'bg-[#A3B18A] text-white' : 'bg-white text-gray-500 hover:bg-gray-50'}`}>
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {(() => {
+          const regData = data.months.map(m => ({ label: m.label, count: regTab === 'patients' ? m.patients : m.doctors }));
+          const maxVal = Math.max(...regData.map(m => m.count), 1);
+          const W = 600; const H = 160; const PAD = 8;
+          const barW = (W - PAD * 2) / regData.length;
+          const barGap = barW * 0.25;
+          const yTicks = [maxVal, Math.round(maxVal * 0.5), 0];
+
+          return (
+            <div className="flex gap-4 mt-4">
+              {/* Y axis */}
+              <div className="flex flex-col justify-between text-xs text-gray-300 text-right pb-6" style={{minWidth:'24px', height:`${H}px`}}>
+                {yTicks.map(v => <span key={v}>{v}</span>)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{height:`${H}px`}} preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#A3B18A" stopOpacity="1"/>
+                      <stop offset="100%" stopColor="#8FA076" stopOpacity="0.8"/>
+                    </linearGradient>
+                  </defs>
+                  {/* Grid lines */}
+                  {yTicks.map((v, i) => {
+                    const y = H - PAD - ((v / maxVal) * (H - PAD * 2));
+                    return <line key={i} x1={PAD} y1={y} x2={W - PAD} y2={y} stroke="#f3f4f6" strokeWidth="1" strokeDasharray="4,4"/>;
+                  })}
+                  {/* Baseline */}
+                  <line x1={PAD} y1={H - PAD} x2={W - PAD} y2={H - PAD} stroke="#e5e7eb" strokeWidth="1"/>
+                  {/* Bars */}
+                  {regData.map(({ count }, i) => {
+                    const barH = (count / maxVal) * (H - PAD * 2);
+                    const x = PAD + i * barW + barGap / 2;
+                    const w = barW - barGap;
+                    const y = H - PAD - barH;
+                    return (
+                      <g key={i}>
+                        {count > 0 && (
+                          <rect x={x} y={y} width={w} height={barH} fill="url(#barGrad)" rx="3" ry="3"/>
+                        )}
+                        {count > 0 && (
+                          <text x={x + w / 2} y={y - 5} textAnchor="middle" fontSize="10" fill="#6b7280" fontWeight="600">{count}</text>
+                        )}
+                      </g>
+                    );
+                  })}
+                </svg>
+                {/* X labels */}
+                <div className="flex text-xs text-gray-400 mt-1">
+                  {regData.map(({ label }) => (
+                    <div key={label} className="flex-1 text-center">{label}</div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
+        })()}
+      </div>
+    </div>
+  );
+};
 
 const SpecializationsSection = () => {
   const [specializations, setSpecializations] = useState([]);
@@ -1507,7 +2001,6 @@ const ReviewsSection = () => {
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
         <div className="px-6 py-4 border-b border-gray-100">
           <h3 className="font-semibold text-gray-900">Reviews ({filteredReviews.length})</h3>
-          <p className="text-xs text-gray-400 mt-0.5">Click a review to see full details</p>
         </div>
 
         {loading ? (
@@ -1522,47 +2015,82 @@ const ReviewsSection = () => {
             <p className="text-sm">No reviews found</p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-50">
-            {filteredReviews.map((review) => (
-              <div key={review.id} onClick={() => setSelectedReview(review)}
-                className="px-6 py-5 hover:bg-[#F5F5F0] transition-colors cursor-pointer group">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 flex-wrap mb-1">
-                      <span className="font-semibold text-gray-900 text-sm">{review.patient_first_name} {review.patient_last_name}</span>
-                      <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                      </svg>
-                      <span className="font-semibold text-[#A3B18A] text-sm">Dr. {review.doctor_full_name}</span>
-                      <span className="text-xs text-gray-400">({review.doctor_specialization})</span>
-                    </div>
-                    <div className="flex items-center gap-2 mb-1">
-                      {renderStars(review.rating)}
-                      <span className="text-xs text-gray-400">{new Date(review.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                    </div>
-                    {review.review_text && <p className="text-sm text-gray-600 line-clamp-1">{review.review_text}</p>}
-                  </div>
-                  <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${review.is_visible ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
-                      {review.is_visible ? 'Approved' : 'Pending'}
-                    </span>
-                    <div className="flex gap-2 items-center">
-                      <button onClick={(e) => toggleVisibility(e, review.id, review.is_visible)}
-                        className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${review.is_visible ? 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100' : 'bg-green-50 text-green-700 hover:bg-green-100'}`}>
-                        {review.is_visible ? 'Hide' : 'Approve'}
-                      </button>
-                      <button onClick={(e) => handleDelete(e, review.id)}
-                        className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
-                        Delete
-                      </button>
-                      <svg className="w-4 h-4 text-gray-300 group-hover:text-[#A3B18A] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="overflow-x-auto">
+            <table className="min-w-full">
+              <thead>
+                <tr className="border-b border-gray-100">
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Patient</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Doctor</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Rating</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Review</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Date</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Status</th>
+                  <th className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {filteredReviews.map((review) => (
+                  <tr key={review.id} className="hover:bg-[#F5F5F0] transition-colors">
+                    {/* Patient */}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#A3B18A] to-[#8FA076] flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
+                          {review.patient_first_name?.charAt(0)}{review.patient_last_name?.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-gray-900">{review.patient_first_name} {review.patient_last_name}</p>
+                          <p className="text-xs text-gray-400">{review.patient_email}</p>
+                        </div>
+                      </div>
+                    </td>
+                    {/* Doctor */}
+                    <td className="px-6 py-4">
+                      <p className="text-sm font-medium text-[#A3B18A]">Dr. {review.doctor_full_name}</p>
+                      <p className="text-xs text-gray-400">{review.doctor_specialization}</p>
+                    </td>
+                    {/* Rating */}
+                    <td className="px-6 py-4">
+                      <p className="text-yellow-400 text-sm leading-none">{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</p>
+                      <p className="text-xs text-gray-400 mt-1">{review.rating}/5</p>
+                    </td>
+                    {/* Review text */}
+                    <td className="px-6 py-4 max-w-xs">
+                      {review.review_text
+                        ? <p className="text-sm text-gray-600 line-clamp-2">{review.review_text}</p>
+                        : <p className="text-xs text-gray-300 italic">No written review</p>
+                      }
+                    </td>
+                    {/* Date */}
+                    <td className="px-6 py-4">
+                      <p className="text-sm text-gray-600 whitespace-nowrap">
+                        {new Date(review.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                      </p>
+                    </td>
+                    {/* Status */}
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 rounded-full text-xs font-semibold ${review.is_visible ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                        {review.is_visible ? 'Approved' : 'Pending'}
+                      </span>
+                    </td>
+                    {/* Actions */}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={(e) => toggleVisibility(e, review.id, review.is_visible)}
+                          className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${review.is_visible ? 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100' : 'bg-green-50 text-green-700 hover:bg-green-100'}`}>
+                          {review.is_visible ? 'Hide' : 'Approve'}
+                        </button>
+                        <button
+                          onClick={(e) => handleDelete(e, review.id)}
+                          className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
@@ -1598,25 +2126,24 @@ const ReviewsSection = () => {
                   <span className="text-sm text-[#A3B18A] font-medium">{ratingLabel[selectedReview.rating]}</span>
                 </div>
               </div>
-              {(selectedReview.rating_professionalism || selectedReview.rating_communication || selectedReview.rating_wait_time) && (
-                <div className="bg-gray-50 rounded-xl p-4">
-                  <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Detailed Ratings</p>
-                  <div className="grid grid-cols-3 gap-4">
-                    {[
-                      { label: 'Professionalism', value: selectedReview.rating_professionalism },
-                      { label: 'Communication', value: selectedReview.rating_communication },
-                      { label: 'Wait Time', value: selectedReview.rating_wait_time },
-                    ].map(({ label, value }) => (
-                      <div key={label} className="text-center">
-                        <p className="text-xs text-gray-500 mb-1">{label}</p>
-                        {value ? (
-                          <><p className="text-yellow-400 text-lg leading-none">{'★'.repeat(value)}{'☆'.repeat(5 - value)}</p><p className="text-xs text-gray-500 mt-1">{value}/5</p></>
-                        ) : <p className="text-gray-300 text-lg">—</p>}
-                      </div>
-                    ))}
-                  </div>
+              {/* Detailed Ratings — always show */}
+              <div className="bg-gray-50 rounded-xl p-4">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Detailed Ratings</p>
+                <div className="grid grid-cols-3 gap-4">
+                  {[
+                    { label: 'Professionalism', value: selectedReview.rating_professionalism },
+                    { label: 'Communication', value: selectedReview.rating_communication },
+                    { label: 'Wait Time', value: selectedReview.rating_wait_time },
+                  ].map(({ label, value }) => (
+                    <div key={label} className="text-center">
+                      <p className="text-xs text-gray-500 mb-1">{label}</p>
+                      {value ? (
+                        <><p className="text-yellow-400 text-lg leading-none">{'★'.repeat(value)}{'☆'.repeat(5 - value)}</p><p className="text-xs text-gray-500 mt-1">{value}/5</p></>
+                      ) : <p className="text-xs text-gray-400 mt-2">Not rated</p>}
+                    </div>
+                  ))}
                 </div>
-              )}
+              </div>
               {selectedReview.review_text && (
                 <div>
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Written Review</p>

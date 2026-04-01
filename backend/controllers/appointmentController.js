@@ -45,9 +45,9 @@ export const createAppointment = async (req, res) => {
       doctorPhone
     } = req.body;
 
-    // Check if the time slot is already booked
+    // Check if the time slot is already CONFIRMED (pending doesn't block the slot)
     const existingAppointment = await pool.query(
-      "SELECT id FROM appointments WHERE doctor_id = $1 AND appointment_date = $2 AND appointment_time = $3 AND status NOT IN ('cancelled', 'no_show')",
+      "SELECT id FROM appointments WHERE doctor_id = $1 AND appointment_date = $2 AND appointment_time = $3 AND status = 'confirmed'",
       [doctorId, appointmentDate, appointmentTime]
     );
 
@@ -58,10 +58,20 @@ export const createAppointment = async (req, res) => {
       });
     }
 
+    // Enforce 24-hour advance booking rule
+    const appointmentDateTime = new Date(`${appointmentDate}T${appointmentTime}`);
+    const hoursUntilAppointment = (appointmentDateTime - new Date()) / (1000 * 60 * 60);
+    if (hoursUntilAppointment < 24) {
+      return res.status(400).json({
+        success: false,
+        message: "Appointments must be booked at least 24 hours in advance."
+      });
+    }
+
     // Generate confirmation number
     const confirmationNumber = generateConfirmationNumber();
 
-    // Insert appointment into database with confirmed status
+    // Insert appointment with PENDING status — doctor must confirm
     const newAppointment = await pool.query(
       `INSERT INTO appointments (
         patient_id, doctor_id, appointment_date, appointment_time, appointment_type, 
@@ -71,7 +81,7 @@ export const createAppointment = async (req, res) => {
         special_requests, doctor_name, doctor_specialization, doctor_location, 
         doctor_address, doctor_phone, confirmation_number, status
       ) VALUES (
-        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, 'confirmed'
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, 'pending'
       ) RETURNING *`,
       [
         patientId, doctorId, appointmentDate, appointmentTime, appointmentType,
@@ -240,7 +250,7 @@ export const updateAppointmentStatus = async (req, res) => {
     const { appointmentId } = req.params;
     const { status } = req.body;
 
-    const validStatuses = ['scheduled', 'confirmed', 'completed', 'cancelled', 'no_show'];
+    const validStatuses = ['pending', 'scheduled', 'confirmed', 'completed', 'cancelled', 'no_show'];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
         success: false,
@@ -273,6 +283,48 @@ export const updateAppointmentStatus = async (req, res) => {
       message: "Failed to update appointment status.",
       error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
+  }
+};
+
+// CONFIRM APPOINTMENT (doctor confirms a pending appointment)
+export const confirmAppointment = async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+
+    // Check it exists and is still pending
+    const existing = await pool.query(
+      "SELECT * FROM appointments WHERE id = $1 AND status = 'pending'",
+      [appointmentId]
+    );
+
+    if (existing.rows.length === 0) {
+      return res.status(404).json({ success: false, message: "Pending appointment not found." });
+    }
+
+    const apt = existing.rows[0];
+
+    // Check no other confirmed appointment exists for this slot
+    const conflict = await pool.query(
+      "SELECT id FROM appointments WHERE doctor_id = $1 AND appointment_date = $2 AND appointment_time = $3 AND status = 'confirmed' AND id != $4",
+      [apt.doctor_id, apt.appointment_date, apt.appointment_time, appointmentId]
+    );
+
+    if (conflict.rows.length > 0) {
+      return res.status(400).json({ success: false, message: "This time slot has already been confirmed for another patient." });
+    }
+
+    const updated = await pool.query(
+      "UPDATE appointments SET status = 'confirmed', updated_at = CURRENT_TIMESTAMP WHERE id = $1 RETURNING *",
+      [appointmentId]
+    );
+
+    // Notify patient (skip — patients don't have a notification panel yet)
+    // createNotification for patient would go here when patient notifications are added
+
+    res.json({ success: true, message: "Appointment confirmed!", appointment: updated.rows[0] });
+  } catch (err) {
+    console.error('Confirm appointment error:', err);
+    res.status(500).json({ success: false, message: "Failed to confirm appointment." });
   }
 };
 
@@ -370,27 +422,26 @@ export const completeSession = async (req, res) => {
   }
 };
 
-// GET DOCTOR'S PATIENTS (from completed appointments)
+// GET DOCTOR'S PATIENTS (from all non-cancelled appointments)
 export const getDoctorPatients = async (req, res) => {
   try {
     const { doctorId } = req.params;
 
-    // Get unique patients who have had appointments with this doctor
     const patients = await pool.query(
-      `SELECT DISTINCT ON (patient_id)
+      `SELECT 
         patient_id,
-        patient_first_name,
-        patient_last_name,
-        patient_email,
-        patient_phone,
-        patient_date_of_birth,
-        MAX(appointment_date) as last_visit,
-        COUNT(*) OVER (PARTITION BY patient_id) as total_sessions
+        MAX(patient_first_name) as patient_first_name,
+        MAX(patient_last_name) as patient_last_name,
+        MAX(patient_email) as patient_email,
+        MAX(patient_phone) as patient_phone,
+        MAX(patient_date_of_birth) as patient_date_of_birth,
+        MAX(appointment_date) FILTER (WHERE status = 'completed') as last_visit,
+        COUNT(*) FILTER (WHERE status = 'completed') as total_sessions,
+        COUNT(*) FILTER (WHERE status IN ('confirmed','scheduled') AND appointment_date >= CURRENT_DATE) as upcoming_count
       FROM appointments 
-      WHERE doctor_id = $1 AND status = 'completed'
-      GROUP BY patient_id, patient_first_name, patient_last_name, 
-               patient_email, patient_phone, patient_date_of_birth
-      ORDER BY patient_id, MAX(appointment_date) DESC`,
+      WHERE doctor_id = $1 AND status NOT IN ('cancelled', 'no_show')
+      GROUP BY patient_id
+      ORDER BY MAX(appointment_date) DESC`,
       [doctorId]
     );
 
@@ -409,32 +460,71 @@ export const getDoctorPatients = async (req, res) => {
   }
 };
 
-// GET PATIENT SESSION HISTORY WITH NOTES
+// CHECK IF PATIENT IS RETURNING (has previous appointment with same doctor)
+export const checkReturningPatient = async (req, res) => {
+  try {
+    const { patientId, doctorId } = req.params;
+
+    const result = await pool.query(
+      `SELECT id FROM appointments 
+       WHERE patient_id = $1 AND doctor_id = $2 
+       AND status NOT IN ('cancelled', 'no_show')
+       LIMIT 1`,
+      [patientId, doctorId]
+    );
+
+    res.json({
+      success: true,
+      isReturning: result.rows.length > 0
+    });
+
+  } catch (err) {
+    console.error('Check returning patient error:', err);
+    res.status(500).json({ success: false, message: "Failed to check patient history." });
+  }
+};
 export const getPatientSessionHistory = async (req, res) => {
   try {
     const { patientId, doctorId } = req.params;
 
+    // Completed sessions — newest first
     const sessions = await pool.query(
-      `SELECT 
-        id,
-        appointment_date,
-        appointment_time,
-        appointment_type,
-        session_fee,
-        duration_minutes,
-        reason_for_visit,
-        session_notes,
-        status,
-        created_at
+      `SELECT id, appointment_date, appointment_time, appointment_type,
+        session_fee, duration_minutes, reason_for_visit,
+        session_notes, status, created_at
       FROM appointments 
       WHERE patient_id = $1 AND doctor_id = $2 AND status = 'completed'
       ORDER BY appointment_date DESC, appointment_time DESC`,
       [patientId, doctorId]
     );
 
+    // Upcoming appointments
+    const upcoming = await pool.query(
+      `SELECT id, appointment_date, appointment_time, appointment_type,
+        session_fee, duration_minutes, reason_for_visit, status, created_at
+      FROM appointments 
+      WHERE patient_id = $1 AND doctor_id = $2 
+        AND status IN ('confirmed', 'scheduled', 'pending')
+        AND appointment_date >= CURRENT_DATE
+      ORDER BY appointment_date ASC, appointment_time ASC`,
+      [patientId, doctorId]
+    );
+
+    // Cancelled appointments — newest first
+    const cancelled = await pool.query(
+      `SELECT id, appointment_date, appointment_time, appointment_type,
+        session_fee, duration_minutes, reason_for_visit, status, created_at
+      FROM appointments 
+      WHERE patient_id = $1 AND doctor_id = $2 AND status = 'cancelled'
+      ORDER BY appointment_date DESC, appointment_time DESC`,
+      [patientId, doctorId]
+    );
+
     res.json({
       success: true,
-      sessions: sessions.rows
+      sessions: sessions.rows,
+      upcoming: upcoming.rows,
+      cancelled: cancelled.rows
     });
 
   } catch (err) {

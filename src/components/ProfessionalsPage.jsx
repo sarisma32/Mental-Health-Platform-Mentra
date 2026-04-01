@@ -82,7 +82,8 @@ const ProfessionalsPage = () => {
       prof.specialization.toLowerCase().includes(selectedSpecialization.toLowerCase());
     const matchesSearch = prof.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       prof.specialization.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      prof.bio.toLowerCase().includes(searchTerm.toLowerCase());
+      prof.bio.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (prof.location && prof.location.toLowerCase().includes(searchTerm.toLowerCase()));
     
     return matchesSpecialization && matchesSearch;
   });
@@ -148,7 +149,7 @@ const ProfessionalsPage = () => {
               </div>
               <input
                 type="text"
-                placeholder="Search by name, specialization, or keyword..."
+                placeholder="Search by name, specialization, or location..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mentra-primary focus:border-transparent"

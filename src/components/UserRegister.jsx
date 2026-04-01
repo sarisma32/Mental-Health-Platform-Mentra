@@ -17,6 +17,14 @@ const UserRegister = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Email verification state
+  const [step, setStep] = useState('form'); // 'form' | 'verify'
+  const [otp, setOtp] = useState('');
+  const [otpError, setOtpError] = useState('');
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
+
   const validateForm = () => {
     const newErrors = {};
 
@@ -101,6 +109,60 @@ const UserRegister = () => {
     navigate(-1);
   };
 
+  const handleSendOtp = async () => {
+    // Validate email first
+    if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      setErrors(prev => ({ ...prev, email: 'Please enter a valid email address first' }));
+      return;
+    }
+    setSendingOtp(true);
+    try {
+      const res = await fetch(buildApiUrl('/api/patients/send-verification'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStep('verify');
+        setOtpError('');
+      } else {
+        setErrors(prev => ({ ...prev, email: data.message }));
+      }
+    } catch (e) {
+      setErrors(prev => ({ ...prev, email: 'Failed to send verification code. Please try again.' }));
+    } finally {
+      setSendingOtp(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otp.trim() || otp.length !== 6) {
+      setOtpError('Please enter the 6-digit code');
+      return;
+    }
+    setVerifyingOtp(true);
+    try {
+      const res = await fetch(buildApiUrl('/api/patients/verify-email'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, otp })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setEmailVerified(true);
+        setStep('form');
+        setOtpError('');
+      } else {
+        setOtpError(data.message || 'Invalid code. Please try again.');
+      }
+    } catch (e) {
+      setOtpError('Verification failed. Please try again.');
+    } finally {
+      setVerifyingOtp(false);
+    }
+  };
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({
@@ -121,6 +183,12 @@ const UserRegister = () => {
     e.preventDefault();
     setIsSubmitting(true);
     
+    if (!emailVerified) {
+      setErrors(prev => ({ ...prev, email: 'Please verify your email address first' }));
+      setIsSubmitting(false);
+      return;
+    }
+
     if (validateForm()) {
       try {
         const response = await fetch(buildApiUrl(API_ENDPOINTS.PATIENT_REGISTER), {
@@ -292,24 +360,78 @@ const UserRegister = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Email Address
                   </label>
-                  <div className="relative">
-                    <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
-                    </svg>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="Enter your email address"
-                      className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-mentra-primary focus:border-transparent transition-colors ${
-                        errors.email ? 'border-red-500' : 'border-gray-300'
-                      }`}
-                      required
-                    />
+                  <div className="relative flex gap-2">
+                    <div className="relative flex-1">
+                      <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                      </svg>
+                      <input
+                        type="email"
+                        name="email"
+                        value={formData.email}
+                        onChange={(e) => { handleInputChange(e); setEmailVerified(false); setStep('form'); }}
+                        placeholder="Enter your email address"
+                        disabled={emailVerified}
+                        className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-mentra-primary focus:border-transparent transition-colors ${
+                          errors.email ? 'border-red-500' : emailVerified ? 'border-green-400 bg-green-50' : 'border-gray-300'
+                        }`}
+                        required
+                      />
+                    </div>
+                    {emailVerified ? (
+                      <span className="flex items-center gap-1 px-3 py-2 bg-green-100 text-green-700 rounded-lg text-sm font-medium whitespace-nowrap">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        Verified
+                      </span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={handleSendOtp}
+                        disabled={sendingOtp || !formData.email}
+                        className="px-4 py-2 bg-mentra-primary hover:bg-mentra-primary-hover text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap"
+                      >
+                        {sendingOtp ? 'Sending...' : 'Verify Email'}
+                      </button>
+                    )}
                   </div>
-                  {errors.email && (
-                    <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                  {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email}</p>}
+
+                  {/* OTP Input */}
+                  {step === 'verify' && !emailVerified && (
+                    <div className="mt-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                      <p className="text-sm text-blue-800 mb-3">
+                        A 6-digit verification code was sent to <strong>{formData.email}</strong>. Enter it below:
+                      </p>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={otp}
+                          onChange={(e) => { setOtp(e.target.value.replace(/\D/g, '').slice(0, 6)); setOtpError(''); }}
+                          placeholder="Enter 6-digit code"
+                          maxLength={6}
+                          className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-center text-lg font-mono tracking-widest focus:ring-2 focus:ring-mentra-primary focus:border-transparent"
+                        />
+                        <button
+                          type="button"
+                          onClick={handleVerifyOtp}
+                          disabled={verifyingOtp || otp.length !== 6}
+                          className="px-4 py-2 bg-mentra-primary hover:bg-mentra-primary-hover text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                        >
+                          {verifyingOtp ? 'Verifying...' : 'Confirm'}
+                        </button>
+                      </div>
+                      {otpError && <p className="mt-2 text-sm text-red-600">{otpError}</p>}
+                      <button
+                        type="button"
+                        onClick={handleSendOtp}
+                        disabled={sendingOtp}
+                        className="mt-2 text-xs text-blue-600 hover:underline"
+                      >
+                        Resend code
+                      </button>
+                    </div>
                   )}
                 </div>
 
@@ -413,14 +535,14 @@ const UserRegister = () => {
                 {/* Submit Button */}
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !emailVerified}
                   className={`w-full py-3 rounded-full font-semibold transition-all duration-300 transform shadow-lg ${
-                    isSubmitting 
-                      ? 'bg-gray-400 cursor-not-allowed' 
+                    isSubmitting || !emailVerified
+                      ? 'bg-gray-400 cursor-not-allowed text-white' 
                       : 'bg-mentra-primary hover:bg-mentra-primary-hover text-white hover:scale-105'
                   }`}
                 >
-                  {isSubmitting ? 'Creating Account...' : 'Sign up'}
+                  {isSubmitting ? 'Creating Account...' : !emailVerified ? 'Verify Email to Continue' : 'Sign up'}
                 </button>
 
                 {/* Login Link */}

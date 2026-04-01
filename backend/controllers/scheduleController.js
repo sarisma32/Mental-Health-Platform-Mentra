@@ -51,6 +51,7 @@ export const addScheduleSlot = async (req, res) => {
     }
 
     // Validate date is not in the past
+    const now = new Date();
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const selectedDate = new Date(scheduleDate);
@@ -60,6 +61,18 @@ export const addScheduleSlot = async (req, res) => {
         success: false,
         message: "Cannot add schedule for past dates"
       });
+    }
+
+    // If today, start time must be after current time
+    const isToday = selectedDate.toDateString() === now.toDateString();
+    if (isToday) {
+      const currentHHMM = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+      if (startTime <= currentHHMM) {
+        return res.status(400).json({
+          success: false,
+          message: `For today's schedule, start time must be after the current time (${currentHHMM}).`
+        });
+      }
     }
 
     // Validate start time < end time
@@ -229,12 +242,12 @@ export const getAvailableTimeSlots = async (req, res) => {
       });
     }
 
-    // Get existing appointments for this date
+    // Get existing CONFIRMED appointments for this date (pending doesn't block the slot)
     const appointments = await pool.query(
       `SELECT appointment_time, duration_minutes 
        FROM appointments 
        WHERE doctor_id = $1 AND appointment_date = $2 
-       AND status NOT IN ('cancelled', 'no_show')`,
+       AND status = 'confirmed'`,
       [doctorId, date]
     );
 

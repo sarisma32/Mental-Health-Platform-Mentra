@@ -371,6 +371,7 @@ const DoctorDashboardNew = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
+      case 'pending': return 'bg-orange-100 text-orange-800';
       case 'scheduled': return 'bg-blue-100 text-blue-800';
       case 'confirmed': return 'bg-green-100 text-green-800';
       case 'completed': return 'bg-gray-100 text-gray-800';
@@ -421,15 +422,6 @@ const DoctorDashboardNew = () => {
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      )
-    },
-    { 
-      id: 'analytics', 
-      name: 'Analytics', 
-      icon: (
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
       )
     },
@@ -727,15 +719,15 @@ const DoctorDashboardNew = () => {
                   </button>
                   
                   <button 
-                    onClick={() => setActiveSection('analytics')}
+                    onClick={() => setActiveSection('reviews')}
                     className="p-4 border-2 border-[#DCE4D4] rounded-lg hover:bg-[#F5F5F0] hover:border-[#A3B18A] transition-all text-center group"
                   >
                     <div className="w-10 h-10 bg-[#DCE4D4] rounded-lg flex items-center justify-center mx-auto mb-3 group-hover:bg-[#A3B18A] transition-colors">
-                      <svg className="w-6 h-6 text-[#A3B18A] group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      <svg className="w-6 h-6 text-[#A3B18A] group-hover:text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                       </svg>
                     </div>
-                    <p className="text-sm font-medium text-gray-900">Reports</p>
+                    <p className="text-sm font-medium text-gray-900">Reviews</p>
                   </button>
                 </div>
               </div>
@@ -743,170 +735,30 @@ const DoctorDashboardNew = () => {
           )}
 
           {activeSection === 'appointments' && (
-            <div className="space-y-6">
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                <div className="flex justify-between items-center mb-6">
-                  <h3 className="text-lg font-semibold text-gray-800">All Appointments</h3>
-                  <div className="flex space-x-2">
-                    <button 
-                      onClick={() => {
-                        setRefreshing(true);
-                        fetchDashboardData(doctor.id, localStorage.getItem('token')).finally(() => setRefreshing(false));
-                      }}
-                      disabled={refreshing}
-                      className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 transition-colors"
-                    >
-                      <svg className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                      </svg>
-                      {refreshing ? 'Refreshing...' : 'Refresh'}
-                    </button>
-                    <select className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent">
-                      <option value="all">All Status</option>
-                      <option value="scheduled">Scheduled</option>
-                      <option value="confirmed">Confirmed</option>
-                      <option value="completed">Completed</option>
-                      <option value="cancelled">Cancelled</option>
-                    </select>
-                  </div>
-                </div>
-                
-                {appointments.length > 0 ? (
-                  <div className="space-y-4">
-                    {appointments.map((appointment) => (
-                      <div key={appointment.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-4">
-                            <div className="w-12 h-12 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center text-white font-semibold shadow-sm">
-                              {appointment.patient_first_name.charAt(0)}{appointment.patient_last_name.charAt(0)}
-                            </div>
-                            <div>
-                              <h4 className="font-semibold text-gray-900">
-                                {appointment.patient_first_name} {appointment.patient_last_name}
-                              </h4>
-                              <p className="text-sm text-gray-600">
-                                {new Date(appointment.appointment_date).toLocaleDateString()} • {formatTime(appointment.appointment_time)} • {appointment.duration_minutes} min
-                              </p>
-                              <p className="text-sm text-gray-500 mt-1">
-                                {appointment.reason_for_visit}
-                              </p>
-                              <p className="text-xs text-gray-400 mt-1">
-                                {appointment.patient_email} • {appointment.patient_phone}
-                              </p>
-                            </div>
-                          </div>
-                          <div className="text-right space-y-2">
-                            <div className="flex items-center space-x-2">
-                              <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(appointment.status)}`}>
-                                {appointment.status}
-                              </span>
-                              <span className="text-sm font-medium text-gray-900">
-                                Rs {appointment.session_fee || doctor.initial_session_fee || 0}
-                              </span>
-                            </div>
-                            <div className="flex space-x-1">
-                              {(appointment.status === 'confirmed' || appointment.status === 'scheduled') && (
-                                <button
-                                  onClick={() => setSelectedAppointment(appointment)}
-                                  className="px-3 py-1.5 bg-blue-100 text-blue-700 text-xs rounded-md hover:bg-blue-200 transition-colors font-medium"
-                                >
-                                  Complete Session
-                                </button>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-12 text-gray-500">
-                    <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <p className="text-lg font-medium">No appointments found</p>
-                    <p className="text-sm">Your appointments will appear here</p>
-                  </div>
-                )}
-              </div>
-            </div>
+            <AppointmentsSection
+              appointments={appointments}
+              doctor={doctor}
+              refreshing={refreshing}
+              onRefresh={() => {
+                setRefreshing(true);
+                fetchDashboardData(doctor.id, localStorage.getItem('token')).finally(() => setRefreshing(false));
+              }}
+              onCompleteSession={(apt) => setSelectedAppointment(apt)}
+              getStatusColor={getStatusColor}
+              formatTime={formatTime}
+            />
           )}
 
           {activeSection === 'patients' && (
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="flex justify-between items-center mb-6">
-                <h3 className="text-lg font-semibold text-gray-800">My Patients</h3>
-                <button 
-                  onClick={fetchDoctorPatients}
-                  className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-                >
-                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                  </svg>
-                  Refresh
-                </button>
-              </div>
-
-              {patients.length > 0 ? (
-                <div className="grid gap-4">
-                  {patients.map((patient) => (
-                    <div key={patient.patient_id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-12 h-12 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center text-white font-semibold shadow-sm">
-                            {patient.patient_first_name.charAt(0)}{patient.patient_last_name.charAt(0)}
-                          </div>
-                          <div>
-                            <h4 className="font-semibold text-gray-900">
-                              {patient.patient_first_name} {patient.patient_last_name}
-                            </h4>
-                            <p className="text-sm text-gray-600">
-                              {patient.patient_email}
-                            </p>
-                            <p className="text-xs text-gray-500 mt-1">
-                              {patient.patient_phone}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm text-gray-600">
-                            Last Visit: {new Date(patient.last_visit).toLocaleDateString()}
-                          </p>
-                          <p className="text-sm font-medium text-[#A3B18A]">
-                            {patient.total_sessions} session{patient.total_sessions !== 1 ? 's' : ''}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12 text-gray-500">
-                  <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                  <p className="text-lg font-medium">No patients yet</p>
-                  <p className="text-sm mt-2">Patients will appear here after you complete sessions with them</p>
-                </div>
-              )}
-            </div>
+            <PatientsSection
+              patients={patients}
+              doctorId={doctor?.id}
+              onRefresh={fetchDoctorPatients}
+            />
           )}
 
           {activeSection === 'schedule' && (
             <ScheduleManagement />
-          )}
-
-          {activeSection === 'analytics' && (
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <div className="text-center py-12 text-gray-500">
-                <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                <p className="text-lg font-medium">Practice Analytics</p>
-                <p className="text-sm mt-2">View insights about your practice performance</p>
-                <p className="text-xs text-gray-400 mt-4">Coming soon</p>
-              </div>
-            </div>
           )}
 
           {activeSection === 'reviews' && doctor && (
@@ -1639,6 +1491,554 @@ const DoctorReviewsSection = ({ doctorId }) => {
   );
 };
 
+const PatientsSection = ({ patients, doctorId, onRefresh }) => {
+  const [selectedPatient, setSelectedPatient] = useState(null);
+  const [sessions, setSessions] = useState([]);
+  const [upcoming, setUpcoming] = useState([]);
+  const [cancelled, setCancelled] = useState([]);
+  const [loadingSessions, setLoadingSessions] = useState(false);
+
+  const fetchPatientHistory = async (patient) => {
+    setSelectedPatient(patient);
+    setLoadingSessions(true);
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(
+        buildApiUrl(`/api/appointments/doctor/${doctorId}/patient/${patient.patient_id}/history`),
+        { headers: { 'Authorization': `Bearer ${token}` } }
+      );
+      const data = await res.json();
+      if (data.success) {
+        setSessions(data.sessions);
+        setUpcoming(data.upcoming || []);
+        setCancelled(data.cancelled || []);
+      }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingSessions(false);
+    }
+  };
+
+  const formatDate = (d) => new Date(d).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+  const formatTime = (t) => {
+    if (!t) return '';
+    const [h, m] = t.split(':');
+    const hour = parseInt(h);
+    return `${hour % 12 || 12}:${m} ${hour >= 12 ? 'PM' : 'AM'}`;
+  };
+
+  return (
+    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="text-lg font-semibold text-gray-800">
+          My Patients
+          <span className="ml-2 text-sm font-normal text-gray-400">({patients.length})</span>
+        </h3>
+        <button
+          onClick={onRefresh}
+          className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+        >
+          <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Refresh
+        </button>
+      </div>
+
+      {patients.length > 0 ? (
+        <div className="grid gap-3">
+          {patients.map((patient) => (
+            <div
+              key={patient.patient_id}
+              onClick={() => fetchPatientHistory(patient)}
+              className="border border-gray-200 rounded-xl p-4 hover:shadow-md hover:border-[#A3B18A] transition-all cursor-pointer group"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center text-white font-semibold shadow-sm">
+                    {patient.patient_first_name.charAt(0)}{patient.patient_last_name.charAt(0)}
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-900">{patient.patient_first_name} {patient.patient_last_name}</h4>
+                    <p className="text-sm text-gray-600">{patient.patient_email}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{patient.patient_phone}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-right">
+                    {patient.last_visit && (
+                      <p className="text-sm text-gray-600">Last Visit: <span className="font-medium">{new Date(patient.last_visit).toLocaleDateString()}</span></p>
+                    )}
+                    <div className="flex items-center gap-2 justify-end mt-0.5">
+                      <p className="text-sm font-medium text-[#A3B18A]">{patient.total_sessions} completed</p>
+                      {parseInt(patient.upcoming_count) > 0 && (
+                        <span className="text-xs px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-medium">
+                          {patient.upcoming_count} upcoming
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <svg className="w-4 h-4 text-gray-300 group-hover:text-[#A3B18A] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12 text-gray-500">
+          <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          <p className="text-lg font-medium">No patients yet</p>
+          <p className="text-sm mt-2">Patients will appear here after you complete sessions with them</p>
+        </div>
+      )}
+
+      {/* Patient History Modal */}
+      {selectedPatient && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            {/* Header */}
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 sticky top-0 bg-white">
+              <div className="flex items-center gap-3">
+                <div className="w-11 h-11 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center text-white font-bold">
+                  {selectedPatient.patient_first_name.charAt(0)}{selectedPatient.patient_last_name.charAt(0)}
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900">{selectedPatient.patient_first_name} {selectedPatient.patient_last_name}</h3>
+                  <p className="text-xs text-gray-500">{selectedPatient.patient_email} • {selectedPatient.patient_phone}</p>
+                </div>
+              </div>
+              <button onClick={() => { setSelectedPatient(null); setSessions([]); setUpcoming([]); setCancelled([]); }} className="text-gray-400 hover:text-gray-600 p-1">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="px-6 py-5">
+              {/* Summary */}
+              <div className="grid grid-cols-3 gap-3 mb-6">
+                <div className="bg-[#F5F5F0] rounded-xl p-4 text-center">
+                  <p className="text-2xl font-bold text-[#A3B18A]">{loadingSessions ? '...' : sessions.length}</p>
+                  <p className="text-xs text-gray-500 mt-1">Completed</p>
+                </div>
+                <div className="bg-green-50 rounded-xl p-4 text-center">
+                  <p className="text-2xl font-bold text-green-600">{loadingSessions ? '...' : upcoming.length}</p>
+                  <p className="text-xs text-gray-500 mt-1">Upcoming</p>
+                </div>
+                <div className="bg-[#F5F5F0] rounded-xl p-4 text-center">
+                  <p className="text-sm font-semibold text-gray-800">
+                    {selectedPatient.last_visit
+                      ? new Date(selectedPatient.last_visit).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                      : '—'}
+                  </p>
+                  <p className="text-xs text-gray-500 mt-1">Last Visit</p>
+                </div>
+              </div>
+
+              {/* Upcoming Sessions */}
+              {!loadingSessions && upcoming.length > 0 && (
+                <div className="mb-6">
+                  <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                    Upcoming Sessions ({upcoming.length})
+                  </h4>
+                  <div className="space-y-2">
+                    {upcoming.map((apt) => (
+                      <div key={apt.id} className="border border-green-200 bg-green-50 rounded-xl px-4 py-3 flex items-center justify-between">
+                        <div>
+                          <p className="font-semibold text-gray-900 text-sm">{formatDate(apt.appointment_date)}</p>
+                          <p className="text-xs text-gray-500">{formatTime(apt.appointment_time)} • {apt.duration_minutes} min • <span className="capitalize">{apt.appointment_type}</span></p>
+                          {apt.reason_for_visit && <p className="text-xs text-gray-500 mt-0.5">{apt.reason_for_visit}</p>}
+                        </div>
+                        <div className="text-right">
+                          <span className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded-full font-medium">{apt.status}</span>
+                          <p className="text-sm font-semibold text-[#A3B18A] mt-1">Rs {apt.session_fee}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Session History */}
+              <h4 className="font-semibold text-gray-800 mb-4">Session History</h4>
+
+              {loadingSessions ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A3B18A] mx-auto"></div>
+                </div>
+              ) : sessions.length === 0 ? (
+                <p className="text-center text-gray-400 py-8">No completed sessions found</p>
+              ) : (
+                <div className="space-y-4">
+                  {sessions.map((session, idx) => (
+                    <div key={session.id} className="border border-gray-200 rounded-xl overflow-hidden">
+                      {/* Session header — numbered newest first */}
+                      <div className="bg-gray-50 px-4 py-3 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <span className="w-6 h-6 bg-[#A3B18A] rounded-full flex items-center justify-center text-white text-xs font-bold">{idx + 1}</span>
+                          <div>
+                            <p className="font-semibold text-gray-900 text-sm">{formatDate(session.appointment_date)}</p>
+                            <p className="text-xs text-gray-500">{formatTime(session.appointment_time)} • {session.duration_minutes} min • <span className="capitalize">{session.appointment_type}</span></p>
+                          </div>
+                        </div>
+                        <span className="text-sm font-semibold text-[#A3B18A]">Rs {session.session_fee}</span>
+                      </div>
+                      <div className="px-4 py-3 space-y-3">
+                        {session.reason_for_visit && (
+                          <div>
+                            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Reason for Visit</p>
+                            <p className="text-sm text-gray-700 mt-1">{session.reason_for_visit}</p>
+                          </div>
+                        )}
+                        {session.session_notes && (
+                          <div>
+                            <p className="text-xs font-semibold text-[#A3B18A] uppercase tracking-wide">Doctor's Notes</p>
+                            <p className="text-sm text-gray-700 mt-1 bg-[#F5F5F0] rounded-lg p-3 whitespace-pre-wrap">{session.session_notes}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Cancelled Appointments */}
+              {!loadingSessions && cancelled.length > 0 && (
+                <div className="mt-6">
+                  <h4 className="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-red-400 rounded-full"></span>
+                    Cancelled Appointments ({cancelled.length})
+                  </h4>
+                  <div className="space-y-2">
+                    {cancelled.map((apt) => (
+                      <div key={apt.id} className="border border-red-100 bg-red-50 rounded-xl px-4 py-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="font-semibold text-gray-700 text-sm">{formatDate(apt.appointment_date)}</p>
+                            <p className="text-xs text-gray-500">{formatTime(apt.appointment_time)} • {apt.duration_minutes} min • <span className="capitalize">{apt.appointment_type}</span></p>
+                            {apt.reason_for_visit && <p className="text-xs text-gray-400 mt-0.5">{apt.reason_for_visit}</p>}
+                          </div>
+                          <div className="text-right">
+                            <span className="text-xs px-2 py-1 bg-red-100 text-red-600 rounded-full font-medium">Cancelled</span>
+                            <p className="text-sm font-medium text-gray-500 mt-1">Rs {apt.session_fee}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-100">
+              <button
+                onClick={() => { setSelectedPatient(null); setSessions([]); setUpcoming([]); setCancelled([]); }}
+                className="w-full py-2.5 bg-[#A3B18A] hover:bg-[#8FA076] text-white rounded-xl font-medium text-sm transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const AppointmentsSection = ({ appointments, doctor, refreshing, onRefresh, onCompleteSession, getStatusColor, formatTime }) => {
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedDetail, setSelectedDetail] = useState(null);
+
+  const handleConfirmAppointment = async (appointmentId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(buildApiUrl(`/api/appointments/${appointmentId}/confirm`), {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (data.success) { onRefresh(); }
+      else alert(data.message || 'Failed to confirm');
+    } catch (e) { alert('Failed to confirm appointment'); }
+  };
+
+  const handleCancelAppointment = async (appointmentId) => {
+    if (!window.confirm('Cancel this appointment?')) return;
+    try {
+      const token = localStorage.getItem('token');
+      const res = await fetch(buildApiUrl(`/api/appointments/${appointmentId}`), {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.success) { onRefresh(); }
+      else alert(data.message || 'Failed to cancel');
+    } catch (e) { alert('Failed to cancel appointment'); }
+  };
+
+  // Sort newest first, then filter
+  const filtered = [...appointments]
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .filter(apt => statusFilter === 'all' || apt.status === statusFilter);
+
+  const formatDate = (d) => new Date(d).toLocaleDateString('en-US', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+
+  return (
+    <div className="space-y-6">
+      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="text-lg font-semibold text-gray-800">
+            All Appointments
+            <span className="ml-2 text-sm font-normal text-gray-400">({filtered.length})</span>
+          </h3>
+          <div className="flex space-x-2">
+            <button
+              onClick={onRefresh}
+              disabled={refreshing}
+              className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 transition-colors"
+            >
+              <svg className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              {refreshing ? 'Refreshing...' : 'Refresh'}
+            </button>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent bg-white"
+            >
+              <option value="all">All Status</option>
+              <option value="scheduled">Scheduled</option>
+              <option value="confirmed">Confirmed</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+
+        {/* List */}
+        {filtered.length > 0 ? (
+          <div className="space-y-3">
+            {filtered.map((appointment) => (
+              <div
+                key={appointment.id}
+                onClick={() => setSelectedDetail(appointment)}
+                className="border border-gray-200 rounded-xl p-4 hover:shadow-md hover:border-[#A3B18A] transition-all cursor-pointer group"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center text-white font-semibold shadow-sm flex-shrink-0">
+                      {appointment.patient_first_name.charAt(0)}{appointment.patient_last_name.charAt(0)}
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">
+                        {appointment.patient_first_name} {appointment.patient_last_name}
+                      </h4>
+                      <p className="text-sm text-gray-600">
+                        {formatDate(appointment.appointment_date)} • {formatTime(appointment.appointment_time)} • {appointment.duration_minutes} min
+                      </p>
+                      {appointment.reason_for_visit && (
+                        <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">{appointment.reason_for_visit}</p>
+                      )}
+                      <p className="text-xs text-gray-400 mt-0.5">
+                        {appointment.patient_email} • {appointment.patient_phone}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right space-y-2 flex-shrink-0">
+                    <div className="flex items-center space-x-2 justify-end">
+                      <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(appointment.status)}`}>
+                        {appointment.status}
+                      </span>
+                      <span className="text-sm font-medium text-gray-900">
+                        Rs {appointment.session_fee || 0}
+                      </span>
+                    </div>
+                    <div className="flex space-x-1 justify-end">
+                      {appointment.status === 'pending' && (
+                        <>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleConfirmAppointment(appointment.id); }}
+                            className="px-3 py-1.5 bg-green-100 text-green-700 text-xs rounded-md hover:bg-green-200 transition-colors font-medium"
+                          >
+                            Confirm
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleCancelAppointment(appointment.id); }}
+                            className="px-3 py-1.5 bg-red-100 text-red-700 text-xs rounded-md hover:bg-red-200 transition-colors font-medium"
+                          >
+                            Cancel
+                          </button>
+                        </>
+                      )}
+                      {(appointment.status === 'confirmed' || appointment.status === 'scheduled') && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onCompleteSession(appointment); }}
+                          className="px-3 py-1.5 bg-blue-100 text-blue-700 text-xs rounded-md hover:bg-blue-200 transition-colors font-medium"
+                        >
+                          Complete Session
+                        </button>
+                      )}
+                      <svg className="w-4 h-4 text-gray-300 group-hover:text-[#A3B18A] transition-colors self-center" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 text-gray-500">
+            <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <p className="text-lg font-medium">No appointments found</p>
+            <p className="text-sm mt-1">
+              {statusFilter !== 'all' ? `No ${statusFilter} appointments` : 'Your appointments will appear here'}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Appointment Detail Modal */}
+      {selectedDetail && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+            {/* Header */}
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 sticky top-0 bg-white">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center text-white font-bold text-sm">
+                  {selectedDetail.patient_first_name.charAt(0)}{selectedDetail.patient_last_name.charAt(0)}
+                </div>
+                <div>
+                  <h3 className="font-bold text-gray-900">{selectedDetail.patient_first_name} {selectedDetail.patient_last_name}</h3>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${getStatusColor(selectedDetail.status)}`}>
+                    {selectedDetail.status}
+                  </span>
+                </div>
+              </div>
+              <button onClick={() => setSelectedDetail(null)} className="text-gray-400 hover:text-gray-600 p-1">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="px-6 py-5 space-y-5">
+              {/* Appointment Info */}
+              <div className="bg-[#F5F5F0] rounded-xl p-4">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Appointment Details</p>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div><span className="text-gray-500">Date:</span> <span className="font-medium ml-1">{formatDate(selectedDetail.appointment_date)}</span></div>
+                  <div><span className="text-gray-500">Time:</span> <span className="font-medium ml-1">{formatTime(selectedDetail.appointment_time)}</span></div>
+                  <div><span className="text-gray-500">Duration:</span> <span className="font-medium ml-1">{selectedDetail.duration_minutes} min</span></div>
+                  <div><span className="text-gray-500">Type:</span> <span className="font-medium ml-1 capitalize">{selectedDetail.appointment_type}</span></div>
+                  <div><span className="text-gray-500">Fee:</span> <span className="font-semibold text-[#A3B18A] ml-1">Rs {selectedDetail.session_fee}</span></div>
+                  <div><span className="text-gray-500">Confirmation:</span> <span className="font-medium ml-1 text-xs">{selectedDetail.confirmation_number}</span></div>
+                </div>
+              </div>
+
+              {/* Patient Contact */}
+              <div className="bg-gray-50 rounded-xl p-4">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Patient Contact</p>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div><span className="text-gray-500">Email:</span> <span className="font-medium ml-1">{selectedDetail.patient_email}</span></div>
+                  <div><span className="text-gray-500">Phone:</span> <span className="font-medium ml-1">{selectedDetail.patient_phone}</span></div>
+                  {selectedDetail.patient_date_of_birth && (
+                    <div><span className="text-gray-500">Date of Birth:</span> <span className="font-medium ml-1">{new Date(selectedDetail.patient_date_of_birth).toLocaleDateString()}</span></div>
+                  )}
+                  {selectedDetail.emergency_contact_name && (
+                    <div><span className="text-gray-500">Emergency Contact:</span> <span className="font-medium ml-1">{selectedDetail.emergency_contact_name}</span></div>
+                  )}
+                  {selectedDetail.emergency_contact_phone && (
+                    <div><span className="text-gray-500">Emergency Phone:</span> <span className="font-medium ml-1">{selectedDetail.emergency_contact_phone}</span></div>
+                  )}
+                </div>
+              </div>
+
+              {/* Session Details */}
+              <div className="space-y-3">
+                {selectedDetail.reason_for_visit && (
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Reason for Visit</p>
+                    <p className="text-sm text-gray-700 bg-white border border-gray-100 rounded-lg p-3">{selectedDetail.reason_for_visit}</p>
+                  </div>
+                )}
+                {selectedDetail.previous_therapy && (
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Previous Therapy</p>
+                    <p className="text-sm text-gray-700 bg-white border border-gray-100 rounded-lg p-3">{selectedDetail.previous_therapy}</p>
+                  </div>
+                )}
+                {selectedDetail.current_medications && (
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Current Medications</p>
+                    <p className="text-sm text-gray-700 bg-white border border-gray-100 rounded-lg p-3">{selectedDetail.current_medications}</p>
+                  </div>
+                )}
+                {selectedDetail.special_requests && (
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Special Requests</p>
+                    <p className="text-sm text-gray-700 bg-white border border-gray-100 rounded-lg p-3">{selectedDetail.special_requests}</p>
+                  </div>
+                )}
+                {selectedDetail.session_notes && (
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Session Notes</p>
+                    <p className="text-sm text-gray-700 bg-blue-50 border border-blue-100 rounded-lg p-3">{selectedDetail.session_notes}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
+              {selectedDetail.status === 'pending' && (
+                <>
+                  <button
+                    onClick={() => { handleConfirmAppointment(selectedDetail.id); setSelectedDetail(null); }}
+                    className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium text-sm transition-colors"
+                  >
+                    Confirm
+                  </button>
+                  <button
+                    onClick={() => { handleCancelAppointment(selectedDetail.id); setSelectedDetail(null); }}
+                    className="flex-1 py-2.5 bg-red-500 hover:bg-red-600 text-white rounded-xl font-medium text-sm transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </>
+              )}
+              {(selectedDetail.status === 'confirmed' || selectedDetail.status === 'scheduled') && (
+                <button
+                  onClick={() => { onCompleteSession(selectedDetail); setSelectedDetail(null); }}
+                  className="flex-1 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-medium text-sm transition-colors"
+                >
+                  Complete Session
+                </button>
+              )}
+              <button
+                onClick={() => setSelectedDetail(null)}
+                className="flex-1 py-2.5 bg-[#A3B18A] hover:bg-[#8FA076] text-white rounded-xl font-medium text-sm transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const ReviewDetailModal = ({ review, onClose }) => {
   const renderStars = (rating, size = 'text-xl') => rating ? (
     <span className={`text-yellow-400 ${size}`}>
@@ -1685,31 +2085,29 @@ const ReviewDetailModal = ({ review, onClose }) => {
             </div>
           </div>
 
-          {/* Sub-ratings — only show if any exist */}
-          {(review.rating_professionalism || review.rating_communication || review.rating_wait_time) && (
-            <div className="bg-gray-50 rounded-xl p-4">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Detailed Ratings</p>
-              <div className="grid grid-cols-3 gap-4">
-                {[
-                  { label: 'Professionalism', value: review.rating_professionalism },
-                  { label: 'Communication', value: review.rating_communication },
-                  { label: 'Wait Time', value: review.rating_wait_time },
-                ].map(({ label, value }) => (
-                  <div key={label} className="text-center">
-                    <p className="text-xs text-gray-500 mb-1">{label}</p>
-                    {value ? (
-                      <>
-                        <p className="text-yellow-400 text-lg leading-none">{'★'.repeat(value)}{'☆'.repeat(5 - value)}</p>
-                        <p className="text-xs text-gray-500 mt-1">{value}/5</p>
-                      </>
-                    ) : (
-                      <p className="text-gray-300 text-lg">—</p>
-                    )}
-                  </div>
-                ))}
-              </div>
+          {/* Detailed Ratings — always show */}
+          <div className="bg-gray-50 rounded-xl p-4">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Detailed Ratings</p>
+            <div className="grid grid-cols-3 gap-4">
+              {[
+                { label: 'Professionalism', value: review.rating_professionalism },
+                { label: 'Communication', value: review.rating_communication },
+                { label: 'Wait Time', value: review.rating_wait_time },
+              ].map(({ label, value }) => (
+                <div key={label} className="text-center">
+                  <p className="text-xs text-gray-500 mb-1">{label}</p>
+                  {value ? (
+                    <>
+                      <p className="text-yellow-400 text-lg leading-none">{'★'.repeat(value)}{'☆'.repeat(5 - value)}</p>
+                      <p className="text-xs text-gray-500 mt-1">{value}/5</p>
+                    </>
+                  ) : (
+                    <p className="text-xs text-gray-400 mt-2">Not rated</p>
+                  )}
+                </div>
+              ))}
             </div>
-          )}
+          </div>
 
           {/* Written review */}
           {review.review_text && (

@@ -28,15 +28,18 @@
 
 
 import express from "express";
-import { registerPatient, loginPatient, getPatientProfile, updatePatientProfile } from "../controllers/patientController.js";
+import { registerPatient, loginPatient, getPatientProfile, updatePatientProfile, sendEmailVerification, verifyEmailOTP } from "../controllers/patientController.js";
 import { validatePatientRegistration, validateLogin } from "../middleware/validation.js";
 import { verifyToken, verifyPatient } from "../middleware/auth.js";
 
 const router = express.Router();
 
+// Email verification (before registration)
+router.post("/send-verification", sendEmailVerification);
+router.post("/verify-email", verifyEmailOTP);
+
 // Public routes
 router.post("/register", validatePatientRegistration, registerPatient);
-// router.post("/login", validateLogin, loginPatient); // Disabled - using unified auth
 
 // Protected routes
 router.get("/profile", verifyToken, verifyPatient, getPatientProfile);

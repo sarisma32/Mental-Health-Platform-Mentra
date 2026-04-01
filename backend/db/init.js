@@ -69,7 +69,7 @@ export const initializeDatabase = async () => {
           appointment_type VARCHAR(20) NOT NULL CHECK (appointment_type IN ('initial', 'followup')),
           session_fee DECIMAL(10,2) NOT NULL,
           duration_minutes INTEGER NOT NULL DEFAULT 60,
-          status VARCHAR(20) DEFAULT 'scheduled' CHECK (status IN ('scheduled', 'confirmed', 'completed', 'cancelled', 'no_show')),
+          status VARCHAR(20) DEFAULT 'pending' CHECK (status IN ('pending', 'scheduled', 'confirmed', 'completed', 'cancelled', 'no_show')),
           
           -- Patient information
           patient_first_name VARCHAR(255) NOT NULL,
@@ -95,6 +95,9 @@ export const initializeDatabase = async () => {
           
           -- Confirmation details
           confirmation_number VARCHAR(20) UNIQUE NOT NULL,
+          
+          -- Reminder
+          reminder_sent BOOLEAN DEFAULT FALSE,
           
           -- Timestamps
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -177,7 +180,7 @@ export const initializeDatabase = async () => {
           id SERIAL PRIMARY KEY,
           email VARCHAR(255) NOT NULL,
           otp VARCHAR(6) NOT NULL,
-          user_type VARCHAR(20) NOT NULL CHECK (user_type IN ('patient', 'doctor', 'admin')),
+          user_type VARCHAR(20) NOT NULL CHECK (user_type IN ('patient', 'doctor', 'admin', 'email_verify')),
           expires_at TIMESTAMP NOT NULL,
           is_used BOOLEAN DEFAULT FALSE,
           attempts INTEGER DEFAULT 0,

@@ -12,10 +12,6 @@ const BookAppointmentPage = () => {
   const [selectedTime, setSelectedTime] = useState('');
   const [appointmentType, setAppointmentType] = useState('initial');
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
     dateOfBirth: '',
     emergencyContact: '',
     emergencyPhone: '',
@@ -31,6 +27,8 @@ const BookAppointmentPage = () => {
   const [loading, setLoading] = useState(true);
   const [availableTimeSlots, setAvailableTimeSlots] = useState([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
+  const [isReturningPatient, setIsReturningPatient] = useState(false);
+  const [patientInfo, setPatientInfo] = useState({ firstName: '', lastName: '', email: '', phone: '' });
 
   // Fetch doctor data from API
   useEffect(() => {
@@ -59,6 +57,26 @@ const BookAppointmentPage = () => {
             credentials: doctor.credentials || "",
             languages: doctor.languages || ""
           });
+
+          // Check if patient is returning (has previous appointment with this doctor)
+          const token = localStorage.getItem('token');
+          const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+          const userRole = localStorage.getItem('userRole');
+          if (token && currentUser.id && userRole === 'patient') {
+            try {
+              const checkRes = await fetch(
+                buildApiUrl(`/api/appointments/check-returning/${currentUser.id}/${professionalId}`),
+                { headers: { 'Authorization': `Bearer ${token}` } }
+              );
+              const checkData = await checkRes.json();
+              if (checkData.success && checkData.isReturning) {
+                setIsReturningPatient(true);
+                setAppointmentType('followup');
+              }
+            } catch (e) {
+              console.error('Returning patient check failed:', e);
+            }
+          }
         } else {
           alert('Doctor not found');
           navigate('/professionals');
@@ -76,6 +94,22 @@ const BookAppointmentPage = () => {
       fetchDoctorData();
     }
   }, [professionalId, navigate]);
+
+  // Auto-fill patient info from logged-in user
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem('user') || '{}');
+    if (userData.full_name) {
+      const parts = userData.full_name.trim().split(' ');
+      const firstName = parts[0] || '';
+      const lastName = parts.slice(1).join(' ') || '';
+      setPatientInfo({
+        firstName,
+        lastName,
+        email: userData.email || '',
+        phone: userData.phone_number || ''
+      });
+    }
+  }, []);
 
   // Generate available months (current + next 2 months)
   const getAvailableMonths = () => {
@@ -101,8 +135,9 @@ const BookAppointmentPage = () => {
   // Generate calendar days for current month
   const generateCalendarDays = () => {
     const days = [];
-    const today = new Date();
-    const isCurrentMonth = currentMonth === 0;
+    const now = new Date();
+    // Minimum bookable date = 24 hours from now
+    const minBookable = new Date(now.getTime() + 24 * 60 * 60 * 1000);
     
     // Empty cells for days before month starts
     for (let i = 0; i < currentMonthData.firstDayOfWeek; i++) {
@@ -111,12 +146,11 @@ const BookAppointmentPage = () => {
     
     // Days of the month
     for (let day = 1; day <= currentMonthData.daysInMonth; day++) {
-      const isPastDate = isCurrentMonth && day < today.getDate();
-      days.push({
-        day,
-        isPastDate,
-        dateString: `${currentMonthData.year}-${(currentMonthData.month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`
-      });
+      const dateString = `${currentMonthData.year}-${(currentMonthData.month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+      // A day is unavailable if its end-of-day is before the 24h minimum
+      const dayEnd = new Date(`${dateString}T23:59:59`);
+      const isPastDate = dayEnd < minBookable;
+      days.push({ day, isPastDate, dateString });
     }
     
     return days;
@@ -231,11 +265,11 @@ const BookAppointmentPage = () => {
         sessionFee: appointmentType === 'initial' ? professional.initialPrice : professional.followupPrice,
         durationMinutes: appointmentType === 'initial' ? 60 : 50,
         
-        // Patient information
-        patientFirstName: formData.firstName,
-        patientLastName: formData.lastName,
-        patientEmail: formData.email,
-        patientPhone: formData.phone,
+        // Patient information — auto-filled from account
+        patientFirstName: patientInfo.firstName,
+        patientLastName: patientInfo.lastName,
+        patientEmail: patientInfo.email,
+        patientPhone: patientInfo.phone,
         patientDateOfBirth: formData.dateOfBirth || null,
         emergencyContactName: formData.emergencyContact || null,
         emergencyContactPhone: formData.emergencyPhone || null,
@@ -318,7 +352,12 @@ const BookAppointmentPage = () => {
       case 1:
         return selectedDate && selectedTime;
       case 2:
-        return formData.firstName && formData.lastName && formData.email && formData.phone;
+        return formData.dateOfBirth &&
+               formData.emergencyContact &&
+               formData.emergencyPhone &&
+               formData.reasonForVisit &&
+               formData.previousTherapy &&
+               formData.medications;
       case 3:
         return true;
       default:
@@ -456,6 +495,18 @@ const BookAppointmentPage = () => {
                   <h2 className="text-2xl font-bold text-gray-900 mb-2">Select Date & Time</h2>
                   <p className="text-gray-600 mb-6">Choose your preferred appointment slot</p>
                   
+                  {/* Returning patient notice */}
+                  {isReturningPatient && (
+                    <div className="mb-6 flex items-start gap-3 bg-[#DCE4D4] border border-[#A3B18A] rounded-lg px-4 py-3">
+                      <svg className="w-5 h-5 text-[#A3B18A] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <p className="text-sm text-[#5a7a4a] font-medium">
+                        Welcome back! You've visited this doctor before, so a <span className="font-bold">Follow-up Session</span> has been automatically selected for you.
+                      </p>
+                    </div>
+                  )}
+
                   {/* Appointment Type */}
                   <div className="mb-8">
                     <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -615,71 +666,34 @@ const BookAppointmentPage = () => {
                 </div>
               )}
 
-              {/* Step 2: Personal Information */}
               {currentStep === 2 && (
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-6">Personal Information</h2>
-                  
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Session Details</h2>
+                  <p className="text-gray-600 mb-6">Please fill in all required fields before proceeding</p>
+
+                  {/* Auto-filled patient info banner */}
+                  <div className="mb-6 bg-[#DCE4D4] border border-[#A3B18A] rounded-xl p-4">
+                    <p className="text-xs font-semibold text-[#5a7a4a] uppercase tracking-wide mb-2">Booking as</p>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <span className="text-gray-500">Name:</span>
+                        <span className="ml-2 font-semibold text-gray-900">{patientInfo.firstName} {patientInfo.lastName}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Email:</span>
+                        <span className="ml-2 font-semibold text-gray-900">{patientInfo.email}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-500">Phone:</span>
+                        <span className="ml-2 font-semibold text-gray-900">{patientInfo.phone || 'Not set'}</span>
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        First Name *
-                      </label>
-                      <input
-                        type="text"
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mentra-primary focus:border-transparent"
-                        required
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Last Name *
-                      </label>
-                      <input
-                        type="text"
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mentra-primary focus:border-transparent"
-                        required
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Email Address *
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mentra-primary focus:border-transparent"
-                        required
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Phone Number *
-                      </label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mentra-primary focus:border-transparent"
-                        required
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Date of Birth
+                        Date of Birth <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="date"
@@ -687,12 +701,13 @@ const BookAppointmentPage = () => {
                         value={formData.dateOfBirth}
                         onChange={handleInputChange}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mentra-primary focus:border-transparent"
+                        required
                       />
                     </div>
-                    
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Emergency Contact Name
+                        Emergency Contact Name <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -700,12 +715,14 @@ const BookAppointmentPage = () => {
                         value={formData.emergencyContact}
                         onChange={handleInputChange}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mentra-primary focus:border-transparent"
+                        placeholder="Full name of emergency contact"
+                        required
                       />
                     </div>
-                    
+
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Emergency Contact Phone
+                        Emergency Contact Phone <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="tel"
@@ -713,12 +730,14 @@ const BookAppointmentPage = () => {
                         value={formData.emergencyPhone}
                         onChange={handleInputChange}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mentra-primary focus:border-transparent"
+                        placeholder="Emergency contact phone number"
+                        required
                       />
                     </div>
-                    
+
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Reason for Visit
+                        Reason for Visit <span className="text-red-500">*</span>
                       </label>
                       <textarea
                         name="reasonForVisit"
@@ -727,12 +746,13 @@ const BookAppointmentPage = () => {
                         rows={3}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mentra-primary focus:border-transparent"
                         placeholder="Please briefly describe what brings you to therapy..."
+                        required
                       />
                     </div>
-                    
+
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Previous Therapy Experience
+                        Previous Therapy Experience <span className="text-red-500">*</span>
                       </label>
                       <textarea
                         name="previousTherapy"
@@ -741,12 +761,13 @@ const BookAppointmentPage = () => {
                         rows={2}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mentra-primary focus:border-transparent"
                         placeholder="Have you been in therapy before? If yes, please provide brief details..."
+                        required
                       />
                     </div>
-                    
+
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Current Medications
+                        Current Medications <span className="text-red-500">*</span>
                       </label>
                       <textarea
                         name="medications"
@@ -754,7 +775,8 @@ const BookAppointmentPage = () => {
                         onChange={handleInputChange}
                         rows={2}
                         className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-mentra-primary focus:border-transparent"
-                        placeholder="Please list any medications you are currently taking..."
+                        placeholder="Please list any medications you are currently taking, or write 'None'..."
+                        required
                       />
                     </div>
                   </div>
@@ -847,20 +869,26 @@ const BookAppointmentPage = () => {
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                         <div>
                           <span className="text-gray-600">Name:</span>
-                          <span className="ml-2 font-medium">{formData.firstName} {formData.lastName}</span>
+                          <span className="ml-2 font-medium">{patientInfo.firstName} {patientInfo.lastName}</span>
                         </div>
                         <div>
                           <span className="text-gray-600">Email:</span>
-                          <span className="ml-2 font-medium">{formData.email}</span>
+                          <span className="ml-2 font-medium">{patientInfo.email}</span>
                         </div>
                         <div>
                           <span className="text-gray-600">Phone:</span>
-                          <span className="ml-2 font-medium">{formData.phone}</span>
+                          <span className="ml-2 font-medium">{patientInfo.phone}</span>
                         </div>
                         {formData.dateOfBirth && (
                           <div>
                             <span className="text-gray-600">Date of Birth:</span>
                             <span className="ml-2 font-medium">{formData.dateOfBirth}</span>
+                          </div>
+                        )}
+                        {formData.emergencyContact && (
+                          <div>
+                            <span className="text-gray-600">Emergency Contact:</span>
+                            <span className="ml-2 font-medium">{formData.emergencyContact} ({formData.emergencyPhone})</span>
                           </div>
                         )}
                       </div>

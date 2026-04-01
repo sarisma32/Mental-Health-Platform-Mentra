@@ -176,21 +176,22 @@ export const validateAppointmentBooking = [
     .withMessage('Valid appointment date is required')
     .custom((value) => {
       const appointmentDate = new Date(value);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      if (appointmentDate < today) {
-        throw new Error('Appointment date cannot be in the past');
+      const minDate = new Date();
+      minDate.setHours(minDate.getHours() + 24);
+      minDate.setHours(0, 0, 0, 0); // start of the minimum day
+
+      if (appointmentDate < minDate) {
+        throw new Error('Appointments must be booked at least 24 hours in advance');
       }
-      
+
       // Check if appointment is within next 3 months
       const threeMonthsFromNow = new Date();
       threeMonthsFromNow.setMonth(threeMonthsFromNow.getMonth() + 3);
-      
+
       if (appointmentDate > threeMonthsFromNow) {
         throw new Error('Appointment date cannot be more than 3 months in advance');
       }
-      
+
       return true;
     }),
 
@@ -228,10 +229,9 @@ export const validateAppointmentBooking = [
     .withMessage('Please enter a valid email address'),
 
   body('patientPhone')
+    .optional({ checkFalsy: true })
     .trim()
-    .notEmpty()
-    .withMessage('Patient phone number is required')
-    .matches(/^\+?[\d\s\-\(\)]{10,15}$/)
+    .matches(/^\+?[\d\s\-\(\)]{7,15}$/)
     .withMessage('Please enter a valid phone number'),
 
   body('doctorName')
