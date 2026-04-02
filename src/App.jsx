@@ -1,28 +1,27 @@
-import React from 'react'
+﻿import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-import MentraLanding from './components/MentraLanding'
-import SignupPage from './components/SignupPage'
-import UserRegister from './components/UserRegister'
-import UserLogin from './components/UserLogin'
-import Dashboard from './components/Dashboard'
-import DoctorDashboard from './components/DoctorDashboard'
-import DoctorDashboardNew from './components/DoctorDashboardNew'
-import DoctorProfileEdit from './components/DoctorProfileEdit'
-import ProfessionalRegister from './components/ProfessionalRegister'
-import DoctorPendingStatus from './components/DoctorPendingStatus'
-import ServicesPage from './components/ServicesPage'
-import AboutUsPage from './components/AboutUsPage'
-import ProfessionalsPage from './components/ProfessionalsPage'
-import BookAppointmentPage from './components/BookAppointmentPage'
-import AppointmentConfirmationPage from './components/AppointmentConfirmationPage'
-import ForgotPassword from './components/ForgotPassword'
-import VerifyOTP from './components/VerifyOTP'
-import ResetPassword from './components/ResetPassword'
-import AdminLogin from './components/AdminLogin'
-import AdminDashboard from './components/AdminDashboard'
-import AdminDashboardNew from './components/AdminDashboardNew'
-import AccountDeactivated from './components/AccountDeactivated'
-import DoctorProfilePage from './components/DoctorProfilePage'
+import MentraLanding from './pages/MentraLanding'
+import SignupPage from './pages/SignupPage'
+import UserRegister from './pages/UserRegister'
+import UserLogin from './pages/UserLogin'
+import Dashboard from './pages/Dashboard'
+import DoctorDashboard from './pages/DoctorDashboard'
+import DoctorDashboardNew from './pages/DoctorDashboardNew'
+import DoctorProfileEdit from './pages/DoctorProfileEdit'
+import ProfessionalRegister from './pages/ProfessionalRegister'
+import DoctorPendingStatus from './pages/DoctorPendingStatus'
+import ServicesPage from './pages/ServicesPage'
+import AboutUsPage from './pages/AboutUsPage'
+import ProfessionalsPage from './pages/ProfessionalsPage'
+import BookAppointmentPage from './pages/BookAppointmentPage'
+import AppointmentConfirmationPage from './pages/AppointmentConfirmationPage'
+import ForgotPassword from './pages/ForgotPassword'
+import VerifyOTP from './pages/VerifyOTP'
+import ResetPassword from './pages/ResetPassword'
+import AdminLogin from './pages/AdminLogin'
+import AdminDashboardNew from './pages/AdminDashboardNew'
+import AccountDeactivated from './pages/AccountDeactivated'
+import DoctorProfilePage from './pages/DoctorProfilePage'
 import './App.css'
 
 function App() {
@@ -50,7 +49,6 @@ function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/admin-login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboardNew />} />
-          <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/account-deactivated" element={<AccountDeactivated />} />
           <Route path="/doctor-profile/:doctorId" element={<DoctorProfilePage />} />
         </Routes>
@@ -60,5 +58,6 @@ function App() {
 }
 
 export default App
+
 
 

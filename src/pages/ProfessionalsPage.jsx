@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import Header from './Header';
-import Breadcrumb from './Breadcrumb';
-import Footer from './Footer';
+﻿import React, { useEffect, useState } from 'react';
+import Header from '../components/Header';
+import Breadcrumb from '../components/Breadcrumb';
+import Footer from '../components/Footer';
 import { Link, useNavigate } from 'react-router-dom';
 import { buildApiUrl, API_ENDPOINTS } from '../config/api.js';
 
@@ -26,7 +26,7 @@ const ProfessionalsPage = () => {
       const data = await res.json();
       if (data.success) setSpecializations(data.specializations.map(s => s.name));
     } catch (e) {
-      // fallback to empty — filter will still work
+      // fallback to empty â€” filter will still work
     }
   };
 
@@ -94,10 +94,10 @@ const ProfessionalsPage = () => {
     const hasHalfStar = rating % 1 !== 0;
 
     for (let i = 0; i < fullStars; i++) {
-      stars.push(<span key={i} className="text-yellow-400">★</span>);
+      stars.push(<span key={i} className="text-yellow-400">â˜…</span>);
     }
     if (hasHalfStar) {
-      stars.push(<span key="half" className="text-yellow-400">☆</span>);
+      stars.push(<span key="half" className="text-yellow-400">â˜†</span>);
     }
     return stars;
   };
@@ -196,7 +196,7 @@ const ProfessionalsPage = () => {
             </div>
           ) : filteredProfessionals.length === 0 ? (
             <div className="text-center py-12">
-              <div className="text-6xl mb-4">🔍</div>
+              <div className="text-6xl mb-4">ðŸ”</div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">No professionals found</h3>
               <p className="text-gray-600 mb-6">Try adjusting your search criteria or browse all professionals.</p>
               <button
@@ -363,3 +363,4 @@ const ProfessionalsPage = () => {
 };
 
 export default ProfessionalsPage;
+

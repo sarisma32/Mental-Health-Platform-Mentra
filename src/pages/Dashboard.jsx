@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import NotificationBell from './NotificationBell';
+import NotificationBell from '../components/NotificationBell';
 import { buildApiUrl, API_ENDPOINTS } from '../config/api.js';
 
 const ratingLabels = { 1: 'Poor', 2: 'Fair', 3: 'Good', 4: 'Very Good', 5: 'Excellent' };
@@ -13,7 +13,7 @@ const StarRating = ({ rating, onRate, size = 'lg' }) => {
         <button key={star} type="button"
           onClick={() => onRate && onRate(star)}
           onMouseEnter={() => setHovered(star)} onMouseLeave={() => setHovered(0)}
-          className={`${size === 'lg' ? 'text-4xl' : 'text-2xl'} cursor-pointer hover:scale-110 transition-transform ${star <= (hovered || rating) ? 'text-yellow-400' : 'text-gray-300'}`}>★</button>
+          className={`${size === 'lg' ? 'text-4xl' : 'text-2xl'} cursor-pointer hover:scale-110 transition-transform ${star <= (hovered || rating) ? 'text-yellow-400' : 'text-gray-300'}`}>â˜…</button>
       ))}
     </div>
   );
@@ -26,7 +26,7 @@ const SubStarRating = ({ rating, onRate }) => {
       {[1,2,3,4,5].map(star => (
         <button key={star} type="button" onClick={() => onRate(star)}
           onMouseEnter={() => setHovered(star)} onMouseLeave={() => setHovered(0)}
-          className={`text-2xl cursor-pointer hover:scale-110 transition-transform ${star <= (hovered || rating) ? 'text-yellow-400' : 'text-gray-300'}`}>★</button>
+          className={`text-2xl cursor-pointer hover:scale-110 transition-transform ${star <= (hovered || rating) ? 'text-yellow-400' : 'text-gray-300'}`}>â˜…</button>
       ))}
     </div>
   );
@@ -308,7 +308,7 @@ const Dashboard = () => {
                           <div className="w-9 h-9 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center text-white font-semibold text-sm">{apt.doctor_name.charAt(0)}</div>
                           <div>
                             <p className="text-sm font-medium text-gray-900">Dr. {apt.doctor_name}</p>
-                            <p className="text-xs text-gray-500">{new Date(apt.appointment_date).toLocaleDateString()} • {formatTime(apt.appointment_time)}</p>
+                            <p className="text-xs text-gray-500">{new Date(apt.appointment_date).toLocaleDateString()} â€¢ {formatTime(apt.appointment_time)}</p>
                           </div>
                         </div>
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(apt.status)}`}>{apt.status}</span>
@@ -362,7 +362,7 @@ const Dashboard = () => {
                         <div className="w-10 h-10 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center text-white font-semibold text-sm">{group.doctorName.charAt(0)}</div>
                         <div className="flex-1">
                           <p className="font-semibold text-gray-900">Dr. {group.doctorName}</p>
-                          <p className="text-xs text-gray-500">{group.doctorSpecialization} • {group.doctorLocation}</p>
+                          <p className="text-xs text-gray-500">{group.doctorSpecialization} â€¢ {group.doctorLocation}</p>
                         </div>
                         <span className="text-xs text-gray-400 font-medium">{group.appointments.length} session{group.appointments.length !== 1 ? 's' : ''}</span>
                       </div>
@@ -372,8 +372,8 @@ const Dashboard = () => {
                             <div className="flex items-start justify-between">
                               <div className="flex-1 space-y-1 text-sm">
                                 <div className="flex items-center text-gray-700"><svg className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>{formatDate(apt.appointment_date)}</div>
-                                <div className="flex items-center text-gray-700"><svg className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>{formatTime(apt.appointment_time)} • {apt.duration_minutes} min</div>
-                                <div className="flex items-center text-gray-700"><svg className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" /></svg>Rs {apt.session_fee} • <span className="capitalize ml-1">{apt.appointment_type}</span></div>
+                                <div className="flex items-center text-gray-700"><svg className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>{formatTime(apt.appointment_time)} â€¢ {apt.duration_minutes} min</div>
+                                <div className="flex items-center text-gray-700"><svg className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" /></svg>Rs {apt.session_fee} â€¢ <span className="capitalize ml-1">{apt.appointment_type}</span></div>
                                 {apt.confirmation_number && <div className="flex items-center text-gray-500 text-xs"><svg className="w-4 h-4 mr-2 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>Confirmation: {apt.confirmation_number}</div>}
                                 {apt.session_notes && apt.status === 'completed' && (
                                   <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
@@ -394,7 +394,7 @@ const Dashboard = () => {
                                 })()}
                                 {apt.status === 'completed' && (
                                   <div>{reviewedAppointments.has(apt.id) ? (
-                                    <span className="text-xs text-green-600 font-medium flex items-center justify-end"><span className="mr-1">★</span> Reviewed</span>
+                                    <span className="text-xs text-green-600 font-medium flex items-center justify-end"><span className="mr-1">â˜…</span> Reviewed</span>
                                   ) : (
                                     <button onClick={() => { setReviewModal(apt); setReviewRating(0); setReviewText(''); setRatingProfessionalism(0); setRatingCommunication(0); setRatingWaitTime(0); }}
                                       className="text-xs text-[#A3B18A] hover:text-[#8FA076] font-medium border border-[#A3B18A] px-2 py-1 rounded">Leave a Review</button>
@@ -488,7 +488,7 @@ const Dashboard = () => {
             <div className="px-6 py-5 space-y-5 max-h-[75vh] overflow-y-auto">
               <div className="bg-[#F5F5F0] rounded-xl p-4 text-sm">
                 <p className="font-semibold text-gray-900">Dr. {reviewModal.doctor_name}</p>
-                <p className="text-gray-500 mt-0.5">{reviewModal.doctor_specialization} • {formatDate(reviewModal.appointment_date)}</p>
+                <p className="text-gray-500 mt-0.5">{reviewModal.doctor_specialization} â€¢ {formatDate(reviewModal.appointment_date)}</p>
               </div>
               <div>
                 <p className="text-sm font-semibold text-gray-800 mb-2">Overall Rating <span className="text-red-500">*</span></p>
@@ -522,3 +522,5 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+
+

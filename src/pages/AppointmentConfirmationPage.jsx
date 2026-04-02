@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+﻿import React, { useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import Header from './Header';
-import Footer from './Footer';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const AppointmentConfirmationPage = () => {
   const location = useLocation();
@@ -189,7 +189,7 @@ const AppointmentConfirmationPage = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Location & Directions</h3>
               <div className="bg-gray-50 rounded-lg p-4">
                 <div className="flex items-start space-x-3">
-                  <span className="text-mentra-primary text-xl mt-1">📍</span>
+                  <span className="text-mentra-primary text-xl mt-1">ðŸ“</span>
                   <div>
                     <h4 className="font-semibold text-gray-900">{professional.location}</h4>
                     <p className="text-gray-600 mt-1">{professional.address}</p>
@@ -200,13 +200,13 @@ const AppointmentConfirmationPage = () => {
                         rel="noopener noreferrer"
                         className="text-mentra-primary hover:text-mentra-primary-hover font-medium text-sm"
                       >
-                        Get Directions →
+                        Get Directions â†’
                       </a>
                       <a 
                         href={`tel:${professional.phone}`}
                         className="text-mentra-primary hover:text-mentra-primary-hover font-medium text-sm"
                       >
-                        Call Clinic →
+                        Call Clinic â†’
                       </a>
                     </div>
                   </div>
@@ -223,19 +223,19 @@ const AppointmentConfirmationPage = () => {
             <div>
               <h4 className="font-semibold mb-2">Before Your Appointment:</h4>
               <ul className="space-y-1">
-                <li>• Arrive 15 minutes early</li>
-                <li>• Bring a valid photo ID</li>
-                <li>• Bring insurance card (if applicable)</li>
-                <li>• Complete intake forms if sent via email</li>
+                <li>â€¢ Arrive 15 minutes early</li>
+                <li>â€¢ Bring a valid photo ID</li>
+                <li>â€¢ Bring insurance card (if applicable)</li>
+                <li>â€¢ Complete intake forms if sent via email</li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-2">Cancellation Policy:</h4>
               <ul className="space-y-1">
-                <li>• 24-hour notice required for cancellations</li>
-                <li>• $50 fee for no-shows or late cancellations</li>
-                <li>• Reschedule by calling the clinic directly</li>
-                <li>• Emergency situations are handled case-by-case</li>
+                <li>â€¢ 24-hour notice required for cancellations</li>
+                <li>â€¢ $50 fee for no-shows or late cancellations</li>
+                <li>â€¢ Reschedule by calling the clinic directly</li>
+                <li>â€¢ Emergency situations are handled case-by-case</li>
               </ul>
             </div>
           </div>
@@ -303,3 +303,4 @@ const AppointmentConfirmationPage = () => {
 };
 
 export default AppointmentConfirmationPage;
+

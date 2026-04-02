@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from './Header';
-import Footer from './Footer';
-import NotificationBanner from './NotificationBanner';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
+import NotificationBanner from '../components/NotificationBanner';
 import { buildApiUrl, API_ENDPOINTS } from '../config/api.js';
 
 const DoctorDashboard = () => {
@@ -189,10 +189,10 @@ const DoctorDashboard = () => {
                   Welcome back, Dr. {doctor.full_name.split(' ')[0]}!
                 </h1>
                 <p className="text-gray-600 mt-1">
-                  {doctor.specialization} • {doctor.hospital_name}
+                  {doctor.specialization} â€¢ {doctor.hospital_name}
                 </p>
                 <span className="inline-block px-3 py-1 text-sm rounded-full mt-2 bg-green-100 text-green-800">
-                  ✓ Verified Professional
+                  âœ“ Verified Professional
                 </span>
               </div>
             </div>
@@ -275,11 +275,11 @@ const DoctorDashboard = () => {
             <div className="flex justify-between items-center px-6">
               <nav className="flex space-x-8">
                 {[
-                  { id: 'overview', name: 'Overview', icon: '📊' },
-                  { id: 'appointments', name: 'Appointments', icon: '📅' },
-                  { id: 'patients', name: 'Patients', icon: '👥' },
-                  { id: 'schedule', name: 'Schedule', icon: '🕒' },
-                  { id: 'analytics', name: 'Analytics', icon: '📈' }
+                  { id: 'overview', name: 'Overview', icon: 'ðŸ“Š' },
+                  { id: 'appointments', name: 'Appointments', icon: 'ðŸ“…' },
+                  { id: 'patients', name: 'Patients', icon: 'ðŸ‘¥' },
+                  { id: 'schedule', name: 'Schedule', icon: 'ðŸ•’' },
+                  { id: 'analytics', name: 'Analytics', icon: 'ðŸ“ˆ' }
                 ].map((tab) => (
                   <button
                     key={tab.id}
@@ -337,7 +337,7 @@ const DoctorDashboard = () => {
                                 {appointment.patient_first_name} {appointment.patient_last_name}
                               </p>
                               <p className="text-sm text-gray-600">
-                                {formatTime(appointment.appointment_time)} • {appointment.appointment_type}
+                                {formatTime(appointment.appointment_time)} â€¢ {appointment.appointment_type}
                               </p>
                             </div>
                           </div>
@@ -440,13 +440,13 @@ const DoctorDashboard = () => {
                                 {appointment.patient_first_name} {appointment.patient_last_name}
                               </h4>
                               <p className="text-sm text-gray-600">
-                                {new Date(appointment.appointment_date).toLocaleDateString()} • {formatTime(appointment.appointment_time)} • {appointment.duration_minutes} min
+                                {new Date(appointment.appointment_date).toLocaleDateString()} â€¢ {formatTime(appointment.appointment_time)} â€¢ {appointment.duration_minutes} min
                               </p>
                               <p className="text-sm text-gray-500">
                                 {appointment.reason_for_visit}
                               </p>
                               <p className="text-xs text-gray-400">
-                                {appointment.patient_email} • {appointment.patient_phone}
+                                {appointment.patient_email} â€¢ {appointment.patient_phone}
                               </p>
                             </div>
                           </div>
@@ -630,3 +630,4 @@ const DoctorDashboard = () => {
 };
 
 export default DoctorDashboard;
+

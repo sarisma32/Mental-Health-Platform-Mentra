@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { buildApiUrl } from '../config/api.js';
-import NotificationBell from './NotificationBell';
+import NotificationBell from '../components/NotificationBell';
 
 const AdminDashboardNew = () => {
   const navigate = useNavigate();
@@ -626,7 +626,7 @@ const AdminDashboardNew = () => {
                           </td>
                           <td className="px-6 py-4">
                             <p className="text-sm text-gray-700">{doctor.hospital_name}</p>
-                            <p className="text-xs text-gray-400">{doctor.location || '—'}</p>
+                            <p className="text-xs text-gray-400">{doctor.location || 'â€”'}</p>
                           </td>
                           <td className="px-6 py-4">
                             <p className="text-sm text-gray-500">{new Date(doctor.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
@@ -710,7 +710,7 @@ const AdminDashboardNew = () => {
                           <div><span className="text-gray-500">Experience:</span><span className="font-medium ml-1">{selectedDoctor.experience}</span></div>
                           <div><span className="text-gray-500">License No:</span><span className="font-medium ml-1">{selectedDoctor.license_number}</span></div>
                           <div><span className="text-gray-500">Hospital:</span><span className="font-medium ml-1">{selectedDoctor.hospital_name}</span></div>
-                          <div><span className="text-gray-500">Location:</span><span className="font-medium ml-1">{selectedDoctor.location || '—'}</span></div>
+                          <div><span className="text-gray-500">Location:</span><span className="font-medium ml-1">{selectedDoctor.location || 'â€”'}</span></div>
                           <div><span className="text-gray-500">Registered:</span><span className="font-medium ml-1">{formatDate(selectedDoctor.created_at)}</span></div>
                         </div>
                       </div>
@@ -989,11 +989,11 @@ const AdminDashboardNew = () => {
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-500">Phone</span>
-                            <span className="font-medium text-gray-900">{selectedPatient.phone_number || '—'}</span>
+                            <span className="font-medium text-gray-900">{selectedPatient.phone_number || 'â€”'}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-500">Age</span>
-                            <span className="font-medium text-gray-900">{selectedPatient.age || '—'}</span>
+                            <span className="font-medium text-gray-900">{selectedPatient.age || 'â€”'}</span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-gray-500">Member Since</span>
@@ -1518,14 +1518,14 @@ const AnalyticsSection = () => {
             ))}
           </div>
           <div className="flex items-center justify-center gap-2 bg-yellow-50 rounded-xl p-4">
-            <span className="text-yellow-400 text-2xl">★</span>
+            <span className="text-yellow-400 text-2xl">â˜…</span>
             <span className="text-2xl font-bold text-gray-900">{data.reviews.avgRating}</span>
             <span className="text-sm text-gray-500">average rating</span>
           </div>
         </div>
       </div>
 
-      {/* Appointment Trends — smooth SVG area chart */}
+      {/* Appointment Trends â€” smooth SVG area chart */}
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
         <div className="flex items-center justify-between mb-2">
           <div>
@@ -1610,7 +1610,7 @@ const AnalyticsSection = () => {
         })()}
       </div>
 
-      {/* New Registrations — improved bar chart */}
+      {/* New Registrations â€” improved bar chart */}
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
         <div className="flex items-center justify-between mb-2">
           <div>
@@ -1942,7 +1942,7 @@ const ReviewsSection = () => {
 
   const renderStars = (rating) => (
     <span className="text-yellow-400 text-sm">
-      {'★'.repeat(rating)}{'☆'.repeat(5 - rating)}
+      {'â˜…'.repeat(rating)}{'â˜†'.repeat(5 - rating)}
     </span>
   );
 
@@ -1960,7 +1960,7 @@ const ReviewsSection = () => {
           { label: 'Total Reviews', value: stats.total || 0, color: 'bg-[#A3B18A]' },
           { label: 'Approved', value: stats.visible || 0, color: 'bg-green-500' },
           { label: 'Pending/Hidden', value: stats.hidden || 0, color: 'bg-yellow-500' },
-          { label: 'Avg Rating', value: stats.avg_rating ? `${stats.avg_rating} ★` : 'N/A', color: 'bg-purple-500' },
+          { label: 'Avg Rating', value: stats.avg_rating ? `${stats.avg_rating} â˜…` : 'N/A', color: 'bg-purple-500' },
         ].map((card) => (
           <div key={card.label} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex items-center space-x-4">
             <div className={`${card.color} p-3 rounded-lg`}>
@@ -2050,7 +2050,7 @@ const ReviewsSection = () => {
                     </td>
                     {/* Rating */}
                     <td className="px-6 py-4">
-                      <p className="text-yellow-400 text-sm leading-none">{'★'.repeat(review.rating)}{'☆'.repeat(5 - review.rating)}</p>
+                      <p className="text-yellow-400 text-sm leading-none">{'â˜…'.repeat(review.rating)}{'â˜†'.repeat(5 - review.rating)}</p>
                       <p className="text-xs text-gray-400 mt-1">{review.rating}/5</p>
                     </td>
                     {/* Review text */}
@@ -2116,17 +2116,17 @@ const ReviewsSection = () => {
                   </svg>
                   <span className="font-semibold text-[#A3B18A]">Dr. {selectedReview.doctor_full_name}</span>
                 </div>
-                <p className="text-gray-400 text-xs mt-1">{selectedReview.doctor_specialization} • {new Date(selectedReview.created_at).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+                <p className="text-gray-400 text-xs mt-1">{selectedReview.doctor_specialization} â€¢ {new Date(selectedReview.created_at).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
               </div>
               <div className="bg-gray-50 rounded-xl p-4">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">Overall Rating</p>
                 <div className="flex items-center gap-3">
-                  <span className="text-yellow-400 text-2xl">{'★'.repeat(selectedReview.rating)}{'☆'.repeat(5 - selectedReview.rating)}</span>
+                  <span className="text-yellow-400 text-2xl">{'â˜…'.repeat(selectedReview.rating)}{'â˜†'.repeat(5 - selectedReview.rating)}</span>
                   <span className="text-lg font-bold text-gray-800">{selectedReview.rating}/5</span>
                   <span className="text-sm text-[#A3B18A] font-medium">{ratingLabel[selectedReview.rating]}</span>
                 </div>
               </div>
-              {/* Detailed Ratings — always show */}
+              {/* Detailed Ratings â€” always show */}
               <div className="bg-gray-50 rounded-xl p-4">
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Detailed Ratings</p>
                 <div className="grid grid-cols-3 gap-4">
@@ -2138,7 +2138,7 @@ const ReviewsSection = () => {
                     <div key={label} className="text-center">
                       <p className="text-xs text-gray-500 mb-1">{label}</p>
                       {value ? (
-                        <><p className="text-yellow-400 text-lg leading-none">{'★'.repeat(value)}{'☆'.repeat(5 - value)}</p><p className="text-xs text-gray-500 mt-1">{value}/5</p></>
+                        <><p className="text-yellow-400 text-lg leading-none">{'â˜…'.repeat(value)}{'â˜†'.repeat(5 - value)}</p><p className="text-xs text-gray-500 mt-1">{value}/5</p></>
                       ) : <p className="text-xs text-gray-400 mt-2">Not rated</p>}
                     </div>
                   ))}
@@ -2178,3 +2178,5 @@ const ReviewsSection = () => {
     </div>
   );
 };
+
+

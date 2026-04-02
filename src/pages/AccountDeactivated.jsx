@@ -1,7 +1,7 @@
-import React from 'react';
+﻿import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from './Header';
-import Footer from './Footer';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 const AccountDeactivated = () => {
   const navigate = useNavigate();
@@ -56,10 +56,10 @@ const AccountDeactivated = () => {
               </p>
               <div className="space-y-1">
                 <p className="text-sm font-medium text-gray-900">
-                  📧 Email: support@mentra.com
+                  ðŸ“§ Email: support@mentra.com
                 </p>
                 <p className="text-sm font-medium text-gray-900">
-                  📞 Phone: +1 (555) 123-4567
+                  ðŸ“ž Phone: +1 (555) 123-4567
                 </p>
               </div>
             </div>
@@ -81,3 +81,5 @@ const AccountDeactivated = () => {
 };
 
 export default AccountDeactivated;
+
+

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import Header from './Header';
+import Header from '../components/Header';
 import { buildApiUrl, API_ENDPOINTS } from '../config/api.js';
 
 const DoctorLogin = () => {
@@ -152,3 +152,4 @@ const DoctorLogin = () => {
 };
 
 export default DoctorLogin;
+

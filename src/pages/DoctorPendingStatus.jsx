@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Header from './Header';
+import Header from '../components/Header';
 import { buildApiUrl } from '../config/api.js';
 
 const DoctorPendingStatus = () => {
@@ -47,14 +47,14 @@ const DoctorPendingStatus = () => {
 
       // Check approval status and redirect accordingly
       if (data.approvalStatus === 'approved') {
-        setMessage('🎉 Your account has been approved! Redirecting to dashboard...');
+        setMessage('ðŸŽ‰ Your account has been approved! Redirecting to dashboard...');
         setTimeout(() => {
           navigate('/doctor-dashboard');
         }, 2000);
       } else if (data.approvalStatus === 'rejected') {
-        setMessage('❌ Your account has been rejected. Please contact support for more information.');
+        setMessage('âŒ Your account has been rejected. Please contact support for more information.');
       } else {
-        setMessage('⏳ Your account is still pending approval. Our team is reviewing your credentials.');
+        setMessage('â³ Your account is still pending approval. Our team is reviewing your credentials.');
       }
     } catch (error) {
       console.error('Error checking status:', error);
@@ -261,3 +261,4 @@ const DoctorPendingStatus = () => {
 };
 
 export default DoctorPendingStatus;
+

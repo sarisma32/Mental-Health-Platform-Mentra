@@ -1,8 +1,8 @@
-import React, { useEffect } from 'react';
-import Header from './Header';
-import Breadcrumb from './Breadcrumb';
-import CallToAction from './CallToAction';
-import Footer from './Footer';
+﻿import React, { useEffect } from 'react';
+import Header from '../components/Header';
+import Breadcrumb from '../components/Breadcrumb';
+import CallToAction from '../components/CallToAction';
+import Footer from '../components/Footer';
 import { Link } from 'react-router-dom';
 
 const AboutUsPage = () => {
@@ -375,3 +375,4 @@ const AboutUsPage = () => {
 };
 
 export default AboutUsPage;
+

@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import NotificationBanner from './NotificationBanner';
-import ScheduleManagement from './ScheduleManagement';
-import NotificationBell from './NotificationBell';
+import NotificationBanner from '../components/NotificationBanner';
+import ScheduleManagement from '../components/ScheduleManagement';
+import NotificationBell from '../components/NotificationBell';
 import { buildApiUrl, API_ENDPOINTS } from '../config/api.js';
 
 const DoctorDashboardNew = () => {
@@ -664,7 +664,7 @@ const DoctorDashboardNew = () => {
                               {appointment.patient_first_name} {appointment.patient_last_name}
                             </p>
                             <p className="text-sm text-gray-600">
-                              {formatTime(appointment.appointment_time)} • {appointment.appointment_type}
+                              {formatTime(appointment.appointment_time)} â€¢ {appointment.appointment_type}
                             </p>
                           </div>
                         </div>
@@ -1326,7 +1326,7 @@ const DoctorVideoUpload = ({ doctorId }) => {
               className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-[#DCE4D4] file:text-[#A3B18A] file:font-medium hover:file:bg-[#A3B18A] hover:file:text-white"
               required
             />
-            <p className="text-xs text-gray-400 mt-1">MP4, MOV, AVI, WebM — max 100MB</p>
+            <p className="text-xs text-gray-400 mt-1">MP4, MOV, AVI, WebM â€” max 100MB</p>
           </div>
           <button
             type="submit"
@@ -1405,7 +1405,7 @@ const DoctorReviewsSection = ({ doctorId }) => {
 
   const renderStars = (rating, size = 'text-base') => (
     <span className={`text-yellow-400 ${size}`}>
-      {'★'.repeat(rating)}{'☆'.repeat(5 - rating)}
+      {'â˜…'.repeat(rating)}{'â˜†'.repeat(5 - rating)}
     </span>
   );
 
@@ -1418,9 +1418,9 @@ const DoctorReviewsSection = ({ doctorId }) => {
           <p className="text-sm text-gray-500 mt-1">Total Reviews</p>
         </div>
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 text-center">
-          <p className="text-3xl font-bold text-yellow-500">{stats.avg_rating || '—'}</p>
+          <p className="text-3xl font-bold text-yellow-500">{stats.avg_rating || 'â€”'}</p>
           <p className="text-sm text-gray-500 mt-1">Average Rating</p>
-          {stats.avg_rating && <p className="text-yellow-400 text-lg mt-1">{'★'.repeat(Math.round(stats.avg_rating))}</p>}
+          {stats.avg_rating && <p className="text-yellow-400 text-lg mt-1">{'â˜…'.repeat(Math.round(stats.avg_rating))}</p>}
         </div>
       </div>
 
@@ -1609,7 +1609,7 @@ const PatientsSection = ({ patients, doctorId, onRefresh }) => {
                 </div>
                 <div>
                   <h3 className="font-bold text-gray-900">{selectedPatient.patient_first_name} {selectedPatient.patient_last_name}</h3>
-                  <p className="text-xs text-gray-500">{selectedPatient.patient_email} • {selectedPatient.patient_phone}</p>
+                  <p className="text-xs text-gray-500">{selectedPatient.patient_email} â€¢ {selectedPatient.patient_phone}</p>
                 </div>
               </div>
               <button onClick={() => { setSelectedPatient(null); setSessions([]); setUpcoming([]); setCancelled([]); }} className="text-gray-400 hover:text-gray-600 p-1">
@@ -1634,7 +1634,7 @@ const PatientsSection = ({ patients, doctorId, onRefresh }) => {
                   <p className="text-sm font-semibold text-gray-800">
                     {selectedPatient.last_visit
                       ? new Date(selectedPatient.last_visit).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-                      : '—'}
+                      : 'â€”'}
                   </p>
                   <p className="text-xs text-gray-500 mt-1">Last Visit</p>
                 </div>
@@ -1652,7 +1652,7 @@ const PatientsSection = ({ patients, doctorId, onRefresh }) => {
                       <div key={apt.id} className="border border-green-200 bg-green-50 rounded-xl px-4 py-3 flex items-center justify-between">
                         <div>
                           <p className="font-semibold text-gray-900 text-sm">{formatDate(apt.appointment_date)}</p>
-                          <p className="text-xs text-gray-500">{formatTime(apt.appointment_time)} • {apt.duration_minutes} min • <span className="capitalize">{apt.appointment_type}</span></p>
+                          <p className="text-xs text-gray-500">{formatTime(apt.appointment_time)} â€¢ {apt.duration_minutes} min â€¢ <span className="capitalize">{apt.appointment_type}</span></p>
                           {apt.reason_for_visit && <p className="text-xs text-gray-500 mt-0.5">{apt.reason_for_visit}</p>}
                         </div>
                         <div className="text-right">
@@ -1678,13 +1678,13 @@ const PatientsSection = ({ patients, doctorId, onRefresh }) => {
                 <div className="space-y-4">
                   {sessions.map((session, idx) => (
                     <div key={session.id} className="border border-gray-200 rounded-xl overflow-hidden">
-                      {/* Session header — numbered newest first */}
+                      {/* Session header â€” numbered newest first */}
                       <div className="bg-gray-50 px-4 py-3 flex items-center justify-between">
                         <div className="flex items-center gap-3">
                           <span className="w-6 h-6 bg-[#A3B18A] rounded-full flex items-center justify-center text-white text-xs font-bold">{idx + 1}</span>
                           <div>
                             <p className="font-semibold text-gray-900 text-sm">{formatDate(session.appointment_date)}</p>
-                            <p className="text-xs text-gray-500">{formatTime(session.appointment_time)} • {session.duration_minutes} min • <span className="capitalize">{session.appointment_type}</span></p>
+                            <p className="text-xs text-gray-500">{formatTime(session.appointment_time)} â€¢ {session.duration_minutes} min â€¢ <span className="capitalize">{session.appointment_type}</span></p>
                           </div>
                         </div>
                         <span className="text-sm font-semibold text-[#A3B18A]">Rs {session.session_fee}</span>
@@ -1721,7 +1721,7 @@ const PatientsSection = ({ patients, doctorId, onRefresh }) => {
                         <div className="flex items-center justify-between">
                           <div>
                             <p className="font-semibold text-gray-700 text-sm">{formatDate(apt.appointment_date)}</p>
-                            <p className="text-xs text-gray-500">{formatTime(apt.appointment_time)} • {apt.duration_minutes} min • <span className="capitalize">{apt.appointment_type}</span></p>
+                            <p className="text-xs text-gray-500">{formatTime(apt.appointment_time)} â€¢ {apt.duration_minutes} min â€¢ <span className="capitalize">{apt.appointment_type}</span></p>
                             {apt.reason_for_visit && <p className="text-xs text-gray-400 mt-0.5">{apt.reason_for_visit}</p>}
                           </div>
                           <div className="text-right">
@@ -1842,13 +1842,13 @@ const AppointmentsSection = ({ appointments, doctor, refreshing, onRefresh, onCo
                         {appointment.patient_first_name} {appointment.patient_last_name}
                       </h4>
                       <p className="text-sm text-gray-600">
-                        {formatDate(appointment.appointment_date)} • {formatTime(appointment.appointment_time)} • {appointment.duration_minutes} min
+                        {formatDate(appointment.appointment_date)} â€¢ {formatTime(appointment.appointment_time)} â€¢ {appointment.duration_minutes} min
                       </p>
                       {appointment.reason_for_visit && (
                         <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">{appointment.reason_for_visit}</p>
                       )}
                       <p className="text-xs text-gray-400 mt-0.5">
-                        {appointment.patient_email} • {appointment.patient_phone}
+                        {appointment.patient_email} â€¢ {appointment.patient_phone}
                       </p>
                     </div>
                   </div>
@@ -2042,9 +2042,9 @@ const AppointmentsSection = ({ appointments, doctor, refreshing, onRefresh, onCo
 const ReviewDetailModal = ({ review, onClose }) => {
   const renderStars = (rating, size = 'text-xl') => rating ? (
     <span className={`text-yellow-400 ${size}`}>
-      {'★'.repeat(rating)}{'☆'.repeat(5 - rating)}
+      {'â˜…'.repeat(rating)}{'â˜†'.repeat(5 - rating)}
     </span>
-  ) : <span className="text-gray-300 text-xl">{'☆'.repeat(5)}</span>;
+  ) : <span className="text-gray-300 text-xl">{'â˜†'.repeat(5)}</span>;
 
   const ratingLabel = { 1: 'Poor', 2: 'Fair', 3: 'Good', 4: 'Very Good', 5: 'Excellent' };
 
@@ -2085,7 +2085,7 @@ const ReviewDetailModal = ({ review, onClose }) => {
             </div>
           </div>
 
-          {/* Detailed Ratings — always show */}
+          {/* Detailed Ratings â€” always show */}
           <div className="bg-gray-50 rounded-xl p-4">
             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">Detailed Ratings</p>
             <div className="grid grid-cols-3 gap-4">
@@ -2098,7 +2098,7 @@ const ReviewDetailModal = ({ review, onClose }) => {
                   <p className="text-xs text-gray-500 mb-1">{label}</p>
                   {value ? (
                     <>
-                      <p className="text-yellow-400 text-lg leading-none">{'★'.repeat(value)}{'☆'.repeat(5 - value)}</p>
+                      <p className="text-yellow-400 text-lg leading-none">{'â˜…'.repeat(value)}{'â˜†'.repeat(5 - value)}</p>
                       <p className="text-xs text-gray-500 mt-1">{value}/5</p>
                     </>
                   ) : (
@@ -2130,3 +2130,5 @@ const ReviewDetailModal = ({ review, onClose }) => {
     </div>
   );
 };
+
+

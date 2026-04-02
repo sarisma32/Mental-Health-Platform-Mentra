@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import Header from './Header';
-import Breadcrumb from './Breadcrumb';
-import Footer from './Footer';
+import Header from '../components/Header';
+import Breadcrumb from '../components/Breadcrumb';
+import Footer from '../components/Footer';
 import { buildApiUrl, API_ENDPOINTS } from '../config/api.js';
 
 const BookAppointmentPage = () => {
@@ -265,7 +265,7 @@ const BookAppointmentPage = () => {
         sessionFee: appointmentType === 'initial' ? professional.initialPrice : professional.followupPrice,
         durationMinutes: appointmentType === 'initial' ? 60 : 50,
         
-        // Patient information — auto-filled from account
+        // Patient information â€” auto-filled from account
         patientFirstName: patientInfo.firstName,
         patientLastName: patientInfo.lastName,
         patientEmail: patientInfo.email,
@@ -321,7 +321,7 @@ const BookAppointmentPage = () => {
         if (data.errors && data.errors.length > 0) {
           errorMessage += '\n\nValidation errors:\n';
           data.errors.forEach(error => {
-            errorMessage += `• ${error.path}: ${error.msg}\n`;
+            errorMessage += `â€¢ ${error.path}: ${error.msg}\n`;
           });
         }
         
@@ -849,7 +849,7 @@ const BookAppointmentPage = () => {
                           <p className="text-mentra-primary text-sm font-medium">{professional.specialization}</p>
                           <div className="mt-2 text-sm text-gray-600">
                             <div className="flex items-center space-x-2 mb-1">
-                              <span>📍</span>
+                              <span>ðŸ“</span>
                               <span>{professional.location}</span>
                             </div>
                             <div className="flex items-center space-x-2">
@@ -913,11 +913,11 @@ const BookAppointmentPage = () => {
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                       <h4 className="font-semibold text-blue-900 mb-2">Important Information</h4>
                       <ul className="text-sm text-blue-800 space-y-1">
-                        <li>• Please arrive 15 minutes early for your appointment</li>
-                        <li>• Bring a valid ID and any relevant medical documents</li>
-                        <li>• Cancellations must be made 24 hours in advance</li>
-                        <li>• Payment is due at the time of service</li>
-                        <li>• A Rs 1,000 fee applies for no-shows or late cancellations</li>
+                        <li>â€¢ Please arrive 15 minutes early for your appointment</li>
+                        <li>â€¢ Bring a valid ID and any relevant medical documents</li>
+                        <li>â€¢ Cancellations must be made 24 hours in advance</li>
+                        <li>â€¢ Payment is due at the time of service</li>
+                        <li>â€¢ A Rs 1,000 fee applies for no-shows or late cancellations</li>
                       </ul>
                     </div>
                   </div>
@@ -978,3 +978,4 @@ const BookAppointmentPage = () => {
 };
 
 export default BookAppointmentPage;
+

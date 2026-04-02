@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { buildApiUrl, API_ENDPOINTS } from '../config/api.js';
 
@@ -23,7 +23,7 @@ const UserRegister = () => {
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Invalid email address';
     if (!formData.phoneNumber.trim()) newErrors.phoneNumber = 'Phone number is required';
     if (!formData.age.trim()) newErrors.age = 'Age is required';
-    else { const a = parseInt(formData.age); if (isNaN(a) || a < 13 || a > 120) newErrors.age = 'Age must be 13–120'; }
+    else { const a = parseInt(formData.age); if (isNaN(a) || a < 13 || a > 120) newErrors.age = 'Age must be 13â€“120'; }
     if (!formData.password) newErrors.password = 'Password is required';
     else {
       const errs = [];
@@ -180,7 +180,7 @@ const UserRegister = () => {
                     disabled={emailVerified}
                     className={`flex-1 px-4 py-3.5 rounded-xl border text-sm outline-none transition-all focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent bg-gray-50 focus:bg-white ${errors.email ? 'border-red-300' : emailVerified ? 'border-green-400 bg-green-50' : 'border-gray-200'}`} />
                   {emailVerified ? (
-                    <span className="flex items-center gap-1 px-3 py-2 bg-green-100 text-green-700 rounded-xl text-xs font-medium whitespace-nowrap">✓ Verified</span>
+                    <span className="flex items-center gap-1 px-3 py-2 bg-green-100 text-green-700 rounded-xl text-xs font-medium whitespace-nowrap">âœ“ Verified</span>
                   ) : (
                     <button type="button" onClick={handleSendOtp} disabled={sendingOtp || !formData.email}
                       className="px-4 py-2 bg-[#A3B18A] hover:bg-[#8FA076] text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap">
@@ -249,3 +249,5 @@ const UserRegister = () => {
 };
 
 export default UserRegister;
+
+

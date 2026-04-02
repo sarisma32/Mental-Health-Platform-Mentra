@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { buildApiUrl, API_ENDPOINTS } from '../config/api.js';
 
@@ -105,7 +105,7 @@ const VerifyOTP = () => {
       {/* Main */}
       <div className="flex-1 flex overflow-hidden">
 
-        {/* Decorative side — LEFT */}
+        {/* Decorative side â€” LEFT */}
         <div className="hidden lg:flex lg:w-1/2 bg-[#F5F5F0] items-center justify-center relative overflow-hidden">
           <div className="absolute top-10 right-10 w-64 h-64 bg-[#DCE4D4] rounded-full opacity-60" />
           <div className="absolute bottom-10 left-10 w-48 h-48 bg-[#A3B18A]/20 rounded-full" />
@@ -131,7 +131,7 @@ const VerifyOTP = () => {
           </div>
         </div>
 
-        {/* Form side — RIGHT */}
+        {/* Form side â€” RIGHT */}
         <div className="w-full lg:w-1/2 flex items-center justify-center px-8 py-16">
           <div className="w-full max-w-sm">
 
@@ -213,3 +213,5 @@ const VerifyOTP = () => {
 };
 
 export default VerifyOTP;
+
+
