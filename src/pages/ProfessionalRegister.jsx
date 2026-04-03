@@ -13,6 +13,12 @@ const ProfessionalRegister = () => {
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [specializations, setSpecializations] = useState([]);
+  const [step, setStep] = useState('form'); // 'form' | 'verify'
+  const [otp, setOtp] = useState('');
+  const [otpError, setOtpError] = useState('');
+  const [sendingOtp, setSendingOtp] = useState(false);
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
+  const [emailVerified, setEmailVerified] = useState(false);
 
   useEffect(() => {
     fetch(buildApiUrl('/api/admin/specializations'))
@@ -56,11 +62,48 @@ const ProfessionalRegister = () => {
     const { name, value, type, checked, files } = e.target;
     setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : type === 'file' ? files[0] : value }));
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
+    if (name === 'email') { setEmailVerified(false); setStep('form'); }
+  };
+
+  const handleSendOtp = async () => {
+    if (!formData.email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      setErrors(prev => ({ ...prev, email: 'Please enter a valid email first' })); return;
+    }
+    setSendingOtp(true);
+    try {
+      const res = await fetch(buildApiUrl('/api/doctors/send-verification'), {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email })
+      });
+      const data = await res.json();
+      if (data.success) { setStep('verify'); setOtpError(''); }
+      else setErrors(prev => ({ ...prev, email: data.message }));
+    } catch { setErrors(prev => ({ ...prev, email: 'Failed to send code.' })); }
+    finally { setSendingOtp(false); }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otp || otp.length !== 6) { setOtpError('Enter the 6-digit code'); return; }
+    setVerifyingOtp(true);
+    try {
+      const res = await fetch(buildApiUrl('/api/doctors/verify-email'), {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, otp })
+      });
+      const data = await res.json();
+      if (data.success) { setEmailVerified(true); setStep('form'); setOtpError(''); }
+      else setOtpError(data.message || 'Invalid code.');
+    } catch { setOtpError('Verification failed.'); }
+    finally { setVerifyingOtp(false); }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    if (!emailVerified) {
+      setErrors(prev => ({ ...prev, email: 'Please verify your email first' }));
+      setIsSubmitting(false); return;
+    }
     if (validateForm()) {
       try {
         const fd = new FormData();
@@ -162,8 +205,40 @@ const ProfessionalRegister = () => {
               {/* Email */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">Email Address</label>
-                <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="you@example.com" className={ic('email')} />
+                <div className="flex gap-2">
+                  <input type="email" name="email" value={formData.email} onChange={handleInputChange}
+                    placeholder="you@example.com" disabled={emailVerified}
+                    className={`flex-1 px-4 py-3.5 rounded-xl border text-sm outline-none transition-all focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent bg-gray-50 focus:bg-white ${errors.email ? 'border-red-300' : emailVerified ? 'border-green-400 bg-green-50' : 'border-gray-200'}`} />
+                  {emailVerified ? (
+                    <span className="flex items-center gap-1 px-3 py-2 bg-green-100 text-green-700 rounded-xl text-xs font-medium whitespace-nowrap">✓ Verified</span>
+                  ) : (
+                    <button type="button" onClick={handleSendOtp} disabled={sendingOtp || !formData.email}
+                      className="px-4 py-2 bg-[#A3B18A] hover:bg-[#8FA076] text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap">
+                      {sendingOtp ? '...' : 'Verify'}
+                    </button>
+                  )}
+                </div>
                 {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
+                {step === 'verify' && !emailVerified && (
+                  <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-xl">
+                    <p className="text-xs text-blue-700 mb-2">Code sent to <strong>{formData.email}</strong></p>
+                    <div className="flex gap-2">
+                      <input type="text" value={otp}
+                        onChange={e => { setOtp(e.target.value.replace(/\D/g,'').slice(0,6)); setOtpError(''); }}
+                        placeholder="6-digit code" maxLength={6}
+                        className="flex-1 px-3 py-2 border border-blue-300 rounded-lg text-sm focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent text-center tracking-widest font-mono" />
+                      <button type="button" onClick={handleVerifyOtp} disabled={verifyingOtp || otp.length !== 6}
+                        className="px-4 py-2 bg-[#A3B18A] hover:bg-[#8FA076] text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50">
+                        {verifyingOtp ? '...' : 'Confirm'}
+                      </button>
+                    </div>
+                    {otpError && <p className="mt-1 text-xs text-red-500">{otpError}</p>}
+                    <button type="button" onClick={handleSendOtp} disabled={sendingOtp}
+                      className="mt-1 text-xs text-blue-600 hover:underline disabled:opacity-50">
+                      Resend code
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* License + Phone */}
@@ -239,9 +314,9 @@ const ProfessionalRegister = () => {
               </div>
               {errors.agreeToTerms && <p className="text-xs text-red-500">{errors.agreeToTerms}</p>}
 
-              <button type="submit" disabled={isSubmitting}
-                className={`w-full py-3 rounded-xl font-semibold text-sm transition-all ${isSubmitting ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#A3B18A] hover:bg-[#8FA076] text-white'}`}>
-                {isSubmitting ? 'Submitting...' : 'Submit Registration'}
+              <button type="submit" disabled={isSubmitting || !emailVerified}
+                className={`w-full py-3 rounded-xl font-semibold text-sm transition-all ${isSubmitting || !emailVerified ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#A3B18A] hover:bg-[#8FA076] text-white'}`}>
+                {isSubmitting ? 'Submitting...' : !emailVerified ? 'Verify Email to Continue' : 'Submit Registration'}
               </button>
 
             </form>

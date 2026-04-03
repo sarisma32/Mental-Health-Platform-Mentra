@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import pool from "../db/index.js";
 import path from "path";
 import { createNotification } from "./notificationController.js";
+import { sendOTPEmail } from "../utils/emailService.js";
 
 // REGISTER DOCTOR
 export const registerDoctor = async (req, res) => {
@@ -577,5 +578,71 @@ export const deleteDoctorVideo = async (req, res) => {
   } catch (err) {
     console.error("Delete video error:", err);
     res.status(500).json({ success: false, message: "Failed to delete video." });
+  }
+};
+
+// SEND EMAIL VERIFICATION OTP (before doctor registration)
+export const sendDoctorEmailVerification = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ success: false, message: 'Email is required' });
+
+    // Check if email already registered as a doctor
+    const existing = await pool.query('SELECT id FROM doctors WHERE email = $1', [email]);
+    if (existing.rows.length > 0) {
+      return res.status(400).json({ success: false, message: 'Email already registered. Please use a different email.' });
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    // Delete any existing OTPs for this email
+    await pool.query(
+      "DELETE FROM password_reset_otps WHERE email = $1 AND user_type = 'doctor_email_verify'",
+      [email]
+    );
+
+    // Store OTP
+    await pool.query(
+      "INSERT INTO password_reset_otps (email, otp, user_type, expires_at) VALUES ($1, $2, 'doctor_email_verify', $3)",
+      [email, otp, expiresAt]
+    );
+
+    // Send OTP email — if delivery fails the email is likely fake/invalid
+    const result = await sendOTPEmail(email, otp, 'Doctor');
+    if (!result.success) {
+      return res.status(400).json({ success: false, message: 'Failed to send verification email. Please check your email address and try again.' });
+    }
+
+    res.json({ success: true, message: 'Verification code sent to your email.' });
+  } catch (err) {
+    console.error('Send doctor email verification error:', err);
+    res.status(500).json({ success: false, message: 'Failed to send verification email.' });
+  }
+};
+
+// VERIFY EMAIL OTP (during doctor registration)
+export const verifyDoctorEmailOTP = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) return res.status(400).json({ success: false, message: 'Email and OTP are required' });
+
+    const record = await pool.query(
+      "SELECT * FROM password_reset_otps WHERE email = $1 AND otp = $2 AND user_type = 'doctor_email_verify' AND is_used = FALSE AND expires_at > NOW()",
+      [email, otp]
+    );
+
+    if (record.rows.length === 0) {
+      return res.status(400).json({ success: false, message: 'Invalid or expired verification code.' });
+    }
+
+    // Mark as used
+    await pool.query('UPDATE password_reset_otps SET is_used = TRUE WHERE id = $1', [record.rows[0].id]);
+
+    res.json({ success: true, message: 'Email verified successfully.' });
+  } catch (err) {
+    console.error('Verify doctor email OTP error:', err);
+    res.status(500).json({ success: false, message: 'Verification failed.' });
   }
 };

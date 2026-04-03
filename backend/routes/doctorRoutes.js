@@ -1,44 +1,3 @@
-// import express from "express";
-// import { registerDoctor, loginDoctor } from "../controllers/doctorController.js";
-
-// const router = express.Router();
-
-// router.post("/register", registerDoctor);
-// router.post("/login", loginDoctor);
-
-// export default router;
-
-
-
-
-
-
-// import express from "express";
-// const router = express.Router();
-
-// router.get("/", (req, res) => {
-//   res.send("Doctor routes working");
-// });
-
-// export default router;
-
-
-
-
-
-
-
-// import express from "express";
-// import { registerDoctor, loginDoctor } from "../controllers/doctorController.js";
-
-// const router = express.Router();
-
-// router.post("/register", registerDoctor);
-// router.post("/login", loginDoctor);
-
-// export default router;
-
-
 import express from "express";
 import { 
   registerDoctor, 
@@ -52,13 +11,19 @@ import {
   updateCompleteProfile,
   uploadDoctorVideo,
   getDoctorVideos,
-  deleteDoctorVideo
+  deleteDoctorVideo,
+  sendDoctorEmailVerification,
+  verifyDoctorEmailOTP
 } from "../controllers/doctorController.js";
 import { validateDoctorRegistration, validateLogin } from "../middleware/validation.js";
 import { verifyToken, verifyDoctor } from "../middleware/auth.js";
 import { uploadDocument, uploadProfileImage, uploadVideo, handleUploadError } from "../middleware/upload.js";
 
 const router = express.Router();
+
+// Email verification (before registration)
+router.post("/send-verification", sendDoctorEmailVerification);
+router.post("/verify-email", verifyDoctorEmailOTP);
 
 // Public routes
 router.post("/register", uploadDocument, handleUploadError, validateDoctorRegistration, registerDoctor);
