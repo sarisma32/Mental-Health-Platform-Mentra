@@ -2,6 +2,7 @@
 import { useNavigate, Link } from 'react-router-dom';
 import NotificationBell from '../components/NotificationBell';
 import DashboardSidebar from '../components/DashboardSidebar';
+import DashboardHeader from '../components/DashboardHeader';
 import { buildApiUrl, API_ENDPOINTS } from '../config/api.js';
 
 const ratingLabels = { 1: 'Poor', 2: 'Fair', 3: 'Good', 4: 'Very Good', 5: 'Excellent' };
@@ -190,26 +191,13 @@ const Dashboard = () => {
       {/* Main content */}
       <div className="flex-1 overflow-auto">
         {/* Top header */}
-        <div className="bg-white shadow-sm border-b border-gray-200 px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-800">{menuItems.find(m => m.id === activeSection)?.name}</h2>
-              <p className="text-sm text-gray-500 mt-1">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <NotificationBell recipientType="patient" recipientId={user?.id} />
-              <div className="flex items-center space-x-3 pl-4 border-l border-gray-200">
-                <div className="text-right">
-                  <p className="text-sm font-medium text-gray-800">{user.full_name}</p>
-                  <p className="text-xs text-gray-500">Patient</p>
-                </div>
-                <div className="w-10 h-10 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center text-white font-semibold shadow-md">
-                  {user.full_name.charAt(0)}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <DashboardHeader
+          sectionTitle={menuItems.find(m => m.id === activeSection)?.name || 'Overview'}
+          userName={user.full_name}
+          userEmail="Patient"
+          notifType="patient"
+          notifId={user?.id}
+        />
 
         {/* Content */}
         <div className="p-8">

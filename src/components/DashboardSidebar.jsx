@@ -28,7 +28,7 @@ const DashboardSidebar = ({
   const initial = userName ? userName.charAt(0).toUpperCase() : '?';
 
   return (
-    <div className="w-64 bg-gradient-to-b from-[#A3B18A] to-[#8FA076] text-white flex flex-col shadow-xl flex-shrink-0">
+    <div className="w-64 h-screen bg-gradient-to-b from-[#A3B18A] to-[#8FA076] text-white flex flex-col shadow-xl flex-shrink-0">
 
       {/* Logo */}
       <div className="p-6 border-b border-white/20">
@@ -62,7 +62,7 @@ const DashboardSidebar = ({
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 space-y-1">
+      <nav className="flex-1 overflow-y-auto p-4 space-y-1">
         {menuItems.map((item) => (
           <button
             key={item.id}

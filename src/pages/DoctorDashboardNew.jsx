@@ -4,6 +4,7 @@ import NotificationBanner from '../components/NotificationBanner';
 import ScheduleManagement from '../components/ScheduleManagement';
 import NotificationBell from '../components/NotificationBell';
 import DashboardSidebar from '../components/DashboardSidebar';
+import DashboardHeader from '../components/DashboardHeader';
 import { buildApiUrl, API_ENDPOINTS } from '../config/api.js';
 
 const DoctorDashboardNew = () => {
@@ -485,35 +486,15 @@ const DoctorDashboardNew = () => {
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         {/* Header */}
-        <div className="bg-white shadow-sm border-b border-gray-200 px-8 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-2xl font-bold text-gray-800">
-                {menuItems.find(item => item.id === activeSection)?.name || 'Overview'}
-              </h2>
-              <p className="text-sm text-gray-500 mt-1">
-                {new Date().toLocaleDateString('en-US', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}
-              </p>
-            </div>
-            <div className="flex items-center space-x-4">
-              <NotificationBell recipientType="doctor" recipientId={doctor?.id} onNavigate={setActiveSection} />
-              <div className="flex items-center space-x-3 pl-4 border-l border-gray-200">
-                <div className="text-right">
-                  <p className="text-sm font-medium text-gray-800">Dr. {doctor.full_name}</p>
-                  <p className="text-xs text-gray-500">{doctor.email}</p>
-                </div>
-                <div className="w-10 h-10 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center text-white font-semibold shadow-md">
-                  {doctor.full_name.charAt(0)}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <DashboardHeader
+          sectionTitle={menuItems.find(item => item.id === activeSection)?.name || 'Overview'}
+          userName={doctor.full_name}
+          userEmail={doctor.email}
+          userPrefix="Dr."
+          notifType="doctor"
+          notifId={doctor?.id}
+          onNotifNavigate={setActiveSection}
+        />
 
         {/* Content Area */}
         <div className="p-8">
