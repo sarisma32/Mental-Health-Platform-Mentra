@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import NotificationBanner from '../components/NotificationBanner';
 import ScheduleManagement from '../components/ScheduleManagement';
 import NotificationBell from '../components/NotificationBell';
+import DashboardSidebar from '../components/DashboardSidebar';
 import { buildApiUrl, API_ENDPOINTS } from '../config/api.js';
 
 const DoctorDashboardNew = () => {
@@ -469,68 +470,17 @@ const DoctorDashboardNew = () => {
       )}
 
       {/* Sidebar */}
-      <div className="w-64 bg-gradient-to-b from-[#A3B18A] to-[#8FA076] text-white flex flex-col shadow-xl">
-        {/* Logo */}
-        <div className="p-6 border-b border-white/20">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-md">
-              <svg className="w-6 h-6 text-[#A3B18A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-xl font-bold">Mentra Doctor</h1>
-              <p className="text-xs text-white/70">Healthcare Portal</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Doctor Info */}
-        <div className="p-4 border-b border-white/20">
-          <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-              <span className="text-white font-bold text-lg">
-                {doctor.full_name.charAt(0)}
-              </span>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold truncate">Dr. {doctor.full_name.split(' ')[0]}</p>
-              <p className="text-xs text-white/70 truncate">{doctor.specialization}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <nav className="flex-1 p-4 space-y-1">
-          {menuItems.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => setActiveSection(item.id)}
-              className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all ${
-                activeSection === item.id
-                  ? 'bg-white/20 shadow-md backdrop-blur-sm'
-                  : 'hover:bg-white/10'
-              }`}
-            >
-              <span className="text-white">{item.icon}</span>
-              <span className="font-medium text-sm">{item.name}</span>
-            </button>
-          ))}
-        </nav>
-
-        {/* Profile & Logout */}
-        <div className="p-4 border-t border-white/20 space-y-2">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center space-x-3 px-4 py-3 rounded-lg hover:bg-white/10 transition-all"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            <span className="font-medium text-sm">Sign out</span>
-          </button>
-        </div>
-      </div>
+      <DashboardSidebar
+        title="Mentra Doctor"
+        subtitle="Healthcare Portal"
+        userName={doctor.full_name}
+        userSub={doctor.specialization}
+        userPrefix="Dr."
+        menuItems={menuItems}
+        activeSection={activeSection}
+        onNavigate={setActiveSection}
+        onLogout={handleLogout}
+      />
 
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
