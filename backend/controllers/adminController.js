@@ -385,7 +385,14 @@ export const getAllAppointments = async (req, res) => {
 
 export const getSpecializations = async (req, res) => {
   try {
-    const result = await pool.query('SELECT * FROM specializations ORDER BY name ASC');
+    // Include doctor_count so the frontend knows which ones are in use
+    const result = await pool.query(`
+      SELECT s.*, COUNT(d.id)::int AS doctor_count
+      FROM specializations s
+      LEFT JOIN doctors d ON d.specialization = s.name
+      GROUP BY s.id
+      ORDER BY s.name ASC
+    `);
     res.json({ success: true, specializations: result.rows });
   } catch (error) {
     console.error('Error fetching specializations:', error);
@@ -420,6 +427,20 @@ export const updateSpecialization = async (req, res) => {
     if (!name || !name.trim()) {
       return res.status(400).json({ success: false, message: 'Name is required' });
     }
+
+    // Block edit if any doctor is using this specialization
+    const inUse = await pool.query(
+      `SELECT COUNT(d.id) FROM specializations s
+       JOIN doctors d ON d.specialization = s.name
+       WHERE s.id = $1`, [id]
+    );
+    if (parseInt(inUse.rows[0].count) > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot edit — this specialization is assigned to one or more doctors.'
+      });
+    }
+
     const result = await pool.query(
       'UPDATE specializations SET name = $1 WHERE id = $2 RETURNING *',
       [name.trim(), id]
@@ -440,6 +461,20 @@ export const updateSpecialization = async (req, res) => {
 export const deleteSpecialization = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Block delete if any doctor is using this specialization
+    const inUse = await pool.query(
+      `SELECT COUNT(d.id) FROM specializations s
+       JOIN doctors d ON d.specialization = s.name
+       WHERE s.id = $1`, [id]
+    );
+    if (parseInt(inUse.rows[0].count) > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cannot delete — this specialization is assigned to one or more doctors.'
+      });
+    }
+
     const result = await pool.query(
       'DELETE FROM specializations WHERE id = $1 RETURNING *',
       [id]

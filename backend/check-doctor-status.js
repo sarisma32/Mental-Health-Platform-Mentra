@@ -2,7 +2,7 @@ import pool from './db/index.js';
 
 const checkDoctorStatus = async () => {
   try {
-    console.log('🔍 Checking doctor status in database...');
+    console.log(' Checking doctor status in database...');
 
     const email = 'gsaru952@gmail.com';
     
@@ -13,7 +13,7 @@ const checkDoctorStatus = async () => {
     );
 
     if (doctor.rows.length > 0) {
-      console.log('✅ Doctor found in database:');
+      console.log(' Doctor found in database:');
       console.log(doctor.rows[0]);
       
       // Check the exact column name in the database
@@ -24,15 +24,15 @@ const checkDoctorStatus = async () => {
         AND column_name LIKE '%status%'
       `);
       
-      console.log('\n📋 Status-related columns in doctors table:');
+      console.log('\n Status-related columns in doctors table:');
       console.log(tableInfo.rows);
       
     } else {
-      console.log('❌ Doctor not found in database');
+      console.log(' Doctor not found in database');
     }
 
   } catch (error) {
-    console.error('❌ Error checking doctor:', error.message);
+    console.error(' Error checking doctor:', error.message);
   } finally {
     process.exit(0);
   }

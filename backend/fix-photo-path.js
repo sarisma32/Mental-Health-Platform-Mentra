@@ -50,7 +50,7 @@ async function fixPhotoPath() {
           [newPath, doctor.id]
         );
 
-        console.log('  ✓ Updated\n');
+        console.log('   Updated\n');
       } else {
         console.log(`Doctor ID ${doctor.id} (${doctor.full_name}): Path already correct\n`);
       }

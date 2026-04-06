@@ -10,7 +10,7 @@ const checkTables = async () => {
     `);
 
     if (tableCheck.rows.length > 0) {
-      console.log('✅ Appointments table exists');
+      console.log(' Appointments table exists');
       
       // Check table structure
       const columns = await pool.query(`
@@ -20,17 +20,17 @@ const checkTables = async () => {
         ORDER BY ordinal_position
       `);
       
-      console.log('📋 Appointments table columns:');
+      console.log(' Appointments table columns:');
       columns.rows.forEach(col => {
         console.log(`  ${col.column_name}: ${col.data_type} (${col.is_nullable === 'YES' ? 'nullable' : 'not null'})`);
       });
     } else {
-      console.log('❌ Appointments table does not exist');
+      console.log(' Appointments table does not exist');
     }
 
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error checking tables:', error);
+    console.error(' Error checking tables:', error);
     process.exit(1);
   }
 };

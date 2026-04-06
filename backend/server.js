@@ -16,6 +16,7 @@ import notificationRoutes from "./routes/notificationRoutes.js";
 import { testConnection, initializeDatabase } from "./db/init.js";
 import { startAppointmentScheduler } from "./utils/appointmentScheduler.js";
 
+
 // ES6 module compatibility
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -45,31 +46,33 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use((req, res, next) => {
   console.log(`${req.method} ${req.path}`);
   next();
-});
+});//print every request in terminal
 
 // Serve uploaded files statically
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));//Allows access to uploaded files like: http://localhost:5002/uploads/photo.jpg
+
+
 
 // Routes
-console.log('🔧 Setting up routes...');
+console.log(' Setting up routes...');
 app.use("/api/admin", adminRoutes);
-console.log('✅ Admin routes mounted at /api/admin');
+console.log(' Admin routes mounted at /api/admin');
 app.use("/api/auth", authRoutes);
-console.log('✅ Auth routes mounted at /api/auth');
+console.log(' Auth routes mounted at /api/auth');
 app.use("/api/patients", patientRoutes);
-console.log('✅ Patient routes mounted at /api/patients');
+console.log(' Patient routes mounted at /api/patients');
 app.use("/api/doctors", doctorRoutes);
-console.log('✅ Doctor routes mounted at /api/doctors');
+console.log(' Doctor routes mounted at /api/doctors');
 app.use("/api/appointments", appointmentRoutes);
-console.log('✅ Appointment routes mounted at /api/appointments');
+console.log(' Appointment routes mounted at /api/appointments');
 app.use("/api/dashboard", dashboardRoutes);
-console.log('✅ Dashboard routes mounted at /api/dashboard');
+console.log(' Dashboard routes mounted at /api/dashboard');
 app.use("/api/schedules", scheduleRoutes);
-console.log('✅ Schedule routes mounted at /api/schedules');
+console.log(' Schedule routes mounted at /api/schedules');
 app.use("/api/reviews", reviewRoutes);
-console.log('✅ Review routes mounted at /api/reviews');
+console.log(' Review routes mounted at /api/reviews');
 app.use("/api/notifications", notificationRoutes);
-console.log('✅ Notification routes mounted at /api/notifications');
+console.log(' Notification routes mounted at /api/notifications');
 
 // Health check route
 app.get("/api/health", (req, res) => {
@@ -79,7 +82,7 @@ app.get("/api/health", (req, res) => {
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development'
   });
-});
+});//Health check endpoint is used to verify that the backend server is running properly.
 
 // Default route
 app.get("/", (req, res) => {
@@ -94,7 +97,7 @@ app.get("/", (req, res) => {
       health: "/api/health"
     }
   });
-});
+});//When someone opens: http://localhost:5002/ They see API info.
 
 // Global error handler
 app.use((error, req, res, next) => {
@@ -104,7 +107,7 @@ app.use((error, req, res, next) => {
     message: "Internal server error",
     error: process.env.NODE_ENV === 'development' ? error.message : undefined
   });
-});
+});//Global error handler is used to handle server errors and send a proper response to the client.
 
 // 404 handler
 app.use((req, res) => {
@@ -121,7 +124,7 @@ const startServer = async () => {
     // Test database connection
     const isConnected = await testConnection();
     if (!isConnected) {
-      console.error('❌ Failed to connect to database. Exiting...');
+      console.error(' Failed to connect to database. Exiting...');
       process.exit(1);
     }
 
@@ -134,17 +137,19 @@ const startServer = async () => {
     // Start server
     const PORT = process.env.PORT || 5002;
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on port ${PORT}`);
-      console.log(`📱 Frontend URL: ${process.env.FRONTEND_URL || "http://localhost:5173"}`);
-      console.log(`🏥 Environment: ${process.env.NODE_ENV || 'development'}`);
-      console.log(`📊 API Documentation: http://localhost:${PORT}/`);
+      console.log(` Server running on port ${PORT}`);
+      console.log(` Frontend URL: ${process.env.FRONTEND_URL || "http://localhost:5173"}`);
+      console.log(` Environment: ${process.env.NODE_ENV || 'development'}`);
+      console.log(` API Documentation: http://localhost:${PORT}/`);
     });
 
   } catch (error) {
-    console.error('❌ Failed to start server:', error);
+    console.error(' Failed to start server:', error);
     process.exit(1);
   }
 };
+
+//These handlers catch unexpected errors and prevent the server from crashing.
 
 // Handle unhandled promise rejections
 process.on('unhandledRejection', (err) => {
@@ -158,6 +163,9 @@ process.on('uncaughtException', (err) => {
   process.exit(1);
 });
 
+
+//When server stops → close properly.
+
 // Graceful shutdown
 process.on('SIGTERM', () => {
   console.log('SIGTERM received. Shutting down gracefully...');
@@ -170,3 +178,4 @@ process.on('SIGINT', () => {
 });
 
 startServer();
+

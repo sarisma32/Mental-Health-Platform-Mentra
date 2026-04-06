@@ -37,9 +37,9 @@ const Footer = () => {
           <div>
             <h4 className="text-sm font-semibold uppercase tracking-widest text-[#A3B18A] mb-4">Contact</h4>
             <ul className="space-y-2 text-sm text-[#B8C9A8]">
-              <li>📧 mentra32@gmail.com</li>
-              <li>📞 +977 9702690848</li>
-              <li>🕐 Support: 24/7 Available</li>
+              <li> mentra32@gmail.com</li>
+              <li> +977 9702690848</li>
+              <li> Support: 24/7 Available</li>
             </ul>
             <div className="mt-4 bg-red-900/40 border border-red-700/50 rounded-lg px-3 py-2">
               <p className="text-red-300 text-xs">🚨 Crisis? Call <strong>988</strong> — Suicide & Crisis Lifeline</p>

@@ -3,7 +3,7 @@ import pool from './db/index.js';
 
 const createTestDoctor = async () => {
   try {
-    console.log('🩺 Creating test doctor account...');
+    console.log(' Creating test doctor account...');
 
     // Doctor details
     const doctorData = {
@@ -25,7 +25,7 @@ const createTestDoctor = async () => {
     );
 
     if (existingDoctor.rows.length > 0) {
-      console.log('⚠️  Doctor already exists. Updating approval status...');
+      console.log('  Doctor already exists. Updating approval status...');
       
       // Update to approved status
       const updatedDoctor = await pool.query(
@@ -33,7 +33,7 @@ const createTestDoctor = async () => {
         [doctorData.email]
       );
       
-      console.log('✅ Doctor status updated to approved!');
+      console.log(' Doctor status updated to approved!');
       console.log('Doctor Details:', {
         id: updatedDoctor.rows[0].id,
         name: updatedDoctor.rows[0].full_name,
@@ -69,7 +69,7 @@ const createTestDoctor = async () => {
       ]
     );
 
-    console.log('✅ Doctor account created successfully!');
+    console.log(' Doctor account created successfully!');
     console.log('Doctor Details:', {
       id: newDoctor.rows[0].id,
       name: newDoctor.rows[0].full_name,
@@ -83,13 +83,13 @@ const createTestDoctor = async () => {
       created: newDoctor.rows[0].created_at
     });
 
-    console.log('\n🎉 Ready to login!');
+    console.log('\n Ready to login!');
     console.log('Email:', doctorData.email);
     console.log('Password:', doctorData.password);
-    console.log('Status: APPROVED ✅');
+    console.log('Status: APPROVED ');
 
   } catch (error) {
-    console.error('❌ Error creating doctor:', error.message);
+    console.error(' Error creating doctor:', error.message);
   } finally {
     process.exit(0);
   }

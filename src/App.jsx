@@ -5,9 +5,8 @@ import SignupPage from './pages/SignupPage'
 import UserRegister from './pages/UserRegister'
 import UserLogin from './pages/UserLogin'
 import Dashboard from './pages/Dashboard'
-import DoctorDashboard from './pages/DoctorDashboard'
 import DoctorDashboardNew from './pages/DoctorDashboardNew'
-import DoctorProfileEdit from './pages/DoctorProfileEdit'
+// import DoctorProfileEdit from './pages/DoctorProfileEdit'
 import ProfessionalRegister from './pages/ProfessionalRegister'
 import DoctorPendingStatus from './pages/DoctorPendingStatus'
 import ServicesPage from './pages/ServicesPage'
@@ -35,8 +34,7 @@ function App() {
           <Route path="/login" element={<UserLogin />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/doctor-dashboard" element={<DoctorDashboardNew />} />
-          <Route path="/doctor-dashboard-old" element={<DoctorDashboard />} />
-          <Route path="/doctor/profile/edit" element={<DoctorProfileEdit />} />
+          {/* <Route path="/doctor/profile/edit" element={<DoctorProfileEdit />} /> */}
           <Route path="/register-professional" element={<ProfessionalRegister />} />
           <Route path="/doctor-pending" element={<DoctorPendingStatus />} />
           <Route path="/services" element={<ServicesPage />} />

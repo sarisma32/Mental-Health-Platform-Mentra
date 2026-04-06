@@ -19,7 +19,7 @@ const createTransporter = () => {
 // Send OTP email
 export const sendOTPEmail = async (email, otp, userName = '') => {
   try {
-    console.log('📧 Attempting to send OTP email...');
+    console.log(' Attempting to send OTP email...');
     console.log('To:', email);
     console.log('OTP:', otp);
     console.log('EMAIL_USER:', process.env.EMAIL_USER);
@@ -87,7 +87,7 @@ export const sendOTPEmail = async (email, otp, userName = '') => {
         <body>
           <div class="container">
             <div class="header">
-              <h1>🔐 Password Reset Request</h1>
+              <h1> Password Reset Request</h1>
             </div>
             <div class="content">
               <p>Hi ${userName || 'User'},</p>
@@ -103,7 +103,7 @@ export const sendOTPEmail = async (email, otp, userName = '') => {
               <p><strong>This OTP will expire in 10 minutes.</strong></p>
               
               <div class="warning">
-                <strong>⚠️ Security Notice:</strong> If you didn't request this password reset, please ignore this email and ensure your account is secure.
+                <strong> Security Notice:</strong> If you didn't request this password reset, please ignore this email and ensure your account is secure.
               </div>
               
               <p>For your security, never share this OTP with anyone, including Mentra staff.</p>
@@ -123,17 +123,17 @@ export const sendOTPEmail = async (email, otp, userName = '') => {
 
     const info = await transporter.sendMail(mailOptions);
     
-    console.log('✅ OTP Email sent successfully to:', email);
+    console.log(' OTP Email sent successfully to:', email);
     console.log('Message ID:', info.messageId);
 
     return { success: true, message: 'OTP sent successfully to your email' };
   } catch (error) {
-    console.error('❌ Error sending OTP email:', error);
+    console.error(' Error sending OTP email:', error);
     
     // Fallback: Show in console if email fails
     console.log(`
     ===============================
-    📧 OTP EMAIL (FALLBACK - Email service failed)
+     OTP EMAIL (FALLBACK - Email service failed)
     ===============================
     To: ${email}
     OTP: ${otp}
@@ -203,10 +203,10 @@ export const sendPasswordResetConfirmation = async (email, userName = '') => {
         <body>
           <div class="container">
             <div class="header">
-              <h1>✅ Password Reset Successful</h1>
+              <h1> Password Reset Successful</h1>
             </div>
             <div class="content">
-              <div class="success-icon">🎉</div>
+              <div class="success-icon"></div>
               
               <p>Hi ${userName || 'User'},</p>
               
@@ -215,7 +215,7 @@ export const sendPasswordResetConfirmation = async (email, userName = '') => {
               <p>You can now log in with your new password.</p>
               
               <div class="warning">
-                <strong>⚠️ Security Alert:</strong> If you didn't make this change, please contact our support team immediately at support@mentra.com
+                <strong> Security Alert:</strong> If you didn't make this change, please contact our support team immediately at support@mentra.com
               </div>
               
               <p>Thank you for using Mentra!</p>
@@ -235,12 +235,12 @@ export const sendPasswordResetConfirmation = async (email, userName = '') => {
 
     const info = await transporter.sendMail(mailOptions);
     
-    console.log('✅ Password reset confirmation email sent to:', email);
+    console.log(' Password reset confirmation email sent to:', email);
     console.log('Message ID:', info.messageId);
 
     return { success: true, message: 'Confirmation email sent' };
   } catch (error) {
-    console.error('❌ Error sending confirmation email:', error);
+    console.error(' Error sending confirmation email:', error);
     return { success: false, message: 'Failed to send confirmation email' };
   }
 };
@@ -296,7 +296,7 @@ export const sendAppointmentBookedEmail = async (appointment) => {
         <body>
           <div class="container">
             <div class="header">
-              <h1>✅ Appointment Confirmed</h1>
+              <h1> Appointment Confirmed</h1>
               <p>Your session has been successfully booked</p>
             </div>
             <div class="content">
@@ -320,7 +320,7 @@ export const sendAppointmentBookedEmail = async (appointment) => {
               </table>
 
               <div class="info-box">
-                💡 <strong>Reminder:</strong> Please arrive a few minutes early and bring any relevant medical records or previous therapy notes.
+                 <strong>Reminder:</strong> Please arrive a few minutes early and bring any relevant medical records or previous therapy notes.
               </div>
 
               <p>If you need to reschedule or have any questions, please contact us through the Mentra platform.</p>
@@ -337,10 +337,10 @@ export const sendAppointmentBookedEmail = async (appointment) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Appointment booked email sent to:', patient_email, '| ID:', info.messageId);
+    console.log(' Appointment booked email sent to:', patient_email, '| ID:', info.messageId);
     return { success: true };
   } catch (error) {
-    console.error('❌ Error sending appointment booked email:', error);
+    console.error(' Error sending appointment booked email:', error);
     return { success: false };
   }
 };
@@ -395,7 +395,7 @@ export const sendSessionCompletedEmail = async (appointment) => {
         <body>
           <div class="container">
             <div class="header">
-              <h1>🎯 Session Completed</h1>
+              <h1> Session Completed</h1>
               <p>Your session notes are ready</p>
             </div>
             <div class="content">
@@ -412,13 +412,13 @@ export const sendSessionCompletedEmail = async (appointment) => {
 
               ${session_notes ? `
               <div class="notes-box">
-                <h3>📋 Session Notes from Dr. ${doctor_name}</h3>
+                <h3> Session Notes from Dr. ${doctor_name}</h3>
                 <p>${session_notes}</p>
               </div>
               ` : ''}
 
               <div class="info-box">
-                💡 You can also view these notes anytime by logging into your Mentra account and checking your appointment history.
+                 You can also view these notes anytime by logging into your Mentra account and checking your appointment history.
               </div>
 
               <p>Thank you for trusting Mentra with your mental health journey. We hope your session was helpful.</p>
@@ -435,13 +435,14 @@ export const sendSessionCompletedEmail = async (appointment) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Session completed email sent to:', patient_email, '| ID:', info.messageId);
+    console.log(' Session completed email sent to:', patient_email, '| ID:', info.messageId);
     return { success: true };
   } catch (error) {
-    console.error('❌ Error sending session completed email:', error);
+    console.error(' Error sending session completed email:', error);
     return { success: false };
   }
 };
+
 
 // ── Appointment Reminder Email (1 hour before) ───────────────────────────────
 export const sendAppointmentReminderEmail = async (appointment) => {
@@ -467,7 +468,7 @@ export const sendAppointmentReminderEmail = async (appointment) => {
     const mailOptions = {
       from: `"Mentra - Mental Health Platform" <${process.env.EMAIL_USER}>`,
       to: patient_email,
-      subject: `⏰ Reminder: Your appointment in 1 hour — Dr. ${doctor_name} | Mentra`,
+      subject: ` Reminder: Your appointment in 1 hour — Dr. ${doctor_name} | Mentra`,
       html: `
         <!DOCTYPE html>
         <html>
@@ -497,7 +498,7 @@ export const sendAppointmentReminderEmail = async (appointment) => {
         <body>
           <div class="container">
             <div class="header">
-              <h1>⏰ Appointment Reminder</h1>
+              <h1> Appointment Reminder</h1>
               <p>Your session is coming up soon</p>
             </div>
             <div class="content">
@@ -505,7 +506,7 @@ export const sendAppointmentReminderEmail = async (appointment) => {
               <p>This is a friendly reminder that you have an appointment scheduled in <strong>1 hour</strong>.</p>
 
               <div class="reminder-banner">
-                <div class="icon">🕐</div>
+                <div class="icon"></div>
                 <div class="text">Your appointment starts in 1 hour!</div>
               </div>
 
@@ -523,7 +524,7 @@ export const sendAppointmentReminderEmail = async (appointment) => {
               </table>
 
               <div class="checklist">
-                <h4>✅ Before You Go — Quick Checklist</h4>
+                <h4> Before You Go — Quick Checklist</h4>
                 <ul>
                   <li>Arrive 10–15 minutes early</li>
                   <li>Bring a valid ID</li>
@@ -546,10 +547,10 @@ export const sendAppointmentReminderEmail = async (appointment) => {
     };
 
     const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Reminder email sent to:', patient_email, '| ID:', info.messageId);
+    console.log(' Reminder email sent to:', patient_email, '| ID:', info.messageId);
     return { success: true };
   } catch (error) {
-    console.error('❌ Error sending reminder email:', error);
+    console.error(' Error sending reminder email:', error);
     return { success: false };
   }
 };

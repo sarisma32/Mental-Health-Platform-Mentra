@@ -34,7 +34,7 @@ const testBooking = async () => {
       doctorPhone: '(01) 4412303'
     };
 
-    console.log('🔄 Testing appointment booking...');
+    console.log(' Testing appointment booking...');
     console.log('Data being sent:', JSON.stringify(appointmentData, null, 2));
 
     const response = await fetch('http://localhost:5000/api/appointments/book', {
@@ -47,13 +47,13 @@ const testBooking = async () => {
 
     const result = await response.json();
     
-    console.log('📋 Response status:', response.status);
-    console.log('📋 Response data:', JSON.stringify(result, null, 2));
+    console.log(' Response status:', response.status);
+    console.log(' Response data:', JSON.stringify(result, null, 2));
 
     if (result.success) {
-      console.log('✅ Appointment booking successful!');
+      console.log(' Appointment booking successful!');
     } else {
-      console.log('❌ Appointment booking failed');
+      console.log(' Appointment booking failed');
       if (result.errors) {
         console.log('Validation errors:');
         result.errors.forEach(error => {
@@ -63,7 +63,7 @@ const testBooking = async () => {
     }
 
   } catch (error) {
-    console.error('❌ Error testing appointment booking:', error);
+    console.error(' Error testing appointment booking:', error);
   }
 };
 

@@ -309,53 +309,7 @@ const ProfessionalsPage = () => {
         </div>
       </section>
 
-      {/* How It Works Section
-      <section className="py-16 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-4">
-              How to Connect with a Professional
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Getting started with professional therapy is simple and secure.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-4 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-mentra-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-white text-2xl font-bold">1</span>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Browse & Filter</h3>
-              <p className="text-gray-600 text-sm">Search by specialization, availability, or specific needs to find the right match.</p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-mentra-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-white text-2xl font-bold">2</span>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Review Profiles & Locations</h3>
-              <p className="text-gray-600 text-sm">Read detailed profiles, credentials, clinic locations, and reviews from other clients.</p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-mentra-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-white text-2xl font-bold">3</span>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Book In-Person Appointment</h3>
-              <p className="text-gray-600 text-sm">Schedule your appointment at the therapist's clinic location at a convenient time.</p>
-            </div>
-
-            <div className="text-center">
-              <div className="w-16 h-16 bg-mentra-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-white text-2xl font-bold">4</span>
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Attend Your Session</h3>
-              <p className="text-gray-600 text-sm">Visit the clinic for your face-to-face therapy session with your chosen professional.</p>
-            </div>
-          </div>
-        </div>
-      </section> */}
+     
 
       <Footer />
     </div>

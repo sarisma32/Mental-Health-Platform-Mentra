@@ -213,9 +213,9 @@ node add-doctor-profile-fields.js
 ## Next Steps
 
 Would you like me to:
-1. ✅ Create the database migration script
-2. ✅ Update the backend controllers
-3. ✅ Create the Doctor Profile Edit component
-4. ✅ Update the Professionals page to fetch real data
+1.  Create the database migration script
+2.  Update the backend controllers
+3.  Create the Doctor Profile Edit component
+4.  Update the Professionals page to fetch real data
 
 Let me know and I'll implement this step by step!

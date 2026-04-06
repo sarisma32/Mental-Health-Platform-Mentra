@@ -10,6 +10,7 @@ const DoctorVideoUpload = ({ doctorId }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
+  
   const fetchVideos = async () => {
     try {
       const res = await fetch(buildApiUrl(`/api/doctors/${doctorId}/videos`));

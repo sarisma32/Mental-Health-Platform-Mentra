@@ -10,6 +10,7 @@ const generateConfirmationNumber = () => {
   return `${prefix}${timestamp}${random}`;
 };
 
+
 // CREATE APPOINTMENT
 export const createAppointment = async (req, res) => {
   try {
@@ -483,6 +484,8 @@ export const checkReturningPatient = async (req, res) => {
     res.status(500).json({ success: false, message: "Failed to check patient history." });
   }
 };
+
+
 export const getPatientSessionHistory = async (req, res) => {
   try {
     const { patientId, doctorId } = req.params;

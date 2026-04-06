@@ -118,7 +118,7 @@ const Header = () => {
                 '/dashboard'
               }>
                 <button className="w-10 h-10 bg-mentra-primary hover:bg-mentra-primary-hover rounded-full flex items-center justify-center text-white font-semibold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg">
-                  {user.email.charAt(0).toUpperCase()}
+                  {(user.full_name || user.email).charAt(0).toUpperCase()}
                 </button>
               </Link>
             ) : (
@@ -216,7 +216,7 @@ const Header = () => {
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <div className="w-10 h-10 bg-mentra-primary rounded-full flex items-center justify-center text-white font-semibold">
-                      {user.email.charAt(0).toUpperCase()}
+                      {(user.full_name || user.email).charAt(0).toUpperCase()}
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 text-sm">Go to Dashboard</p>

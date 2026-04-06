@@ -206,7 +206,7 @@ const AppointmentConfirmationPage = () => {
                         href={`tel:${professional.phone}`}
                         className="text-mentra-primary hover:text-mentra-primary-hover font-medium text-sm"
                       >
-                        Call Clinic â†’
+                        Call Clinic ’
                       </a>
                     </div>
                   </div>
@@ -223,19 +223,19 @@ const AppointmentConfirmationPage = () => {
             <div>
               <h4 className="font-semibold mb-2">Before Your Appointment:</h4>
               <ul className="space-y-1">
-                <li>â€¢ Arrive 15 minutes early</li>
-                <li>â€¢ Bring a valid photo ID</li>
-                <li>â€¢ Bring insurance card (if applicable)</li>
-                <li>â€¢ Complete intake forms if sent via email</li>
+                <li> Arrive 15 minutes early</li>
+                <li> Bring a valid photo ID</li>
+                <li> Bring insurance card (if applicable)</li>
+                <li> Complete intake forms if sent via email</li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-2">Cancellation Policy:</h4>
               <ul className="space-y-1">
-                <li>â€¢ 24-hour notice required for cancellations</li>
-                <li>â€¢ $50 fee for no-shows or late cancellations</li>
-                <li>â€¢ Reschedule by calling the clinic directly</li>
-                <li>â€¢ Emergency situations are handled case-by-case</li>
+                <li> 24-hour notice required for cancellations</li>
+                <li> $50 fee for no-shows or late cancellations</li>
+                <li> Reschedule by calling the clinic directly</li>
+                <li> Emergency situations are handled case-by-case</li>
               </ul>
             </div>
           </div>
@@ -303,4 +303,6 @@ const AppointmentConfirmationPage = () => {
 };
 
 export default AppointmentConfirmationPage;
+
+
 

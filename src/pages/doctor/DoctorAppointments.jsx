@@ -196,3 +196,4 @@ const DoctorAppointments = ({ appointments, refreshing, onRefresh, onCompleteSes
 };
 
 export default DoctorAppointments;
+

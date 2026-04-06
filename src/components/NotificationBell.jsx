@@ -3,12 +3,12 @@ import { buildApiUrl, API_ENDPOINTS } from '../config/api.js';
 
 const typeIcon = (type) => {
   switch (type) {
-    case 'new_appointment': return '📅';
-    case 'session_completed': return '✅';
-    case 'new_user': return '👤';
-    case 'new_doctor': return '🩺';
-    case 'new_review': return '⭐';
-    default: return '🔔';
+    case 'new_appointment': return '';
+    case 'session_completed': return '';
+    case 'new_user': return '';
+    case 'new_doctor': return '';
+    case 'new_review': return '';
+    default: return '';
   }
 };
 

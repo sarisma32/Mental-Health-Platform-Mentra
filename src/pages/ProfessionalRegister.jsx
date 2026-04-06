@@ -70,6 +70,7 @@ const ProfessionalRegister = () => {
       setErrors(prev => ({ ...prev, email: 'Please enter a valid email first' })); return;
     }
     setSendingOtp(true);
+    
     try {
       const res = await fetch(buildApiUrl('/api/doctors/send-verification'), {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -184,7 +185,7 @@ const ProfessionalRegister = () => {
             </button>
 
             <h1 className="text-2xl font-bold text-gray-900 mb-1">Register as Professional</h1>
-            <p className="text-gray-400 text-sm mb-6">Verified professionals only â€” admin review required</p>
+            <p className="text-gray-400 text-sm mb-6">Verified professionals only  admin review required</p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
 

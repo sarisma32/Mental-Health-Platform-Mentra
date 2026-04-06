@@ -22,15 +22,15 @@ node server.js
 ### Step 3: Verify Server Started
 You should see output like:
 ```
-✅ Database connected successfully
-✅ Admin routes mounted at /api/admin
-✅ Auth routes mounted at /api/auth
-✅ Patient routes mounted at /api/patients
-✅ Doctor routes mounted at /api/doctors
-✅ Appointment routes mounted at /api/appointments
-✅ Dashboard routes mounted at /api/dashboard
-✅ Schedule routes mounted at /api/schedules  ← This is important!
-🚀 Server running on port 5002
+ Database connected successfully
+ Admin routes mounted at /api/admin
+ Auth routes mounted at /api/auth
+ Patient routes mounted at /api/patients
+ Doctor routes mounted at /api/doctors
+ Appointment routes mounted at /api/appointments
+ Dashboard routes mounted at /api/dashboard
+ Schedule routes mounted at /api/schedules  ← This is important!
+ Server running on port 5002
 ```
 
 ### Step 4: Test the Routes (Optional)
@@ -42,8 +42,8 @@ node test-schedule-routes.js
 
 Expected output:
 ```
-✅ Status: 200
-📦 Response: {
+ Status: 200
+ Response: {
   "success": true,
   "schedule": []
 }
@@ -62,9 +62,9 @@ If you see "Route not found", the server wasn't restarted properly.
 7. **Click "Add Slot"**
 
 You should see:
-- ✅ Green success notification: "Schedule slot added successfully!"
-- ✅ The slot appears in "Your Schedule" list below
-- ✅ The date shows green highlight in calendar
+-  Green success notification: "Schedule slot added successfully!"
+-  The slot appears in "Your Schedule" list below
+-  The date shows green highlight in calendar
 
 ## Common Issues
 
@@ -122,19 +122,19 @@ Before testing, verify:
 ## What Changed
 
 ### Database
-- ✅ Changed from `day_of_week` (0-6) to `schedule_date` (YYYY-MM-DD)
-- ✅ Table recreated with new schema
-- ✅ Migration script executed successfully
+-  Changed from `day_of_week` (0-6) to `schedule_date` (YYYY-MM-DD)
+-  Table recreated with new schema
+-  Migration script executed successfully
 
 ### Backend API
-- ✅ `addScheduleSlot` now accepts `scheduleDate` instead of `dayOfWeek`
-- ✅ `getAvailableTimeSlots` queries by specific date
-- ✅ All validation updated for date-based system
+-  `addScheduleSlot` now accepts `scheduleDate` instead of `dayOfWeek`
+-  `getAvailableTimeSlots` queries by specific date
+-  All validation updated for date-based system
 
 ### Frontend
-- ✅ Calendar interface for date selection
-- ✅ Visual indicators for scheduled dates
-- ✅ Form sends `scheduleDate` in request body
+-  Calendar interface for date selection
+-  Visual indicators for scheduled dates
+-  Form sends `scheduleDate` in request body
 
 ## Expected API Request
 
@@ -195,11 +195,11 @@ psql -U postgres -d mentra_db -c "SELECT * FROM doctor_schedules;"
 ## Success Indicators
 
 You'll know it's working when:
-1. ✅ No red "Route not found" notification
-2. ✅ Green "Schedule slot added successfully!" notification appears
-3. ✅ Slot appears in schedule list immediately
-4. ✅ Calendar date shows green highlight
-5. ✅ Browser console shows 200 status code
+1.  No red "Route not found" notification
+2.  Green "Schedule slot added successfully!" notification appears
+3.  Slot appears in schedule list immediately
+4.  Calendar date shows green highlight
+5.  Browser console shows 200 status code
 
 ---
 

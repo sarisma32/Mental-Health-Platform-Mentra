@@ -108,13 +108,13 @@ npm start
 
 ## Current Email Template Features
 
-✅ Professional HTML email design
-✅ Mentra branding with sage green colors
-✅ Large, easy-to-read OTP display
-✅ Security warnings
-✅ 10-minute expiration notice
-✅ Responsive design
-✅ Confirmation emails after password reset
+ Professional HTML email design
+ Mentra branding with sage green colors
+ Large, easy-to-read OTP display
+ Security warnings
+ 10-minute expiration notice
+ Responsive design
+ Confirmation emails after password reset
 
 ---
 

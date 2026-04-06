@@ -6,7 +6,7 @@ import { sendOTPEmail, sendPasswordResetConfirmation } from "../utils/emailServi
 
 // UNIFIED LOGIN - checks both patients and doctors tables
 export const unifiedLogin = async (req, res) => {
-  console.log('🚀 UNIFIED LOGIN CALLED - Auth Controller');
+  console.log(' UNIFIED LOGIN CALLED - Auth Controller');
   console.log('Request body:', req.body);
   
   try {
@@ -86,12 +86,12 @@ export const unifiedLogin = async (req, res) => {
       }
 
       // Check if doctor is approved
-      console.log('🔍 Debug - Doctor approval check:');
+      console.log(' Debug - Doctor approval check:');
       console.log('doctor.approval_status:', doctor.approval_status);
       
       // Allow login for pending doctors, but they'll see a different page
       if (doctor.approval_status === 'rejected') {
-        console.log('❌ Doctor rejected');
+        console.log('Doctor rejected');
         return res.status(403).json({ 
           success: false,
           message: `Your account has been rejected. Please contact support for more information.`,
@@ -99,7 +99,7 @@ export const unifiedLogin = async (req, res) => {
         });
       }
 
-      console.log('✅ Doctor login allowed, status:', doctor.approval_status);
+      console.log(' Doctor login allowed, status:', doctor.approval_status);
 
       // Create JWT Token for doctor (works for both pending and approved)
       const token = jwt.sign(
@@ -144,12 +144,12 @@ export const unifiedLogin = async (req, res) => {
 // FORGOT PASSWORD - Send OTP
 export const forgotPassword = async (req, res) => {
   try {
-    console.log('🔐 FORGOT PASSWORD REQUEST RECEIVED');
+    console.log(' FORGOT PASSWORD REQUEST RECEIVED');
     const { email } = req.body;
     console.log('Email:', email);
 
     if (!email) {
-      console.log('❌ No email provided');
+      console.log(' No email provided');
       return res.status(400).json({
         success: false,
         message: "Email is required"
@@ -190,16 +190,16 @@ export const forgotPassword = async (req, res) => {
     }
 
     // Generate and store OTP
-    console.log('✅ User found:', user.full_name, '- Type:', userType);
+    console.log(' User found:', user.full_name, '- Type:', userType);
     const otp = generateOTP();
-    console.log('🔢 Generated OTP:', otp);
+    console.log(' Generated OTP:', otp);
     await storeOTP(email, otp, userType);
-    console.log('💾 OTP stored in database');
+    console.log(' OTP stored in database');
 
     // Send OTP via email
-    console.log('📧 Attempting to send email...');
+    console.log(' Attempting to send email...');
     const emailResult = await sendOTPEmail(email, otp, user.full_name);
-    console.log('📧 Email result:', emailResult);
+    console.log(' Email result:', emailResult);
 
     if (!emailResult.success) {
       return res.status(500).json({

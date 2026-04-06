@@ -10,7 +10,7 @@ async function testPatientsAPI() {
     console.log('Response:', JSON.stringify(data, null, 2));
     
     if (data.success && data.patients) {
-      console.log(`\n✅ Found ${data.patients.length} patients`);
+      console.log(`\n Found ${data.patients.length} patients`);
       console.table(data.patients.map(p => ({
         id: p.id,
         name: p.full_name,
@@ -19,7 +19,7 @@ async function testPatientsAPI() {
       })));
     }
   } catch (error) {
-    console.error('❌ Error:', error.message);
+    console.error(' Error:', error.message);
   }
 }
 

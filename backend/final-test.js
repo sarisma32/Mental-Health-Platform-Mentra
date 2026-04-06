@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 
 async function finalTest() {
-  console.log('🧪 FINAL TEST - Forgot Password with Email');
+  console.log(' FINAL TEST - Forgot Password with Email');
   console.log('==========================================');
   console.log('Backend: http://localhost:5002');
   console.log('Testing email: sarismaghimire32@gmail.com');
@@ -22,16 +22,16 @@ async function finalTest() {
     console.log('');
     
     if (data.success) {
-      console.log('✅ SUCCESS! Check your email inbox now!');
-      console.log('📧 Email: sarismaghimire32@gmail.com');
-      console.log('📬 Subject: Password Reset OTP - Mentra');
+      console.log(' SUCCESS! Check your email inbox now!');
+      console.log(' Email: sarismaghimire32@gmail.com');
+      console.log(' Subject: Password Reset OTP - Mentra');
       console.log('');
       console.log('The OTP should arrive within seconds.');
     } else {
-      console.log('❌ FAILED:', data.message);
+      console.log(' FAILED:', data.message);
     }
   } catch (error) {
-    console.error('❌ ERROR:', error.message);
+    console.error(' ERROR:', error.message);
   }
 }
 

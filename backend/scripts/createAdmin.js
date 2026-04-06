@@ -4,7 +4,7 @@ import { testConnection, initializeDatabase } from '../db/init.js';
 
 const createDefaultAdmin = async () => {
   try {
-    console.log('🔄 Creating default admin user...');
+    console.log(' Creating default admin user...');
 
     // Test connection and initialize database
     await testConnection();
@@ -17,7 +17,7 @@ const createDefaultAdmin = async () => {
     );
 
     if (existingAdmin.rows.length > 0) {
-      console.log('ℹ️  Default admin already exists');
+      console.log(' Default admin already exists');
       return;
     }
 
@@ -30,14 +30,14 @@ const createDefaultAdmin = async () => {
       ['Admin User', 'admin@mentra.com', hashedPassword, 'admin']
     );
 
-    console.log('✅ Default admin created successfully:');
-    console.log('📧 Email: admin@mentra.com');
-    console.log('🔑 Password: Admin@123');
-    console.log('⚠️  Please change the default password after first login!');
-    console.log('👤 Admin details:', newAdmin.rows[0]);
+    console.log(' Default admin created successfully:');
+    console.log(' Email: admin@mentra.com');
+    console.log(' Password: Admin@123');
+    console.log('  Please change the default password after first login!');
+    console.log(' Admin details:', newAdmin.rows[0]);
 
   } catch (error) {
-    console.error('❌ Error creating admin:', error);
+    console.error(' Error creating admin:', error);
   } finally {
     process.exit(0);
   }

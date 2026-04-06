@@ -5,10 +5,10 @@
 Follow these steps to verify that booked time slots are NOT available to other patients:
 
 ### Prerequisites
-- ✅ Backend server running (port 5002)
-- ✅ Frontend server running (port 5173)
-- ✅ Doctor account: ghimiresarishma1@gmail.com / Gsaru952@
-- ✅ At least 2 patient accounts for testing
+-  Backend server running (port 5002)
+-  Frontend server running (port 5173)
+-  Doctor account: ghimiresarishma1@gmail.com / Gsaru952@
+-  At least 2 patient accounts for testing
 
 ---
 
@@ -25,7 +25,7 @@ Follow these steps to verify that booked time slots are NOT available to other p
 5. Select a future date (e.g., March 15, 2026)
 6. Set times: 9:00 AM - 5:00 PM
 7. Click "Add Slot"
-8. ✅ Verify: Slot appears in "Your Schedule" list
+8.  Verify: Slot appears in "Your Schedule" list
 9. Sign out
 
 ---
@@ -38,12 +38,12 @@ Follow these steps to verify that booked time slots are NOT available to other p
 4. Find the doctor and click "Book Session"
 5. Select appointment type (Initial or Follow-up)
 6. Select date: March 15, 2026
-7. ✅ **IMPORTANT:** Note all available times shown
+7.  **IMPORTANT:** Note all available times shown
    - Should see: 9 AM, 10 AM, 11 AM, 12 PM, 1 PM, 2 PM, 3 PM, 4 PM
 8. Select time: 10:00 AM
 9. Fill in personal information
 10. Click through to confirm booking
-11. ✅ Verify: Success message appears
+11.  Verify: Success message appears
 12. Sign out
 
 ---
@@ -56,13 +56,13 @@ Follow these steps to verify that booked time slots are NOT available to other p
 4. Find the SAME doctor and click "Book Session"
 5. Select appointment type
 6. Select date: March 15, 2026
-7. ✅ **VERIFY THE MAGIC:**
+7.  **VERIFY THE MAGIC:**
    - Available times should be: 9 AM, 11 AM, 12 PM, 1 PM, 2 PM, 3 PM, 4 PM
-   - **10:00 AM should NOT appear!** ❌
+   - **10:00 AM should NOT appear!** 
    - This proves the system is working!
 8. Select a different time (e.g., 2:00 PM)
 9. Complete the booking
-10. ✅ Verify: Success message appears
+10.  Verify: Success message appears
 
 ---
 
@@ -70,7 +70,7 @@ Follow these steps to verify that booked time slots are NOT available to other p
 
 1. Login as Patient C (third patient account)
 2. Go to book same doctor on March 15, 2026
-3. ✅ **VERIFY:**
+3.  **VERIFY:**
    - 10:00 AM should NOT appear (booked by Patient A)
    - 2:00 PM should NOT appear (booked by Patient B)
    - Only remaining times should be shown
@@ -79,7 +79,7 @@ Follow these steps to verify that booked time slots are NOT available to other p
 
 ## Expected Results
 
-### ✅ Success Indicators:
+###  Success Indicators:
 
 1. **After Patient A books 10 AM:**
    - Patient B cannot see 10 AM in available slots
@@ -94,7 +94,7 @@ Follow these steps to verify that booked time slots are NOT available to other p
    - Smooth booking process
    - Each patient sees only truly available slots
 
-### ❌ Failure Indicators:
+###  Failure Indicators:
 
 1. **If 10 AM still appears for Patient B:**
    - System is NOT filtering booked times
@@ -236,10 +236,10 @@ WHERE doctor_id = 11
 
 ## Summary
 
-✅ **The system ALREADY prevents double-booking**
-✅ **No code changes needed**
-✅ **Works automatically**
-✅ **Real-time updates**
+ **The system ALREADY prevents double-booking**
+ **No code changes needed**
+ **Works automatically**
+ **Real-time updates**
 
 Just follow the test steps above to verify it's working in your application!
 

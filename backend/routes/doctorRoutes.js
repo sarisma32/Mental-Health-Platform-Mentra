@@ -19,6 +19,8 @@ import { validateDoctorRegistration, validateLogin } from "../middleware/validat
 import { verifyToken, verifyDoctor } from "../middleware/auth.js";
 import { uploadDocument, uploadProfileImage, uploadVideo, handleUploadError } from "../middleware/upload.js";
 
+
+
 const router = express.Router();
 
 // Email verification (before registration)

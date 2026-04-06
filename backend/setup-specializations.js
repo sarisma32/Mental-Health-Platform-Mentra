@@ -8,7 +8,7 @@ const setup = async () => {
       created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )
   `);
-  console.log('✅ specializations table ready');
+  console.log(' specializations table ready');
 
   const count = await pool.query('SELECT COUNT(*) FROM specializations');
   if (parseInt(count.rows[0].count) === 0) {
@@ -19,7 +19,7 @@ const setup = async () => {
         ('Cognitive Behavioral Therapy'),('Trauma Therapy')
       ON CONFLICT (name) DO NOTHING
     `);
-    console.log('✅ Default specializations seeded');
+    console.log(' Default specializations seeded');
   }
 
   const result = await pool.query('SELECT name FROM specializations ORDER BY name');

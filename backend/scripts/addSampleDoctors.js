@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 
 const addSampleDoctors = async () => {
   try {
-    console.log('🔄 Adding sample doctors...');
+    console.log(' Adding sample doctors...');
 
     const sampleDoctors = [
       {
@@ -67,16 +67,16 @@ const addSampleDoctors = async () => {
           ]
         );
 
-        console.log(`✅ Added doctor: ${result.rows[0].full_name} (ID: ${result.rows[0].id})`);
+        console.log(` Added doctor: ${result.rows[0].full_name} (ID: ${result.rows[0].id})`);
       } else {
-        console.log(`⚠️  Doctor ${doctor.fullName} already exists`);
+        console.log(`  Doctor ${doctor.fullName} already exists`);
       }
     }
 
-    console.log('✅ Sample doctors added successfully');
+    console.log(' Sample doctors added successfully');
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error adding sample doctors:', error);
+    console.error(' Error adding sample doctors:', error);
     process.exit(1);
   }
 };

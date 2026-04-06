@@ -3,7 +3,7 @@ import pool from './db/index.js';
 
 const updateExistingDoctor = async () => {
   try {
-    console.log('🔄 Updating existing doctor account...');
+    console.log(' Updating existing doctor account...');
 
     const email = 'gsaru952@gmail.com';
     const newPassword = 'saruG@32';
@@ -40,7 +40,7 @@ const updateExistingDoctor = async () => {
     );
 
     if (updatedDoctor.rows.length > 0) {
-      console.log('✅ Doctor account updated successfully!');
+      console.log(' Doctor account updated successfully!');
       console.log('Updated Doctor Details:', {
         id: updatedDoctor.rows[0].id,
         name: updatedDoctor.rows[0].full_name,
@@ -53,16 +53,16 @@ const updateExistingDoctor = async () => {
         status: updatedDoctor.rows[0].approval_status
       });
 
-      console.log('\n🎉 Ready to login with original email!');
+      console.log('\n Ready to login with original email!');
       console.log('Email:', email);
       console.log('Password:', newPassword);
-      console.log('Status: APPROVED ✅');
+      console.log('Status: APPROVED ');
     } else {
-      console.log('❌ No doctor found with that email');
+      console.log(' No doctor found with that email');
     }
 
   } catch (error) {
-    console.error('❌ Error updating doctor:', error.message);
+    console.error(' Error updating doctor:', error.message);
   } finally {
     process.exit(0);
   }

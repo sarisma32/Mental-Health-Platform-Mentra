@@ -5,13 +5,13 @@ const BASE_URL = 'http://localhost:5000';
 
 const testAPI = async () => {
   try {
-    console.log('🧪 Testing Mentra Backend API...\n');
+    console.log(' Testing Mentra Backend API...\n');
 
     // Test health endpoint
     console.log('1. Testing health endpoint...');
     const healthResponse = await fetch(`${BASE_URL}/api/health`);
     const healthData = await healthResponse.json();
-    console.log('✅ Health check:', healthData.message);
+    console.log(' Health check:', healthData.message);
 
     // Test patient registration
     console.log('\n2. Testing patient registration...');
@@ -31,9 +31,9 @@ const testAPI = async () => {
 
     const patientResult = await patientResponse.json();
     if (patientResult.success) {
-      console.log('✅ Patient registration successful');
+      console.log(' Patient registration successful');
     } else {
-      console.log('❌ Patient registration failed:', patientResult.message);
+      console.log(' Patient registration failed:', patientResult.message);
     }
 
     // Test admin login
@@ -51,15 +51,15 @@ const testAPI = async () => {
 
     const adminResult = await adminResponse.json();
     if (adminResult.success) {
-      console.log('✅ Admin login successful');
+      console.log(' Admin login successful');
     } else {
-      console.log('❌ Admin login failed:', adminResult.message);
+      console.log(' Admin login failed:', adminResult.message);
     }
 
-    console.log('\n🎉 API tests completed!');
+    console.log('\n API tests completed!');
 
   } catch (error) {
-    console.error('❌ API test error:', error.message);
+    console.error(' API test error:', error.message);
   }
 };
 

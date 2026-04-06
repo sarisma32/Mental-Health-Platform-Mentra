@@ -2,7 +2,7 @@ import pool from '../db/index.js';
 
 const migrateDoctorsTable = async () => {
   try {
-    console.log('🔄 Migrating doctors table...\n');
+    console.log(' Migrating doctors table...\n');
 
     // Drop the existing doctors table and recreate it with correct structure
     console.log('1. Dropping existing doctors table...');
@@ -33,7 +33,7 @@ const migrateDoctorsTable = async () => {
     await pool.query('CREATE INDEX IF NOT EXISTS idx_doctors_email ON doctors(email)');
     await pool.query('CREATE INDEX IF NOT EXISTS idx_doctors_approval_status ON doctors(approval_status)');
 
-    console.log('✅ Doctors table migration completed successfully!');
+    console.log(' Doctors table migration completed successfully!');
 
     // Verify the new structure
     const columns = await pool.query(`
@@ -49,7 +49,7 @@ const migrateDoctorsTable = async () => {
     });
 
   } catch (error) {
-    console.error('❌ Migration error:', error.message);
+    console.error(' Migration error:', error.message);
   } finally {
     process.exit(0);
   }

@@ -3,7 +3,7 @@ import pool from './db/index.js';
 
 async function checkAndUpdateDoctor() {
   try {
-    console.log('🔍 Checking doctors in database...\n');
+    console.log(' Checking doctors in database...\n');
 
     // Get all doctors
     const result = await pool.query(`
@@ -13,7 +13,7 @@ async function checkAndUpdateDoctor() {
     `);
 
     if (result.rows.length === 0) {
-      console.log('❌ No doctors found in database');
+      console.log(' No doctors found in database');
       return;
     }
 
@@ -28,7 +28,7 @@ async function checkAndUpdateDoctor() {
 
     // Update the test doctor to pending status for testing
     const testEmail = 'gsaru952@gmail.com';
-    console.log(`\n🔄 Updating ${testEmail} to 'pending' status for testing...`);
+    console.log(`\n Updating ${testEmail} to 'pending' status for testing...`);
     
     const updateResult = await pool.query(
       `UPDATE doctors 
@@ -39,17 +39,17 @@ async function checkAndUpdateDoctor() {
     );
 
     if (updateResult.rows.length > 0) {
-      console.log('✅ Doctor updated successfully!');
+      console.log(' Doctor updated successfully!');
       console.log(`   Name: ${updateResult.rows[0].full_name}`);
       console.log(`   Email: ${updateResult.rows[0].email}`);
       console.log(`   New Status: ${updateResult.rows[0].approval_status}`);
     } else {
-      console.log(`❌ Doctor with email ${testEmail} not found`);
+      console.log(` Doctor with email ${testEmail} not found`);
     }
 
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error:', error.message);
+    console.error(' Error:', error.message);
     process.exit(1);
   }
 }

@@ -53,7 +53,7 @@ const DoctorProfilePage = () => {
 
   const renderStars = (rating) => (
     <span className="text-yellow-400">
-      {'â˜…'.repeat(Math.round(rating))}{'â˜†'.repeat(5 - Math.round(rating))}
+      {'★'.repeat(Math.round(rating))}{'☆'.repeat(5 - Math.round(rating))}
     </span>
   );
 
@@ -95,12 +95,12 @@ const DoctorProfilePage = () => {
             <div className="flex-1 text-center md:text-left text-white">
               <h1 className="text-3xl font-bold">Dr. {doctor.full_name}</h1>
               <p className="text-white/90 text-lg mt-1">{doctor.specialization}</p>
-              <p className="text-white/70 text-sm mt-1">{doctor.hospital_name} â€¢ {doctor.location}</p>
+              <p className="text-white/70 text-sm mt-1">{doctor.hospital_name}  {doctor.location}</p>
 
               <div className="flex flex-wrap items-center gap-4 mt-4 justify-center md:justify-start">
                 {reviewStats.avg_rating && (
                   <div className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full text-sm">
-                    <span className="text-yellow-300">â˜…</span>
+                    <span className="text-yellow-300">★</span>
                     <span>{reviewStats.avg_rating} ({reviewStats.total_reviews} reviews)</span>
                   </div>
                 )}
@@ -262,7 +262,7 @@ const DoctorProfilePage = () => {
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex items-center gap-6">
                   <div className="text-center">
                     <p className="text-5xl font-bold text-gray-900">{reviewStats.avg_rating}</p>
-                    <p className="text-yellow-400 text-2xl mt-1">{'â˜…'.repeat(Math.round(reviewStats.avg_rating))}</p>
+                    <p className="text-yellow-400 text-2xl mt-1">{'★'.repeat(Math.round(reviewStats.avg_rating))}</p>
                     <p className="text-sm text-gray-500 mt-1">{reviewStats.total_reviews} reviews</p>
                   </div>
                 </div>
@@ -279,7 +279,7 @@ const DoctorProfilePage = () => {
                           <p className="text-xs text-gray-400">{new Date(r.appointment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                         </div>
                       </div>
-                      <span className="text-yellow-400">{'â˜…'.repeat(r.rating)}{'â˜†'.repeat(5 - r.rating)}</span>
+                      <span className="text-yellow-400">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span>
                     </div>
                     {r.review_text && <p className="mt-3 text-sm text-gray-700">{r.review_text}</p>}
                   </div>

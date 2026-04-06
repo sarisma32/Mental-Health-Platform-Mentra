@@ -8,7 +8,7 @@ const __dirname = path.dirname(__filename);
 
 export const initializeDatabase = async () => {
   try {
-    console.log('🔄 Initializing database...');
+    console.log(' Initializing database...');
     
     // Create tables one by one
     
@@ -129,7 +129,7 @@ export const initializeDatabase = async () => {
           ('Trauma Therapy')
         ON CONFLICT (name) DO NOTHING
       `);
-      console.log('✅ Default specializations seeded');
+      console.log(' Default specializations seeded');
     }
 
     // Doctor Videos table
@@ -217,12 +217,12 @@ export const initializeDatabase = async () => {
       await pool.query(`CREATE INDEX IF NOT EXISTS idx_password_reset_otps_otp ON password_reset_otps(otp)`);
       await pool.query(`CREATE INDEX IF NOT EXISTS idx_password_reset_otps_expires_at ON password_reset_otps(expires_at)`);
     } catch (indexError) {
-      console.warn('⚠️  Warning: Some indexes could not be created:', indexError.message);
+      console.warn('  Warning: Some indexes could not be created:', indexError.message);
     }
     
-    console.log('✅ Database initialized successfully');
+    console.log(' Database initialized successfully');
   } catch (error) {
-    console.error('❌ Database initialization error:', error.message);
+    console.error(' Database initialization error:', error.message);
     throw error;
   }
 };
@@ -231,10 +231,10 @@ export const initializeDatabase = async () => {
 export const testConnection = async () => {
   try {
     const result = await pool.query('SELECT NOW()');
-    console.log('✅ Database connection successful:', result.rows[0].now);
+    console.log(' Database connection successful:', result.rows[0].now);
     return true;
   } catch (error) {
-    console.error('❌ Database connection failed:', error.message);
+    console.error(' Database connection failed:', error.message);
     return false;
   }
 };

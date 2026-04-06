@@ -1,5 +1,5 @@
 import pool from "../db/index.js";
-import { sendAppointmentReminderEmail } from "./emailService.js";
+import { sendAppointmentReminderEmail, sendAppointmentBookedEmail } from "./emailService.js";
 
 // Auto-confirm pending appointments that are within 5 hours of scheduled time
 const autoConfirmPendingAppointments = async () => {
@@ -10,19 +10,24 @@ const autoConfirmPendingAppointments = async () => {
        WHERE status = 'pending'
          AND (appointment_date + appointment_time::interval) <= (NOW() + INTERVAL '5 hours')
          AND (appointment_date + appointment_time::interval) > NOW()
-       RETURNING id, patient_first_name, patient_last_name, doctor_name, appointment_date, appointment_time`
+       RETURNING *`
     );
 
     if (result.rows.length > 0) {
-      console.log(`✅ Auto-confirmed ${result.rows.length} pending appointment(s):`);
-      result.rows.forEach(apt => {
+      console.log(` Auto-confirmed ${result.rows.length} pending appointment(s):`);
+      for (const apt of result.rows) {
         console.log(`   - #${apt.id} | ${apt.patient_first_name} ${apt.patient_last_name} → Dr. ${apt.doctor_name} | ${apt.appointment_date} ${apt.appointment_time}`);
-      });
+        // Notify patient their appointment was auto-confirmed
+        sendAppointmentBookedEmail(apt).catch(e =>
+          console.error(` Auto-confirm email error for #${apt.id}:`, e.message)
+        );
+      }
     }
   } catch (err) {
-    console.error('❌ Auto-confirm scheduler error:', err.message);
+    console.error(' Auto-confirm scheduler error:', err.message);
   }
 };
+
 
 // Send reminder emails for appointments happening in the next hour
 const sendAppointmentReminders = async () => {
@@ -37,7 +42,7 @@ const sendAppointmentReminders = async () => {
     );
 
     if (result.rows.length > 0) {
-      console.log(`📧 Sending ${result.rows.length} reminder email(s)...`);
+      console.log(` Sending ${result.rows.length} reminder email(s)...`);
       for (const apt of result.rows) {
         const emailResult = await sendAppointmentReminderEmail(apt);
         if (emailResult.success) {
@@ -46,18 +51,18 @@ const sendAppointmentReminders = async () => {
             'UPDATE appointments SET reminder_sent = TRUE WHERE id = $1',
             [apt.id]
           );
-          console.log(`   ✅ Reminder sent for appointment #${apt.id} — ${apt.patient_first_name} ${apt.patient_last_name}`);
+          console.log(`    Reminder sent for appointment #${apt.id} — ${apt.patient_first_name} ${apt.patient_last_name}`);
         }
       }
     }
   } catch (err) {
-    console.error('❌ Reminder scheduler error:', err.message);
+    console.error(' Reminder scheduler error:', err.message);
   }
 };
 
 // Start the scheduler — runs every 15 minutes
 export const startAppointmentScheduler = () => {
-  console.log('⏰ Appointment scheduler started (auto-confirm + reminders, every 15 min)');
+  console.log(' Appointment scheduler started (auto-confirm + reminders, every 15 min)');
 
   // Run immediately on startup
   autoConfirmPendingAppointments();

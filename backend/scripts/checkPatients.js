@@ -6,7 +6,7 @@ const checkPatients = async () => {
       "SELECT id, full_name, email FROM patients ORDER BY id"
     );
 
-    console.log('📋 Available patients:');
+    console.log(' Available patients:');
     if (patients.rows.length === 0) {
       console.log('  No patients found in database');
     } else {
@@ -17,7 +17,7 @@ const checkPatients = async () => {
 
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error checking patients:', error);
+    console.error(' Error checking patients:', error);
     process.exit(1);
   }
 };

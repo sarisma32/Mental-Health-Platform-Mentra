@@ -1,9 +1,9 @@
-# 🔐 OTP-Based Forgot Password Feature
+#  OTP-Based Forgot Password Feature
 
 ## Overview
 Complete implementation of secure OTP-based password reset functionality for the Mentra mental health platform.
 
-## ✨ Features Implemented
+##  Features Implemented
 
 ### Backend (Node.js + Express + PostgreSQL)
 - **OTP Generation & Storage**: Secure 6-digit OTP with 10-minute expiration
@@ -25,7 +25,7 @@ Complete implementation of secure OTP-based password reset functionality for the
   - Resend OTP with cooldown timer
   - Loading states and error handling
 
-## 🗄️ Database Schema
+##  Database Schema
 
 ### New Table: `password_reset_otps`
 ```sql
@@ -41,7 +41,7 @@ CREATE TABLE password_reset_otps (
 );
 ```
 
-## 🔄 Complete Flow
+##  Complete Flow
 
 ### 1. Request Password Reset
 ```
@@ -68,7 +68,7 @@ Body: {
 Response: { "success": true, "message": "Password reset successfully" }
 ```
 
-## 🛡️ Security Features
+##  Security Features
 
 ### OTP Security
 - **6-digit numeric OTP** (100,000 - 999,999)
@@ -88,7 +88,7 @@ Response: { "success": true, "message": "Password reset successfully" }
 - **Real-time strength validation**
 - **Confirmation matching**
 
-## 📱 Frontend Routes
+##  Frontend Routes
 
 | Route | Component | Description |
 |-------|-----------|-------------|
@@ -104,7 +104,7 @@ Response: { "success": true, "message": "Password reset successfully" }
 | POST | `/api/auth/verify-otp` | Verify OTP | Email + 6-digit OTP |
 | POST | `/api/auth/reset-password` | Reset password | Token + password rules |
 
-## 📧 Email Service
+##  Email Service
 
 ### Current Implementation
 - **Mock service** that logs OTPs to console
@@ -118,7 +118,7 @@ Response: { "success": true, "message": "Password reset successfully" }
 
 See `backend/EMAIL_SERVICE_SETUP.md` for detailed configuration.
 
-## 🧪 Testing
+##  Testing
 
 ### Test Scripts Included
 1. `backend/test-forgot-password.js` - Basic API testing
@@ -134,7 +134,7 @@ See `backend/EMAIL_SERVICE_SETUP.md` for detailed configuration.
 - Email: `testuser@example.com`
 - Password: `TestPassword123!`
 
-## 🚀 Usage Instructions
+##  Usage Instructions
 
 ### For Users
 1. Go to login page
@@ -154,7 +154,7 @@ See `backend/EMAIL_SERVICE_SETUP.md` for detailed configuration.
 6. Start backend and frontend servers
 7. Test the forgot password flow
 
-## 🔒 Security Considerations
+##  Security Considerations
 
 ### Rate Limiting (Recommended)
 ```javascript
@@ -177,7 +177,7 @@ app.use('/api/auth/forgot-password', forgotPasswordLimiter);
 - **SQL injection prevention** (using parameterized queries)
 - **XSS protection**
 
-## 📝 Environment Variables
+##  Environment Variables
 
 Add to `backend/.env`:
 ```env
@@ -197,7 +197,7 @@ NODE_ENV=development
 FRONTEND_URL=http://localhost:5173
 ```
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 ### Common Issues
 1. **OTP not received**: Check console logs (mock service)
@@ -208,7 +208,7 @@ FRONTEND_URL=http://localhost:5173
 ### Debug Mode
 Set `NODE_ENV=development` to see detailed error messages.
 
-## 🔄 Future Enhancements
+##  Future Enhancements
 
 ### Planned Features
 - [ ] SMS OTP option
@@ -224,7 +224,7 @@ Set `NODE_ENV=development` to see detailed error messages.
 - [ ] Email queue management
 - [ ] Database connection pooling
 
-## 📊 Monitoring
+##  Monitoring
 
 ### Metrics to Track
 - OTP request rate
@@ -238,7 +238,7 @@ All security events are logged with timestamps and IP addresses for audit purpos
 
 ---
 
-## 🎉 Implementation Complete!
+##  Implementation Complete!
 
 The OTP-based forgot password feature is now fully implemented and ready for production use. The system provides a secure, user-friendly way for users to reset their passwords while maintaining high security standards.
 

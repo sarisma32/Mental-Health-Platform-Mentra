@@ -1,16 +1,3 @@
-// import express from "express";
-// import { loginAdmin } from "../controllers/adminController.js";
-
-// const router = express.Router();
-
-// router.post("/login", loginAdmin);
-
-// export default router;
-
-
-
-
-
 import express from "express";
 import { 
   getAllDoctors,
@@ -50,7 +37,7 @@ router.post("/specializations", createSpecialization);
 router.put("/specializations/:id", updateSpecialization);
 router.delete("/specializations/:id", deleteSpecialization);
 
-console.log('✅ Admin routes configured:', router.stack.map(r => r.route?.path).filter(Boolean));
+console.log(' Admin routes configured:', router.stack.map(r => r.route?.path).filter(Boolean));
 
 export default router;
 

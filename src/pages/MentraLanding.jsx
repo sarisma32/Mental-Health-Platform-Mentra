@@ -87,15 +87,15 @@ const MentraLanding = () => {
               </p>
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
-                  <span className="text-mentra-primary text-xl">âœ“</span>
+                  <span className="text-mentra-primary text-xl"></span>
                   <span className="text-gray-700">Licensed and board-certified professionals</span>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <span className="text-mentra-primary text-xl">âœ“</span>
+                  <span className="text-mentra-primary text-xl"></span>
                   <span className="text-gray-700">Specialized in various mental health areas</span>
                 </div>
                 <div className="flex items-center space-x-3">
-                  <span className="text-mentra-primary text-xl">âœ“</span>
+                  <span className="text-mentra-primary text-xl"></span>
                   <span className="text-gray-700">Culturally competent and diverse backgrounds</span>
                 </div>
               </div>

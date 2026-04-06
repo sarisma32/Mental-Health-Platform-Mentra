@@ -51,9 +51,9 @@ export const registerPatient = async (req, res) => {
         email: newPatient.rows[0].email,
         role: 'patient'
       },
-      process.env.JWT_SECRET,
+      process.env.JWT_SECRET,//This is a secret password that only your server knows, stored safely in a .env file (never hardcoded).
       { expiresIn: "7d" }
-    );
+    );//PartWhat it isHeaderAlgorithm used to sign (e.g. HS256)PayloadYour data (id, email, role) — base64 encodedSignatureHeader + Payload locked with the secret key
 
     res.status(201).json({ 
       success: true,
@@ -200,6 +200,7 @@ export const updatePatientProfile = async (req, res) => {
     });
   }
 };
+
 
 // SEND EMAIL VERIFICATION OTP (before registration)
 export const sendEmailVerification = async (req, res) => {

@@ -2,7 +2,7 @@ import pool from '../db/index.js';
 
 const migratePatientsTable = async () => {
   try {
-    console.log('🔄 Migrating patients table...\n');
+    console.log(' Migrating patients table...\n');
 
     // Check if patients table needs phone_number and age to be NOT NULL
     const columns = await pool.query(`
@@ -43,7 +43,7 @@ const migratePatientsTable = async () => {
       await pool.query('ALTER TABLE patients ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP');
     }
 
-    console.log('✅ Patients table migration completed successfully!');
+    console.log(' Patients table migration completed successfully!');
 
     // Verify the new structure
     const finalColumns = await pool.query(`
@@ -53,13 +53,13 @@ const migratePatientsTable = async () => {
       ORDER BY ordinal_position
     `);
     
-    console.log('\n📋 Final patients table structure:');
+    console.log('\n Final patients table structure:');
     finalColumns.rows.forEach(col => {
       console.log(`  - ${col.column_name}: ${col.data_type} (${col.is_nullable === 'YES' ? 'nullable' : 'not null'})`);
     });
 
   } catch (error) {
-    console.error('❌ Migration error:', error.message);
+    console.error(' Migration error:', error.message);
   } finally {
     process.exit(0);
   }

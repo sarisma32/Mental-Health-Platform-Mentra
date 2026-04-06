@@ -18,6 +18,7 @@ const ScheduleManagement = () => {
     fetchSchedules();
   }, []);
 
+  
   const fetchSchedules = async () => {
     try {
       setLoading(true);

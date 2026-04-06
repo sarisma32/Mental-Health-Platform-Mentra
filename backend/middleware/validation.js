@@ -10,7 +10,7 @@ export const handleValidationErrors = (req, res, next) => {
       errors: errors.array()
     });
   }
-  next();
+  next(); // all good — proceed to registerPatient
 };
 
 // Patient registration validation

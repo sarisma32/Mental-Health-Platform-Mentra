@@ -28,7 +28,7 @@ async function createScheduleTable() {
     // Execute the SQL
     await pool.query(sqlFile);
 
-    console.log('✓ doctor_schedules table created successfully!\n');
+    console.log(' doctor_schedules table created successfully!\n');
 
     // Check if table was created
     const checkTable = await pool.query(`

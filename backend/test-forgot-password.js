@@ -4,11 +4,11 @@ const API_BASE = 'http://localhost:5000/api/auth';
 
 // Test forgot password flow
 const testForgotPasswordFlow = async () => {
-  console.log('🧪 Testing Forgot Password Flow...\n');
+  console.log(' Testing Forgot Password Flow...\n');
 
   try {
     // Step 1: Request OTP for forgot password
-    console.log('1️⃣ Testing forgot password request...');
+    console.log(' Testing forgot password request...');
     const forgotResponse = await fetch(`${API_BASE}/forgot-password`, {
       method: 'POST',
       headers: {
@@ -23,14 +23,14 @@ const testForgotPasswordFlow = async () => {
     console.log('Forgot Password Response:', forgotData);
 
     if (forgotData.success) {
-      console.log('✅ Forgot password request successful\n');
+      console.log(' Forgot password request successful\n');
     } else {
-      console.log('❌ Forgot password request failed\n');
+      console.log(' Forgot password request failed\n');
       return;
     }
 
     // Step 2: Test OTP verification with invalid OTP
-    console.log('2️⃣ Testing OTP verification with invalid OTP...');
+    console.log(' Testing OTP verification with invalid OTP...');
     const invalidOtpResponse = await fetch(`${API_BASE}/verify-otp`, {
       method: 'POST',
       headers: {
@@ -46,13 +46,13 @@ const testForgotPasswordFlow = async () => {
     console.log('Invalid OTP Response:', invalidOtpData);
 
     if (!invalidOtpData.success) {
-      console.log('✅ Invalid OTP correctly rejected\n');
+      console.log(' Invalid OTP correctly rejected\n');
     } else {
-      console.log('❌ Invalid OTP was accepted (this should not happen)\n');
+      console.log(' Invalid OTP was accepted (this should not happen)\n');
     }
 
     // Step 3: Test password reset with invalid token
-    console.log('3️⃣ Testing password reset with invalid token...');
+    console.log(' Testing password reset with invalid token...');
     const resetResponse = await fetch(`${API_BASE}/reset-password`, {
       method: 'POST',
       headers: {
@@ -69,13 +69,13 @@ const testForgotPasswordFlow = async () => {
     console.log('Reset Password Response:', resetData);
 
     if (!resetData.success) {
-      console.log('✅ Invalid reset token correctly rejected\n');
+      console.log(' Invalid reset token correctly rejected\n');
     } else {
-      console.log('❌ Invalid reset token was accepted (this should not happen)\n');
+      console.log(' Invalid reset token was accepted (this should not happen)\n');
     }
 
-    console.log('🎉 Forgot password flow test completed!');
-    console.log('\n📝 Note: To test the complete flow with a real user:');
+    console.log(' Forgot password flow test completed!');
+    console.log('\n Note: To test the complete flow with a real user:');
     console.log('1. Register a user first');
     console.log('2. Use their email for forgot password');
     console.log('3. Check the console for the OTP (mock email service)');
@@ -83,7 +83,7 @@ const testForgotPasswordFlow = async () => {
     console.log('5. Use the reset token to change password');
 
   } catch (error) {
-    console.error('❌ Test failed:', error.message);
+    console.error(' Test failed:', error.message);
   }
 };
 

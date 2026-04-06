@@ -1,6 +1,6 @@
 # How to Switch Between Admin, Doctor, and Patient Logins
 
-## 🔄 Quick Guide to Switch Users
+##  Quick Guide to Switch Users
 
 ### Method 1: Use the Logout Button (EASIEST)
 
@@ -50,16 +50,16 @@ This way you can have multiple users logged in at the same time!
 
 ---
 
-## 👥 Test Accounts
+##  Test Accounts
 
-### 🔐 Admin Account
+###  Admin Account
 ```
 URL: http://localhost:5173/admin-login
 Email: admin@mentra.com
 Password: admin123
 ```
 
-### 👨‍⚕️ Doctor Accounts
+###  Doctor Accounts
 
 **Approved Doctor:**
 ```
@@ -78,7 +78,7 @@ Status: Pending (sees "Registration Pending" page)
 Note: You need to know their passwords
 ```
 
-### 👤 Patient Account
+###  Patient Account
 ```
 URL: http://localhost:5173/login
 Email: (any registered patient email)
@@ -87,7 +87,7 @@ Password: (their password)
 
 ---
 
-## 🎯 Complete Testing Workflow
+##  Complete Testing Workflow
 
 ### Scenario 1: Test Admin Approval
 
@@ -146,7 +146,7 @@ Password: (their password)
 
 ---
 
-## 🚀 Quick Switch Commands
+##  Quick Switch Commands
 
 ### Currently Admin → Want to be Doctor:
 1. Click "Logout" button (top right)
@@ -165,7 +165,7 @@ Password: (their password)
 
 ---
 
-## 💡 Pro Tips
+##  Pro Tips
 
 ### Tip 1: Use Multiple Browser Windows
 - **Window 1:** Admin (normal browser)
@@ -186,7 +186,7 @@ Press F12 → Console → Type: `localStorage.clear()` → Enter → Refresh
 
 ---
 
-## ❓ Common Questions
+##  Common Questions
 
 **Q: I'm logged in as admin but see patient homepage?**
 A: Click the green "A" profile icon in the header - it will take you to admin dashboard.
@@ -204,11 +204,11 @@ A:
 
 ---
 
-## 🎉 You're Ready!
+##  You're Ready!
 
 Now you can easily switch between:
-- ✅ Admin (manage doctors)
-- ✅ Doctor (view appointments, patients)
-- ✅ Patient (book appointments)
+-  Admin (manage doctors)
+-  Doctor (view appointments, patients)
+-  Patient (book appointments)
 
-**Happy Testing!** 🚀
+**Happy Testing!** 

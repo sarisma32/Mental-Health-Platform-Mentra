@@ -148,8 +148,14 @@ const BookAppointmentPage = () => {
     for (let day = 1; day <= currentMonthData.daysInMonth; day++) {
       const dateString = `${currentMonthData.year}-${(currentMonthData.month + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
       // A day is unavailable if its end-of-day is before the 24h minimum
-      const dayEnd = new Date(`${dateString}T23:59:59`);
-      const isPastDate = dayEnd < minBookable;
+      // const dayEnd = new Date(`${dateString}T23:59:59`);
+      // const isPastDate = dayEnd < minBookable;
+
+      //  Correct approach
+const dayStart = new Date(`${dateString}T00:00:00`);
+const isPastDate = dayStart < minBookable;
+
+
       days.push({ day, isPastDate, dateString });
     }
     
@@ -158,6 +164,8 @@ const BookAppointmentPage = () => {
 
   const calendarDays = generateCalendarDays();
 
+
+  
   // Fetch available time slots when date is selected
   const fetchAvailableTimeSlots = async (date) => {
     if (!professionalId || !date) return;
@@ -849,7 +857,7 @@ const BookAppointmentPage = () => {
                           <p className="text-mentra-primary text-sm font-medium">{professional.specialization}</p>
                           <div className="mt-2 text-sm text-gray-600">
                             <div className="flex items-center space-x-2 mb-1">
-                              <span>ðŸ“</span>
+                              <span></span>
                               <span>{professional.location}</span>
                             </div>
                             <div className="flex items-center space-x-2">
@@ -913,11 +921,11 @@ const BookAppointmentPage = () => {
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                       <h4 className="font-semibold text-blue-900 mb-2">Important Information</h4>
                       <ul className="text-sm text-blue-800 space-y-1">
-                        <li>â€¢ Please arrive 15 minutes early for your appointment</li>
-                        <li>â€¢ Bring a valid ID and any relevant medical documents</li>
-                        <li>â€¢ Cancellations must be made 24 hours in advance</li>
-                        <li>â€¢ Payment is due at the time of service</li>
-                        <li>â€¢ A Rs 1,000 fee applies for no-shows or late cancellations</li>
+                        <li> Please arrive 15 minutes early for your appointment</li>
+                        <li> Bring a valid ID and any relevant medical documents</li>
+                        <li> Cancellations must be made 24 hours in advance</li>
+                        <li> Payment is due at the time of service</li>
+                        <li> A Rs 1,000 fee applies for no-shows or late cancellations</li>
                       </ul>
                     </div>
                   </div>

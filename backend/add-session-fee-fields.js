@@ -35,7 +35,7 @@ async function addSessionFeeFields() {
       ADD COLUMN IF NOT EXISTS followup_session_fee DECIMAL(10, 2);
     `);
     
-    console.log('✓ Session fee fields added successfully');
+    console.log(' Session fee fields added successfully');
     
     // Update existing doctors with default values if they have session_fee
     await pool.query(`
@@ -46,7 +46,7 @@ async function addSessionFeeFields() {
         AND initial_session_fee IS NULL;
     `);
     
-    console.log('✓ Existing doctors updated with default session fees');
+    console.log(' Existing doctors updated with default session fees');
     
     // Show current doctors
     const result = await pool.query(`

@@ -109,11 +109,24 @@ const AdminSpecializations = () => {
                       <div className="w-8 h-8 bg-[#DCE4D4] rounded-lg flex items-center justify-center flex-shrink-0">
                         <svg className="w-4 h-4 text-[#A3B18A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                       </div>
-                      <span className="text-sm font-medium text-gray-800">{spec.name}</span>
+                      <div>
+                        <span className="text-sm font-medium text-gray-800">{spec.name}</span>
+                        {spec.doctor_count > 0 && (
+                          <span className="ml-2 text-xs text-gray-400">({spec.doctor_count} doctor{spec.doctor_count !== 1 ? 's' : ''})</span>
+                        )}
+                      </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <button onClick={() => { setEditingId(spec.id); setEditName(spec.name); }} className="px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">Edit</button>
-                      <button onClick={() => handleDelete(spec.id, spec.name)} className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">Delete</button>
+                      {spec.doctor_count > 0 ? (
+                        <span title="Cannot edit — assigned to doctors" className="px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed select-none">Edit</span>
+                      ) : (
+                        <button onClick={() => { setEditingId(spec.id); setEditName(spec.name); }} className="px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">Edit</button>
+                      )}
+                      {spec.doctor_count > 0 ? (
+                        <span title="Cannot delete — assigned to doctors" className="px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed select-none">Delete</span>
+                      ) : (
+                        <button onClick={() => handleDelete(spec.id, spec.name)} className="px-3 py-1.5 text-xs font-medium text-red-600 bg-red-50 hover:bg-red-100 rounded-lg transition-colors">Delete</button>
+                      )}
                     </div>
                   </>
                 )}

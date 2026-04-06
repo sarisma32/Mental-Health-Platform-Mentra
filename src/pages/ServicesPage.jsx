@@ -191,29 +191,7 @@ const ServicesPage = () => {
         </div>
       </section>
 
-      {/* Additional Services
-      <section className="py-14 bg-[#F5F5F0]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-10">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Additional Support</h2>
-            <p className="text-gray-500 text-sm">Specialized services to complement your care.</p>
-          </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {additionalServices.map((service, index) => (
-              <div key={index}
-                className="bg-white rounded-xl p-5 flex items-start gap-4 hover:shadow-sm transition-shadow">
-                <div className="w-10 h-10 bg-[#DCE4D4] rounded-lg flex items-center justify-center flex-shrink-0">
-                  {service.icon}
-                </div>
-                <div>
-                  <h3 className="font-semibold text-gray-900 text-sm mb-1">{service.title}</h3>
-                  <p className="text-gray-500 text-xs leading-relaxed">{service.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section> */}
+      
 
       <CallToAction />
 
