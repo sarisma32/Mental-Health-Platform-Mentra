@@ -1,0 +1,29 @@
+/**
+ * Floating chatbot toggle button shown on all public pages.
+ * Also used as the trigger from the nav "Chatbot" link.
+ */
+const ChatbotButton = ({ isOpen, onClick }) => {
+  return (
+    <button
+      onClick={onClick}
+      className={`fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 ${
+        isOpen
+          ? 'bg-gray-500 hover:bg-gray-600'
+          : 'bg-[#A3B18A] hover:bg-[#8FA076]'
+      }`}
+      title={isOpen ? 'Close chatbot' : 'Open chatbot'}
+    >
+      {isOpen ? (
+        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      ) : (
+        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+        </svg>
+      )}
+    </button>
+  );
+};
+
+export default ChatbotButton;
