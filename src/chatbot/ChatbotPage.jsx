@@ -118,48 +118,43 @@ const ChatbotPage = () => {
     addMessage(msg, 'user');
     setIsTyping(true);
 
-    if (isAiQuestion(msg)) {
-      try {
-        const res = await fetch(buildApiUrl('/api/chatbot/chat'), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: msg, history: geminiHistory }),
-        });
-        const data = await res.json();
-        setIsTyping(false);
+    // All messages go through the AI — it returns structured JSON
+    try {
+      const res = await fetch(buildApiUrl('/api/chatbot/chat'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg, history: geminiHistory }),
+      });
+      const data = await res.json();
+      setIsTyping(false);
 
-        if (data.success) {
-          // For availability intent, append doctor cards if doctors returned
-          let reply = data.reply;
-          if (data.intent === 'crisis') {
-            addMessage({ text: reply, isCrisis: true }, 'bot');
-          } else if (data.intent === 'availability' && data.doctors?.length > 0) {
-            addMessage({ text: reply, doctors: data.doctors }, 'bot');
-          } else if (data.intent === 'recommendation') {
-            reply = data.reply + '\n\n[→ Browse Doctors](/professionals)';
-            addMessage(reply, 'bot');
-          } else {
-            addMessage(reply, 'bot');
-          }
+      if (data.success) {
+        const { intent, risk_level, reply, doctors, action } = data;
 
-          setGeminiHistory(prev => [
-            ...prev,
-            { role: 'user', parts: [{ text: msg }] },
-            { role: 'model', parts: [{ text: data.reply }] },
-          ]);
+        // Build message object based on intent / risk
+        if (risk_level === 'high' || intent === 'crisis') {
+          addMessage({ text: reply, isCrisis: true }, 'bot');
+        } else if ((intent === 'doctor_availability' || intent === 'doctor_recommendation') && doctors?.length > 0) {
+          addMessage({ text: reply, doctors }, 'bot');
+        } else if (action === 'booking_link' || action === 'doctor_list') {
+          addMessage({ text: reply + '\n\n[→ Browse Doctors](/professionals)', doctors: doctors?.length ? doctors : null }, 'bot');
+        } else if (action === 'signup_link') {
+          addMessage(reply + '\n\n[→ Sign Up](/register-user)', 'bot');
         } else {
-          addMessage(data.message || 'Sorry, I could not process that. Please try again.', 'bot');
+          addMessage(reply, 'bot');
         }
-      } catch (err) {
-        setIsTyping(false);
-        addMessage('Sorry, the AI service is temporarily unavailable. Please try again later.', 'bot');
+
+        setGeminiHistory(prev => [
+          ...prev,
+          { role: 'user', parts: [{ text: msg }] },
+          { role: 'model', parts: [{ text: reply }] },
+        ]);
+      } else {
+        addMessage(data.message || 'Sorry, I could not process that. Please try again.', 'bot');
       }
-    } else {
-      const delay = 400 + Math.random() * 600;
-      setTimeout(() => {
-        setIsTyping(false);
-        addMessage(getBotResponse(msg, isLoggedIn), 'bot');
-      }, delay);
+    } catch (err) {
+      setIsTyping(false);
+      addMessage('Sorry, the AI service is temporarily unavailable. Please try again later.', 'bot');
     }
   };
 
