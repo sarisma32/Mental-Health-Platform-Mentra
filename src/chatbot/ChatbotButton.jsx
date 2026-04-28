@@ -9,7 +9,7 @@ const ChatbotButton = ({ isOpen, onClick }) => {
       className={`fixed bottom-6 right-6 z-40 w-14 h-14 rounded-full shadow-xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 ${
         isOpen
           ? 'bg-gray-500 hover:bg-gray-600'
-          : 'bg-[#A3B18A] hover:bg-[#8FA076]'
+          : 'bg-[#4A7C59] hover:bg-[#3d6b4a]'
       }`}
       title={isOpen ? 'Close chatbot' : 'Open chatbot'}
     >

@@ -140,6 +140,7 @@ export const initializeDatabase = async () => {
           title VARCHAR(255) NOT NULL,
           description TEXT,
           video_path VARCHAR(500) NOT NULL,
+          cloudinary_public_id VARCHAR(500),
           created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
@@ -148,7 +149,7 @@ export const initializeDatabase = async () => {
     await pool.query(`
       CREATE TABLE IF NOT EXISTS notifications (
           id SERIAL PRIMARY KEY,
-          recipient_type VARCHAR(20) NOT NULL CHECK (recipient_type IN ('doctor', 'admin')),
+          recipient_type VARCHAR(20) NOT NULL CHECK (recipient_type IN ('doctor', 'admin', 'patient')),
           recipient_id INTEGER,
           type VARCHAR(50) NOT NULL,
           title VARCHAR(255) NOT NULL,
@@ -216,6 +217,12 @@ export const initializeDatabase = async () => {
       await pool.query(`CREATE INDEX IF NOT EXISTS idx_password_reset_otps_email ON password_reset_otps(email)`);
       await pool.query(`CREATE INDEX IF NOT EXISTS idx_password_reset_otps_otp ON password_reset_otps(otp)`);
       await pool.query(`CREATE INDEX IF NOT EXISTS idx_password_reset_otps_expires_at ON password_reset_otps(expires_at)`);
+
+      // Add cloudinary_public_id column if it doesn't exist (migration for existing tables)
+      await pool.query(`
+        ALTER TABLE doctor_videos
+        ADD COLUMN IF NOT EXISTS cloudinary_public_id VARCHAR(500)
+      `).catch(() => {}); // ignore if already exists
     } catch (indexError) {
       console.warn('  Warning: Some indexes could not be created:', indexError.message);
     }

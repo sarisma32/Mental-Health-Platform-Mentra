@@ -216,8 +216,8 @@ const ChatbotPage = () => {
           </div>
 
           <div className="p-4 border-t border-gray-200">
-            <div className="flex items-center gap-2 px-3 py-2 bg-[#DCE4D4] rounded-xl">
-              <div className="w-7 h-7 bg-[#A3B18A] rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="flex items-center gap-2 px-3 py-2 bg-[#d0e8dc] rounded-xl">
+              <div className="w-7 h-7 bg-[#4A7C59] rounded-full flex items-center justify-center flex-shrink-0">
                 <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
@@ -239,7 +239,7 @@ const ChatbotPage = () => {
           {/* Welcome screen — shown before first message */}
           {!started ? (
             <div className="flex-1 overflow-y-auto flex flex-col items-center justify-center px-4 py-12">
-              <div className="w-16 h-16 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-2xl flex items-center justify-center mb-6 shadow-lg">
+              <div className="w-16 h-16 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-2xl flex items-center justify-center mb-6 shadow-lg">
                 <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
@@ -253,7 +253,7 @@ const ChatbotPage = () => {
                   : `How can I help you today? Ask me anything about Mentra, finding a doctor, or managing your mental health.`
                 }
               </p>
-              <div className="flex items-center gap-2 mb-8 px-3 py-1.5 bg-[#DCE4D4] rounded-full">
+              <div className="flex items-center gap-2 mb-8 px-3 py-1.5 bg-[#d0e8dc] rounded-full">
                 <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
                 <p className="text-xs text-[#5a7a4a] font-medium">AI-powered doctor recommendations available</p>
               </div>
@@ -264,10 +264,10 @@ const ChatbotPage = () => {
                   <button
                     key={p.value}
                     onClick={() => handleSend(p.value)}
-                    className="text-left p-4 bg-white border border-gray-200 rounded-xl hover:border-[#A3B18A] hover:shadow-md transition-all group"
+                    className="text-left p-4 bg-white border border-gray-200 rounded-xl hover:border-[#4A7C59] hover:shadow-md transition-all group"
                   >
                     <span className="text-2xl mb-2 block">{p.icon}</span>
-                    <p className="font-semibold text-gray-800 text-sm group-hover:text-[#A3B18A] transition-colors">{p.title}</p>
+                    <p className="font-semibold text-gray-800 text-sm group-hover:text-[#4A7C59] transition-colors">{p.title}</p>
                     <p className="text-xs text-gray-400 mt-0.5">{p.subtitle}</p>
                   </button>
                 ))}
@@ -305,7 +305,7 @@ const ChatbotPage = () => {
                 {/* Typing indicator */}
                 {isTyping && (
                   <div className="flex items-start gap-4">
-                    <div className="w-8 h-8 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+                    <div className="w-8 h-8 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center flex-shrink-0 mt-1">
                       <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                       </svg>
@@ -327,7 +327,7 @@ const ChatbotPage = () => {
           {/* Input bar — always visible at bottom */}
           <div className="border-t border-gray-200 bg-white px-4 py-4 flex-shrink-0">
             <div className="max-w-3xl mx-auto">
-              <div className="flex items-end gap-3 bg-white border border-gray-300 rounded-2xl px-4 py-3 shadow-sm focus-within:border-[#A3B18A] focus-within:ring-2 focus-within:ring-[#A3B18A]/20 transition-all">
+              <div className="flex items-end gap-3 bg-white border border-gray-300 rounded-2xl px-4 py-3 shadow-sm focus-within:border-[#4A7C59] focus-within:ring-2 focus-within:ring-[#4A7C59]/20 transition-all">
                 <textarea
                   ref={inputRef}
                   value={input}
@@ -345,7 +345,7 @@ const ChatbotPage = () => {
                 <button
                   onClick={() => handleSend()}
                   disabled={!input.trim()}
-                  className="w-9 h-9 bg-[#A3B18A] hover:bg-[#8FA076] disabled:bg-gray-200 rounded-xl flex items-center justify-center transition-colors flex-shrink-0"
+                  className="w-9 h-9 bg-[#4A7C59] hover:bg-[#3d6b4a] disabled:bg-gray-200 rounded-xl flex items-center justify-center transition-colors flex-shrink-0"
                 >
                   <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
@@ -372,7 +372,7 @@ const FullPageMessage = ({ message, formatTime }) => {
       {/* Avatar */}
       <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1 ${
         isBot
-          ? 'bg-gradient-to-br from-[#A3B18A] to-[#8FA076]'
+          ? 'bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a]'
           : 'bg-gray-200'
       }`}>
         {isBot ? (
@@ -393,7 +393,7 @@ const FullPageMessage = ({ message, formatTime }) => {
         <div className={`px-5 py-4 rounded-2xl text-sm leading-relaxed ${
           isBot
             ? 'bg-gray-100 text-gray-700 rounded-tl-sm'
-            : 'bg-[#A3B18A] text-white rounded-tr-sm'
+            : 'bg-[#4A7C59] text-white rounded-tr-sm'
         }`}>
           {parseText(message.text)}
         </div>
@@ -473,7 +473,7 @@ const DoctorCard = ({ doctor }) => (
         {doctor.available_dates?.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1">
             {doctor.available_dates.slice(0, 3).map(date => (
-              <span key={date} className="text-xs bg-[#DCE4D4] text-[#5a7a4a] px-2 py-0.5 rounded-full">
+              <span key={date} className="text-xs bg-[#d0e8dc] text-[#5a7a4a] px-2 py-0.5 rounded-full">
                 {new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               </span>
             ))}
@@ -485,7 +485,7 @@ const DoctorCard = ({ doctor }) => (
       </div>
       <a
         href={`/professionals`}
-        className="text-xs bg-[#A3B18A] hover:bg-[#8FA076] text-white px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
+        className="text-xs bg-[#4A7C59] hover:bg-[#3d6b4a] text-white px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap"
       >
         View Profile
       </a>

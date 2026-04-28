@@ -22,7 +22,7 @@ const ReviewDetailModal = ({ review, onClose }) => {
 
         <div className="px-6 py-5 space-y-5">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center text-white font-bold">
+            <div className="w-12 h-12 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-bold">
               {review.patient_first_name?.charAt(0)}{review.patient_last_name?.charAt(0)}
             </div>
             <div>
@@ -38,7 +38,7 @@ const ReviewDetailModal = ({ review, onClose }) => {
             <div className="flex items-center gap-3">
               {renderStars(review.rating, 'text-2xl')}
               <span className="text-lg font-bold text-gray-800">{review.rating}/5</span>
-              <span className="text-sm text-[#A3B18A] font-medium">{ratingLabel[review.rating]}</span>
+              <span className="text-sm text-[#4A7C59] font-medium">{ratingLabel[review.rating]}</span>
             </div>
           </div>
 
@@ -75,7 +75,7 @@ const ReviewDetailModal = ({ review, onClose }) => {
 
         <div className="px-6 py-4 border-t border-gray-100">
           <button onClick={onClose}
-            className="w-full py-2.5 bg-[#A3B18A] hover:bg-[#8FA076] text-white rounded-xl font-medium text-sm transition-colors">Close</button>
+            className="w-full py-2.5 bg-[#4A7C59] hover:bg-[#3d6b4a] text-white rounded-xl font-medium text-sm transition-colors">Close</button>
         </div>
       </div>
     </div>
@@ -121,7 +121,7 @@ const DoctorReviews = ({ doctorId }) => {
         </div>
 
         {loading ? (
-          <div className="text-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A3B18A] mx-auto"></div></div>
+          <div className="text-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4A7C59] mx-auto"></div></div>
         ) : reviews.length === 0 ? (
           <div className="text-center py-12 text-gray-400">
             <svg className="w-12 h-12 mx-auto mb-3 text-gray-200" fill="currentColor" viewBox="0 0 24 24">
@@ -136,7 +136,7 @@ const DoctorReviews = ({ doctorId }) => {
                 className="px-6 py-4 cursor-pointer hover:bg-[#F5F5F0] transition-colors group">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                    <div className="w-10 h-10 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-semibold text-sm">
                       {review.patient_first_name?.charAt(0)}{review.patient_last_name?.charAt(0)}
                     </div>
                     <div>
@@ -149,7 +149,7 @@ const DoctorReviews = ({ doctorId }) => {
                       {renderStars(review.rating)}
                       <p className="text-xs text-gray-400 mt-0.5">{review.rating}/5</p>
                     </div>
-                    <svg className="w-4 h-4 text-gray-300 group-hover:text-[#A3B18A] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-gray-300 group-hover:text-[#4A7C59] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </div>

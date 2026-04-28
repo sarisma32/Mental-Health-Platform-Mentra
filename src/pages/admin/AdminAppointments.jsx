@@ -38,7 +38,7 @@ const AdminAppointments = () => {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total', value: stats.total, color: 'bg-[#A3B18A]', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /> },
+          { label: 'Total', value: stats.total, color: 'bg-[#4A7C59]', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /> },
           { label: 'Upcoming', value: stats.upcoming, color: 'bg-blue-500', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /> },
           { label: 'Completed', value: stats.completed, color: 'bg-green-500', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /> },
           { label: 'Cancelled', value: stats.cancelled, color: 'bg-red-400', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /> },
@@ -62,14 +62,14 @@ const AdminAppointments = () => {
             <div className="relative flex-1">
               <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
               <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search patient or doctor..."
-                className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent" />
+                className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#4A7C59] focus:border-transparent" />
             </div>
-            <button type="submit" className="px-4 py-2 bg-[#A3B18A] text-white rounded-lg text-sm font-medium hover:bg-[#8FA076] transition-colors">Search</button>
+            <button type="submit" className="px-4 py-2 bg-[#4A7C59] text-white rounded-lg text-sm font-medium hover:bg-[#3d6b4a] transition-colors">Search</button>
           </form>
           <div className="flex gap-2 flex-wrap">
             {['all', 'confirmed', 'completed', 'cancelled'].map(s => (
               <button key={s} onClick={() => setStatusFilter(s)}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${statusFilter === s ? 'bg-[#A3B18A] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${statusFilter === s ? 'bg-[#4A7C59] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
                 {s === 'confirmed' ? 'Upcoming' : s.charAt(0).toUpperCase() + s.slice(1)}
               </button>
             ))}
@@ -87,7 +87,7 @@ const AdminAppointments = () => {
           </button>
         </div>
         {loading ? (
-          <div className="text-center py-16"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#A3B18A] mx-auto mb-3"></div><p className="text-gray-500 text-sm">Loading appointments...</p></div>
+          <div className="text-center py-16"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#4A7C59] mx-auto mb-3"></div><p className="text-gray-500 text-sm">Loading appointments...</p></div>
         ) : appointments.length === 0 ? (
           <div className="text-center py-16"><p className="text-gray-500 font-medium">No appointments found</p><p className="text-gray-400 text-sm mt-1">Try adjusting your filters</p></div>
         ) : (
@@ -105,7 +105,7 @@ const AdminAppointments = () => {
                   <tr key={apt.id} className="hover:bg-[#F5F5F0] transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#A3B18A] to-[#8FA076] flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
                           {apt.patient_first_name?.charAt(0)}{apt.patient_last_name?.charAt(0)}
                         </div>
                         <div>

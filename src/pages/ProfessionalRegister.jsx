@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { buildApiUrl, API_ENDPOINTS } from '../config/api.js';
 
@@ -57,6 +57,8 @@ const ProfessionalRegister = () => {
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+
 
   const handleInputChange = (e) => {
     const { name, value, type, checked, files } = e.target;
@@ -119,7 +121,7 @@ const ProfessionalRegister = () => {
     setIsSubmitting(false);
   };
 
-  const ic = (field) => `w-full px-4 py-3.5 rounded-xl border text-sm outline-none transition-all focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent bg-gray-50 focus:bg-white ${errors[field] ? 'border-red-300' : 'border-gray-200'}`;
+  const ic = (field) => `w-full px-4 py-3.5 rounded-xl border text-sm outline-none transition-all focus:ring-2 focus:ring-[#4A7C59] focus:border-transparent bg-gray-50 focus:bg-white ${errors[field] ? 'border-red-300' : 'border-gray-200'}`;
 
   return (
     <div className="h-screen overflow-hidden bg-white flex flex-col">
@@ -127,7 +129,7 @@ const ProfessionalRegister = () => {
       {/* Nav */}
       <nav className="flex items-center justify-between px-8 py-4 border-b border-gray-100 flex-shrink-0">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#A3B18A] rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-[#4A7C59] rounded-lg flex items-center justify-center">
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
@@ -136,7 +138,7 @@ const ProfessionalRegister = () => {
         </Link>
         <div className="flex items-center gap-4 text-sm">
           <span className="text-gray-400">Already have an account?</span>
-          <Link to="/login" className="bg-[#A3B18A] hover:bg-[#8FA076] text-white px-4 py-2 rounded-lg font-medium transition-colors">Sign in</Link>
+          <Link to="/login" className="bg-[#4A7C59] hover:bg-[#3d6b4a] text-white px-4 py-2 rounded-lg font-medium transition-colors">Sign in</Link>
         </div>
       </nav>
 
@@ -145,23 +147,23 @@ const ProfessionalRegister = () => {
 
         {/* Left decorative */}
         <div className="hidden lg:flex lg:w-1/2 bg-[#F5F5F0] items-center justify-center relative overflow-hidden">
-          <div className="absolute top-10 right-10 w-64 h-64 bg-[#DCE4D4] rounded-full opacity-60" />
-          <div className="absolute bottom-10 left-10 w-48 h-48 bg-[#A3B18A]/20 rounded-full" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#DCE4D4]/40 rounded-full" />
+          <div className="absolute top-10 right-10 w-64 h-64 bg-[#d0e8dc] rounded-full opacity-60" />
+          <div className="absolute bottom-10 left-10 w-48 h-48 bg-[#4A7C59]/20 rounded-full" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#d0e8dc]/40 rounded-full" />
           <div className="relative z-10 text-center px-8">
-            <div className="w-20 h-20 bg-[#A3B18A] rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <div className="w-20 h-20 bg-[#4A7C59] rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
               <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>
             </div>
             <h3 className="text-2xl font-bold text-gray-800 mb-3">Join as a Professional</h3>
             <p className="text-gray-500 text-sm leading-relaxed max-w-xs mx-auto mb-6">
-              Verified professionals only. Your profile will be reviewed within 24â€“72 hours.
+              Verified professionals only. Your profile will be reviewed within 24–72 hours.
             </p>
             <div className="space-y-3 text-left">
               {['Profile reviewed by admin before going live', 'Documents stored securely & confidentially', 'Notified via email once approved'].map(item => (
                 <div key={item} className="flex items-center gap-3">
-                  <div className="w-5 h-5 bg-[#A3B18A] rounded-full flex items-center justify-center flex-shrink-0">
+                  <div className="w-5 h-5 bg-[#4A7C59] rounded-full flex items-center justify-center flex-shrink-0">
                     <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                     </svg>
@@ -209,12 +211,12 @@ const ProfessionalRegister = () => {
                 <div className="flex gap-2">
                   <input type="email" name="email" value={formData.email} onChange={handleInputChange}
                     placeholder="you@example.com" disabled={emailVerified}
-                    className={`flex-1 px-4 py-3.5 rounded-xl border text-sm outline-none transition-all focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent bg-gray-50 focus:bg-white ${errors.email ? 'border-red-300' : emailVerified ? 'border-green-400 bg-green-50' : 'border-gray-200'}`} />
+                    className={`flex-1 px-4 py-3.5 rounded-xl border text-sm outline-none transition-all focus:ring-2 focus:ring-[#4A7C59] focus:border-transparent bg-gray-50 focus:bg-white ${errors.email ? 'border-red-300' : emailVerified ? 'border-green-400 bg-green-50' : 'border-gray-200'}`} />
                   {emailVerified ? (
-                    <span className="flex items-center gap-1 px-3 py-2 bg-green-100 text-green-700 rounded-xl text-xs font-medium whitespace-nowrap">✓ Verified</span>
+                    <span className="flex items-center gap-1 px-3 py-2 bg-green-100 text-green-700 rounded-xl text-xs font-medium whitespace-nowrap">? Verified</span>
                   ) : (
                     <button type="button" onClick={handleSendOtp} disabled={sendingOtp || !formData.email}
-                      className="px-4 py-2 bg-[#A3B18A] hover:bg-[#8FA076] text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap">
+                      className="px-4 py-2 bg-[#4A7C59] hover:bg-[#3d6b4a] text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap">
                       {sendingOtp ? '...' : 'Verify'}
                     </button>
                   )}
@@ -227,9 +229,9 @@ const ProfessionalRegister = () => {
                       <input type="text" value={otp}
                         onChange={e => { setOtp(e.target.value.replace(/\D/g,'').slice(0,6)); setOtpError(''); }}
                         placeholder="6-digit code" maxLength={6}
-                        className="flex-1 px-3 py-2 border border-blue-300 rounded-lg text-sm focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent text-center tracking-widest font-mono" />
+                        className="flex-1 px-3 py-2 border border-blue-300 rounded-lg text-sm focus:ring-2 focus:ring-[#4A7C59] focus:border-transparent text-center tracking-widest font-mono" />
                       <button type="button" onClick={handleVerifyOtp} disabled={verifyingOtp || otp.length !== 6}
-                        className="px-4 py-2 bg-[#A3B18A] hover:bg-[#8FA076] text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50">
+                        className="px-4 py-2 bg-[#4A7C59] hover:bg-[#3d6b4a] text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50">
                         {verifyingOtp ? '...' : 'Confirm'}
                       </button>
                     </div>
@@ -298,7 +300,7 @@ const ProfessionalRegister = () => {
               {/* Document upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1.5">License / Certificate Document</label>
-                <label htmlFor="doc-upload" className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border cursor-pointer transition-all bg-gray-50 hover:bg-white ${errors.document ? 'border-red-300' : 'border-gray-200 hover:border-[#A3B18A]'}`}>
+                <label htmlFor="doc-upload" className={`flex items-center gap-3 px-4 py-3.5 rounded-xl border cursor-pointer transition-all bg-gray-50 hover:bg-white ${errors.document ? 'border-red-300' : 'border-gray-200 hover:border-[#4A7C59]'}`}>
                   <svg className="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                   </svg>
@@ -310,13 +312,13 @@ const ProfessionalRegister = () => {
 
               {/* Terms */}
               <div className="flex items-start gap-2">
-                <input type="checkbox" name="agreeToTerms" checked={formData.agreeToTerms} onChange={handleInputChange} className="mt-0.5 w-4 h-4 text-[#A3B18A] rounded" />
-                <label className="text-xs text-gray-500">I agree to the <a href="#" className="text-[#A3B18A] underline">terms</a> & <a href="#" className="text-[#A3B18A] underline">privacy policy</a> and confirm all information is accurate</label>
+                <input type="checkbox" name="agreeToTerms" checked={formData.agreeToTerms} onChange={handleInputChange} className="mt-0.5 w-4 h-4 text-[#4A7C59] rounded" />
+                <label className="text-xs text-gray-500">I agree to the <a href="#" className="text-[#4A7C59] underline">terms</a> & <a href="#" className="text-[#4A7C59] underline">privacy policy</a> and confirm all information is accurate</label>
               </div>
               {errors.agreeToTerms && <p className="text-xs text-red-500">{errors.agreeToTerms}</p>}
 
               <button type="submit" disabled={isSubmitting || !emailVerified}
-                className={`w-full py-3 rounded-xl font-semibold text-sm transition-all ${isSubmitting || !emailVerified ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#A3B18A] hover:bg-[#8FA076] text-white'}`}>
+                className={`w-full py-3 rounded-xl font-semibold text-sm transition-all ${isSubmitting || !emailVerified ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#4A7C59] hover:bg-[#3d6b4a] text-white'}`}>
                 {isSubmitting ? 'Submitting...' : !emailVerified ? 'Verify Email to Continue' : 'Submit Registration'}
               </button>
 

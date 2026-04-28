@@ -1,6 +1,6 @@
 import pool from "../db/index.js";
 
-// Get notifications for a recipient (doctor or admin)
+// Get notifications for a recipient (doctor, admin, or patient)
 export const getNotifications = async (req, res) => {
   try {
     const { recipientType, recipientId } = req.params;
@@ -8,12 +8,10 @@ export const getNotifications = async (req, res) => {
     let query = `SELECT * FROM notifications WHERE recipient_type = $1`;
     const params = [recipientType];
 
-    // For doctor, filter by their specific ID
-    if (recipientType === 'doctor' && recipientId && recipientId !== 'all') {
-      query += ` AND (recipient_id = $2 OR recipient_id IS NULL)`;
+    if ((recipientType === 'doctor' || recipientType === 'patient') && recipientId && recipientId !== 'all') {
+      query += ` AND recipient_id = $2`;
       params.push(parseInt(recipientId));
     }
-    // For admin, no extra filter — get all admin notifications
 
     query += ` ORDER BY created_at DESC LIMIT 50`;
 
@@ -50,8 +48,8 @@ export const markAllAsRead = async (req, res) => {
     let query = `UPDATE notifications SET is_read = true WHERE recipient_type = $1`;
     const params = [recipientType];
 
-    if (recipientType === 'doctor' && recipientId && recipientId !== 'all') {
-      query += ` AND (recipient_id = $2 OR recipient_id IS NULL)`;
+    if ((recipientType === 'doctor' || recipientType === 'patient') && recipientId && recipientId !== 'all') {
+      query += ` AND recipient_id = $2`;
       params.push(parseInt(recipientId));
     }
 

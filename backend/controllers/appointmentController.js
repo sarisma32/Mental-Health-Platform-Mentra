@@ -1,5 +1,5 @@
 import pool from "../db/index.js";
-import { sendAppointmentBookedEmail, sendSessionCompletedEmail } from "../utils/emailService.js";
+import { sendAppointmentBookedEmail, sendSessionCompletedEmail, sendAppointmentConfirmedEmail } from "../utils/emailService.js";
 import { createNotification } from "./notificationController.js";
 
 // Generate unique confirmation number
@@ -114,6 +114,15 @@ export const createAppointment = async (req, res) => {
       type: 'new_appointment',
       title: 'New Appointment Booked',
       message: `${patientFirstName} ${patientLastName} booked a session with Dr. ${doctorName} on ${appointmentDate}.`
+    });
+
+    // Notify patient — booking received
+    createNotification({
+      recipientType: 'patient',
+      recipientId: patientId,
+      type: 'appointment_booked',
+      title: 'Appointment Booked',
+      message: `Your appointment with Dr. ${doctorName} on ${new Date(appointmentDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} is pending confirmation.`,
     });
 
     res.status(201).json({
@@ -319,8 +328,19 @@ export const confirmAppointment = async (req, res) => {
       [appointmentId]
     );
 
-    // Notify patient (skip — patients don't have a notification panel yet)
-    // createNotification for patient would go here when patient notifications are added
+    // Notify patient — appointment confirmed
+    createNotification({
+      recipientType: 'patient',
+      recipientId: updated.rows[0].patient_id,
+      type: 'appointment_confirmed',
+      title: 'Appointment Confirmed',
+      message: `Your appointment with Dr. ${updated.rows[0].doctor_name} on ${new Date(updated.rows[0].appointment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} has been confirmed.`,
+    });
+
+    // Send confirmation email to patient
+    sendAppointmentConfirmedEmail(updated.rows[0]).catch(e =>
+      console.error('Confirmation email error:', e)
+    );
 
     res.json({ success: true, message: "Appointment confirmed!", appointment: updated.rows[0] });
   } catch (err) {
@@ -340,17 +360,19 @@ export const cancelAppointment = async (req, res) => {
     );
 
     if (cancelledAppointment.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Appointment not found."
-      });
+      return res.status(404).json({ success: false, message: "Appointment not found." });
     }
 
-    res.json({
-      success: true,
-      message: "Appointment cancelled successfully.",
-      appointment: cancelledAppointment.rows[0]
+    // Notify patient — appointment cancelled
+    createNotification({
+      recipientType: 'patient',
+      recipientId: cancelledAppointment.rows[0].patient_id,
+      type: 'appointment_cancelled',
+      title: 'Appointment Cancelled',
+      message: `Your appointment with Dr. ${cancelledAppointment.rows[0].doctor_name} on ${new Date(cancelledAppointment.rows[0].appointment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} has been cancelled.`,
     });
+
+    res.json({ success: true, message: "Appointment cancelled successfully.", appointment: cancelledAppointment.rows[0] });
 
   } catch (err) {
     console.error('Cancel appointment error:', err);
@@ -405,6 +427,15 @@ export const completeSession = async (req, res) => {
       type: 'session_completed',
       title: 'Session Completed',
       message: `Dr. ${apt.doctor_name} completed a session with ${apt.patient_first_name} ${apt.patient_last_name}.`
+    });
+
+    // Notify patient — session completed
+    createNotification({
+      recipientType: 'patient',
+      recipientId: apt.patient_id,
+      type: 'session_completed',
+      title: 'Session Completed',
+      message: `Your session with Dr. ${apt.doctor_name} has been completed. Check your appointments to view session notes.`,
     });
 
     res.json({

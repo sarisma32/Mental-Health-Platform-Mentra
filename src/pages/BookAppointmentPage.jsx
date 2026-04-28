@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Breadcrumb from '../components/Breadcrumb';
@@ -45,7 +45,7 @@ const BookAppointmentPage = () => {
             name: doctor.full_name,
             specialization: doctor.specialization,
             image: doctor.profile_photo 
-              ? `http://localhost:5002/${doctor.profile_photo}` 
+              ? (doctor.profile_photo.startsWith('http') ? doctor.profile_photo : `http://localhost:5002/${doctor.profile_photo}`)
               : "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=300&h=300&fit=crop&crop=face",
             location: doctor.hospital_name,
             address: doctor.location || "Location not specified",
@@ -273,7 +273,7 @@ const isPastDate = dayStart < minBookable;
         sessionFee: appointmentType === 'initial' ? professional.initialPrice : professional.followupPrice,
         durationMinutes: appointmentType === 'initial' ? 60 : 50,
         
-        // Patient information â€” auto-filled from account
+        // Patient information — auto-filled from account
         patientFirstName: patientInfo.firstName,
         patientLastName: patientInfo.lastName,
         patientEmail: patientInfo.email,
@@ -329,7 +329,7 @@ const isPastDate = dayStart < minBookable;
         if (data.errors && data.errors.length > 0) {
           errorMessage += '\n\nValidation errors:\n';
           data.errors.forEach(error => {
-            errorMessage += `â€¢ ${error.path}: ${error.msg}\n`;
+            errorMessage += `• ${error.path}: ${error.msg}\n`;
           });
         }
         
@@ -505,8 +505,8 @@ const isPastDate = dayStart < minBookable;
                   
                   {/* Returning patient notice */}
                   {isReturningPatient && (
-                    <div className="mb-6 flex items-start gap-3 bg-[#DCE4D4] border border-[#A3B18A] rounded-lg px-4 py-3">
-                      <svg className="w-5 h-5 text-[#A3B18A] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="mb-6 flex items-start gap-3 bg-[#d0e8dc] border border-[#4A7C59] rounded-lg px-4 py-3">
+                      <svg className="w-5 h-5 text-[#4A7C59] flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
                       <p className="text-sm text-[#5a7a4a] font-medium">
@@ -680,7 +680,7 @@ const isPastDate = dayStart < minBookable;
                   <p className="text-gray-600 mb-6">Please fill in all required fields before proceeding</p>
 
                   {/* Auto-filled patient info banner */}
-                  <div className="mb-6 bg-[#DCE4D4] border border-[#A3B18A] rounded-xl p-4">
+                  <div className="mb-6 bg-[#d0e8dc] border border-[#4A7C59] rounded-xl p-4">
                     <p className="text-xs font-semibold text-[#5a7a4a] uppercase tracking-wide mb-2">Booking as</p>
                     <div className="grid grid-cols-2 gap-3 text-sm">
                       <div>

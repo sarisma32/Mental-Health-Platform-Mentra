@@ -36,9 +36,9 @@ const AdminOverview = ({ stats, setActiveSection }) => {
             { label: 'Appointments', desc: 'Monitor bookings', section: 'appointments', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /> },
           ].map(item => (
             <button key={item.label} onClick={() => setActiveSection(item.section)}
-              className="p-4 border-2 border-[#DCE4D4] rounded-lg hover:bg-[#F5F5F0] hover:border-[#A3B18A] transition-all text-left group">
-              <div className="w-10 h-10 bg-[#DCE4D4] rounded-lg flex items-center justify-center mb-3 group-hover:bg-[#A3B18A] transition-colors">
-                <svg className="w-6 h-6 text-[#A3B18A] group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">{item.icon}</svg>
+              className="p-4 border-2 border-[#d0e8dc] rounded-lg hover:bg-[#F5F5F0] hover:border-[#4A7C59] transition-all text-left group">
+              <div className="w-10 h-10 bg-[#d0e8dc] rounded-lg flex items-center justify-center mb-3 group-hover:bg-[#4A7C59] transition-colors">
+                <svg className="w-6 h-6 text-[#4A7C59] group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">{item.icon}</svg>
               </div>
               <h4 className="font-semibold text-gray-800">{item.label}</h4>
               <p className="text-sm text-gray-500 mt-1">{item.desc}</p>

@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { buildApiUrl } from '../../config/api.js';
 
+const getMediaUrl = (path) => {
+  if (!path) return null;
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  return `http://localhost:5002/${path}`;
+};
+
 const DoctorVideoUpload = ({ doctorId }) => {
   const [videos, setVideos] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -74,7 +80,7 @@ const DoctorVideoUpload = ({ doctorId }) => {
 
   return (
     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-      <div className="bg-gradient-to-r from-[#A3B18A] to-[#8FA076] px-6 py-4">
+      <div className="bg-gradient-to-r from-[#4A7C59] to-[#3d6b4a] px-6 py-4">
         <div className="flex items-center space-x-3">
           <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.069A1 1 0 0121 8.82v6.36a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -93,23 +99,23 @@ const DoctorVideoUpload = ({ doctorId }) => {
             <label className="block text-sm font-medium text-gray-700 mb-1">Video Title <span className="text-red-500">*</span></label>
             <input type="text" value={title} onChange={e => setTitle(e.target.value)}
               placeholder="e.g. Understanding Anxiety Symptoms"
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent" required />
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#4A7C59] focus:border-transparent" required />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Description (optional)</label>
             <textarea value={description} onChange={e => setDescription(e.target.value)} rows={2}
               placeholder="Brief description of what this video covers..."
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent resize-none" />
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#4A7C59] focus:border-transparent resize-none" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Video File <span className="text-red-500">*</span></label>
             <input type="file" accept="video/mp4,video/mov,video/avi,video/webm,video/mkv"
               onChange={e => setVideoFile(e.target.files[0])}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-[#DCE4D4] file:text-[#A3B18A] file:font-medium hover:file:bg-[#A3B18A] hover:file:text-white" required />
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-[#d0e8dc] file:text-[#4A7C59] file:font-medium hover:file:bg-[#4A7C59] hover:file:text-white" required />
             <p className="text-xs text-gray-400 mt-1">MP4, MOV, AVI, WebM — max 100MB</p>
           </div>
           <button type="submit" disabled={uploading || !title.trim() || !videoFile}
-            className="w-full py-2.5 bg-[#A3B18A] hover:bg-[#8FA076] text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+            className="w-full py-2.5 bg-[#4A7C59] hover:bg-[#3d6b4a] text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
             {uploading ? (
               <><svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg> Uploading...</>
             ) : (
@@ -136,7 +142,7 @@ const DoctorVideoUpload = ({ doctorId }) => {
                       </svg>
                     </button>
                   </div>
-                  <video src={`http://localhost:5002/${v.video_path}`} controls className="w-full mt-3 rounded-lg max-h-48 bg-black" />
+                  <video src={getMediaUrl(v.video_path)} controls className="w-full mt-3 rounded-lg max-h-48 bg-black" />
                 </div>
               ))}
             </div>

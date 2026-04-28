@@ -9,9 +9,9 @@ export const registerPatient = async (req, res) => {
   try {
     const { fullName, email, password, phoneNumber, age } = req.body;
 
-    // Check if user exists
+    // Check if user exists (exclude deleted accounts — they can re-register)
     const existing = await pool.query(
-      "SELECT * FROM patients WHERE email = $1",
+      "SELECT * FROM patients WHERE email = $1 AND status != 'deleted'",
       [email]
     );
 
@@ -99,7 +99,10 @@ export const loginPatient = async (req, res) => {
 
     const user = userCheck.rows[0];
 
-    // Compare password
+    // Block deleted accounts
+    if (user.status === 'deleted') {
+      return res.status(400).json({ success: false, message: 'This account has been deleted.' });
+    }
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
     if (!isPasswordValid) {
@@ -209,7 +212,7 @@ export const sendEmailVerification = async (req, res) => {
     if (!email) return res.status(400).json({ success: false, message: 'Email is required' });
 
     // Check if email already registered
-    const existing = await pool.query('SELECT id FROM patients WHERE email = $1', [email]);
+    const existing = await pool.query('SELECT id FROM patients WHERE email = $1 AND status != \'deleted\'', [email]);
     if (existing.rows.length > 0) {
       return res.status(400).json({ success: false, message: 'Email already registered. Please use a different email.' });
     }
@@ -238,7 +241,7 @@ export const sendEmailVerification = async (req, res) => {
 
     // Send OTP email — log to console as fallback if delivery fails
     try {
-      const result = await sendOTPEmail(email, otp, 'New User');
+      const result = await sendOTPEmail(email, otp, 'New User', 'verification');
       if (!result.success) {
         console.log(`[PATIENT EMAIL VERIFY] OTP for ${email}: ${otp}`);
       }
@@ -276,5 +279,94 @@ export const verifyEmailOTP = async (req, res) => {
   } catch (err) {
     console.error('Verify email OTP error:', err);
     res.status(500).json({ success: false, message: 'Verification failed.' });
+  }
+};
+
+// CHANGE PASSWORD
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const patientId = req.user.id;
+    if (!currentPassword || !newPassword) return res.status(400).json({ success: false, message: 'Both passwords are required.' });
+    if (newPassword.length < 8) return res.status(400).json({ success: false, message: 'New password must be at least 8 characters.' });
+    const result = await pool.query('SELECT password FROM patients WHERE id = $1', [patientId]);
+    if (!result.rows.length) return res.status(404).json({ success: false, message: 'Patient not found.' });
+    const valid = await bcrypt.compare(currentPassword, result.rows[0].password);
+    if (!valid) return res.status(400).json({ success: false, message: 'Current password is incorrect.' });
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await pool.query('UPDATE patients SET password = $1 WHERE id = $2', [hashed, patientId]);
+    res.json({ success: true, message: 'Password changed successfully.' });
+  } catch (err) {
+    console.error('Change password error:', err);
+    res.status(500).json({ success: false, message: 'Failed to change password.' });
+  }
+};
+
+// DELETE ACCOUNT (soft delete — marks as deleted, allows re-registration)
+export const deleteAccount = async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const patientId = req.user.id;
+
+    const patient = await client.query('SELECT full_name, email FROM patients WHERE id = $1', [patientId]);
+    if (!patient.rows.length) return res.status(404).json({ success: false, message: 'Account not found.' });
+
+    const { full_name, email } = patient.rows[0];
+
+    await client.query('BEGIN');
+
+    // 1. Soft delete — rename email so same address can re-register
+    const deletedEmail = `deleted_${Date.now()}_${email}`;
+    await client.query(
+      "UPDATE patients SET status = 'deleted', email = $1, updated_at = NOW() WHERE id = $2",
+      [deletedEmail, patientId]
+    );
+
+    // 2. Future pending/confirmed appointments → cancel them & free the slot
+    //    (slot becomes available by simply cancelling — no appointment blocks it)
+    await client.query(
+      `UPDATE appointments
+       SET status = 'cancelled',
+           patient_first_name = 'Deleted',
+           patient_last_name = 'User',
+           patient_email = 'deleted@account.com',
+           patient_phone = '—',
+           updated_at = NOW()
+       WHERE patient_id = $1
+         AND status IN ('pending', 'confirmed', 'scheduled')
+         AND appointment_date >= CURRENT_DATE`,
+      [patientId]
+    );
+
+    // 3. Past / completed appointments → keep for records, anonymise patient info
+    await client.query(
+      `UPDATE appointments
+       SET patient_first_name = 'Deleted',
+           patient_last_name = 'User',
+           patient_email = 'deleted@account.com',
+           patient_phone = '—',
+           updated_at = NOW()
+       WHERE patient_id = $1
+         AND status IN ('completed', 'cancelled', 'no_show')`,
+      [patientId]
+    );
+
+    await client.query('COMMIT');
+
+    // 4. Notify admin
+    createNotification({
+      recipientType: 'admin',
+      type: 'account_deleted',
+      title: 'Patient Account Deleted',
+      message: `Patient "${full_name}" (${email}) has deleted their account. Future appointments have been cancelled and slots freed.`,
+    });
+
+    res.json({ success: true, message: 'Account deleted successfully.' });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Delete account error:', err);
+    res.status(500).json({ success: false, message: 'Failed to delete account.' });
+  } finally {
+    client.release();
   }
 };

@@ -1,8 +1,15 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { buildApiUrl } from '../config/api.js';
+
+// Helper: returns correct URL whether it's a Cloudinary URL or old local path
+const getMediaUrl = (path) => {
+  if (!path) return null;
+  if (path.startsWith('http://') || path.startsWith('https://')) return path;
+  return `http://localhost:5002/${path}`;
+};
 
 const DoctorProfilePage = () => {
   const { doctorId } = useParams();
@@ -53,13 +60,13 @@ const DoctorProfilePage = () => {
 
   const renderStars = (rating) => (
     <span className="text-yellow-400">
-      {'★'.repeat(Math.round(rating))}{'☆'.repeat(5 - Math.round(rating))}
+      {'?'.repeat(Math.round(rating))}{'?'.repeat(5 - Math.round(rating))}
     </span>
   );
 
   if (loading) return (
     <div className="min-h-screen bg-[#F5F5F0] flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#A3B18A]"></div>
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4A7C59]"></div>
     </div>
   );
 
@@ -67,7 +74,7 @@ const DoctorProfilePage = () => {
     <div className="min-h-screen bg-[#F5F5F0] flex items-center justify-center">
       <div className="text-center">
         <p className="text-gray-600 text-lg">Doctor not found.</p>
-        <button onClick={() => navigate('/professionals')} className="mt-4 text-[#A3B18A] underline">Back to Professionals</button>
+        <button onClick={() => navigate('/professionals')} className="mt-4 text-[#4A7C59] underline">Back to Professionals</button>
       </div>
     </div>
   );
@@ -77,13 +84,13 @@ const DoctorProfilePage = () => {
       <Header />
 
       {/* Hero Banner */}
-      <div className="bg-gradient-to-r from-[#A3B18A] to-[#8FA076] py-12">
+      <div className="bg-gradient-to-r from-[#4A7C59] to-[#3d6b4a] py-12">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-center md:items-start gap-8">
             {/* Photo */}
             <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-xl flex-shrink-0">
               {doctor.profile_photo ? (
-                <img src={`http://localhost:5002/${doctor.profile_photo}`} alt={doctor.full_name} className="w-full h-full object-cover" />
+                <img src={getMediaUrl(doctor.profile_photo)} alt={doctor.full_name} className="w-full h-full object-cover" />
               ) : (
                 <div className="w-full h-full bg-white/30 flex items-center justify-center text-white text-4xl font-bold">
                   {doctor.full_name?.charAt(0)}
@@ -100,7 +107,7 @@ const DoctorProfilePage = () => {
               <div className="flex flex-wrap items-center gap-4 mt-4 justify-center md:justify-start">
                 {reviewStats.avg_rating && (
                   <div className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full text-sm">
-                    <span className="text-yellow-300">★</span>
+                    <span className="text-yellow-300">?</span>
                     <span>{reviewStats.avg_rating} ({reviewStats.total_reviews} reviews)</span>
                   </div>
                 )}
@@ -112,7 +119,7 @@ const DoctorProfilePage = () => {
 
               <button
                 onClick={handleBook}
-                className="mt-6 bg-white text-[#A3B18A] hover:bg-[#F5F5F0] font-semibold px-8 py-3 rounded-lg transition-colors shadow-md"
+                className="mt-6 bg-white text-[#4A7C59] hover:bg-[#F5F5F0] font-semibold px-8 py-3 rounded-lg transition-colors shadow-md"
               >
                 Book Appointment
               </button>
@@ -135,7 +142,7 @@ const DoctorProfilePage = () => {
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-6 py-4 text-sm font-medium border-b-2 transition-colors ${
                   activeTab === tab.id
-                    ? 'border-[#A3B18A] text-[#A3B18A]'
+                    ? 'border-[#4A7C59] text-[#4A7C59]'
                     : 'border-transparent text-gray-500 hover:text-gray-700'
                 }`}
               >
@@ -172,20 +179,20 @@ const DoctorProfilePage = () => {
                 <h3 className="font-semibold text-gray-900 mb-4">Details</h3>
                 <div className="space-y-3 text-sm">
                   <div className="flex items-start gap-3">
-                    <svg className="w-4 h-4 text-[#A3B18A] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-[#4A7C59] mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     </svg>
                     <span className="text-gray-700">{doctor.hospital_name}, {doctor.location}</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <svg className="w-4 h-4 text-[#A3B18A] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 text-[#4A7C59] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span className="text-gray-700">{doctor.experience} experience</span>
                   </div>
                   {doctor.initial_session_fee && (
                     <div className="flex items-center gap-3">
-                      <svg className="w-4 h-4 text-[#A3B18A] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-[#4A7C59] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                       </svg>
                       <span className="text-gray-700">Initial: Rs {doctor.initial_session_fee}</span>
@@ -193,7 +200,7 @@ const DoctorProfilePage = () => {
                   )}
                   {doctor.followup_session_fee && (
                     <div className="flex items-center gap-3">
-                      <svg className="w-4 h-4 text-[#A3B18A] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4 text-[#4A7C59] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                       </svg>
                       <span className="text-gray-700">Follow-up: Rs {doctor.followup_session_fee}</span>
@@ -204,7 +211,7 @@ const DoctorProfilePage = () => {
 
               <button
                 onClick={handleBook}
-                className="w-full bg-[#A3B18A] hover:bg-[#8FA076] text-white font-semibold py-3 rounded-lg transition-colors"
+                className="w-full bg-[#4A7C59] hover:bg-[#3d6b4a] text-white font-semibold py-3 rounded-lg transition-colors"
               >
                 Book Appointment
               </button>
@@ -228,7 +235,7 @@ const DoctorProfilePage = () => {
                 {videos.map(v => (
                   <div key={v.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
                     <video
-                      src={`http://localhost:5002/${v.video_path}`}
+                      src={getMediaUrl(v.video_path)}
                       controls
                       className="w-full bg-black max-h-52"
                     />
@@ -262,7 +269,7 @@ const DoctorProfilePage = () => {
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex items-center gap-6">
                   <div className="text-center">
                     <p className="text-5xl font-bold text-gray-900">{reviewStats.avg_rating}</p>
-                    <p className="text-yellow-400 text-2xl mt-1">{'★'.repeat(Math.round(reviewStats.avg_rating))}</p>
+                    <p className="text-yellow-400 text-2xl mt-1">{'?'.repeat(Math.round(reviewStats.avg_rating))}</p>
                     <p className="text-sm text-gray-500 mt-1">{reviewStats.total_reviews} reviews</p>
                   </div>
                 </div>
@@ -271,7 +278,7 @@ const DoctorProfilePage = () => {
                   <div key={r.id} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
                     <div className="flex items-start justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                        <div className="w-10 h-10 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-semibold text-sm">
                           {r.patient_first_name?.charAt(0)}{r.patient_last_name?.charAt(0)}
                         </div>
                         <div>
@@ -279,7 +286,7 @@ const DoctorProfilePage = () => {
                           <p className="text-xs text-gray-400">{new Date(r.appointment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                         </div>
                       </div>
-                      <span className="text-yellow-400">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span>
+                      <span className="text-yellow-400">{'?'.repeat(r.rating)}{'?'.repeat(5 - r.rating)}</span>
                     </div>
                     {r.review_text && <p className="mt-3 text-sm text-gray-700">{r.review_text}</p>}
                   </div>

@@ -12,26 +12,26 @@ const PatientAppointments = ({
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-semibold text-gray-800">My Appointments</h3>
-        <button onClick={() => fetchAppointments(user.id, localStorage.getItem('token'))} className="text-sm text-[#A3B18A] hover:text-[#8FA076] font-medium">Refresh</button>
+        <button onClick={() => fetchAppointments(user.id, localStorage.getItem('token'))} className="text-sm text-[#4A7C59] hover:text-[#3d6b4a] font-medium">Refresh</button>
       </div>
 
       {/* Tabs */}
       <div className="flex space-x-2 mb-6 border-b border-gray-200">
         {[['upcoming', `Upcoming (${stats.upcoming})`], ['past', `Past (${stats.past})`], ['all', `All (${stats.total})`]].map(([tab, label]) => (
           <button key={tab} onClick={() => setActiveTab(tab)}
-            className={`px-4 py-2 font-medium text-sm transition-colors ${activeTab === tab ? 'text-[#A3B18A] border-b-2 border-[#A3B18A]' : 'text-gray-600 hover:text-gray-900'}`}>
+            className={`px-4 py-2 font-medium text-sm transition-colors ${activeTab === tab ? 'text-[#4A7C59] border-b-2 border-[#4A7C59]' : 'text-gray-600 hover:text-gray-900'}`}>
             {label}
           </button>
         ))}
       </div>
 
       {loading ? (
-        <div className="text-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A3B18A] mx-auto mb-4"></div></div>
+        <div className="text-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4A7C59] mx-auto mb-4"></div></div>
       ) : filteredAppointments.length === 0 ? (
         <div className="text-center py-12">
           <svg className="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
           <p className="text-gray-600 mb-4">No appointments found</p>
-          <button onClick={() => navigate('/professionals')} className="bg-[#A3B18A] hover:bg-[#8FA076] text-white px-6 py-2 rounded-lg font-medium transition-colors">Book Your First Session</button>
+          <button onClick={() => navigate('/professionals')} className="bg-[#4A7C59] hover:bg-[#3d6b4a] text-white px-6 py-2 rounded-lg font-medium transition-colors">Book Your First Session</button>
         </div>
       ) : (
         <div className="space-y-6">
@@ -46,7 +46,7 @@ const PatientAppointments = ({
           ).map(([doctorId, group]) => (
             <div key={doctorId} className="border border-gray-200 rounded-xl overflow-hidden">
               <div className="bg-[#F5F5F0] px-4 py-3 flex items-center gap-3 border-b border-gray-200">
-                <div className="w-10 h-10 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center text-white font-semibold text-sm">{group.doctorName.charAt(0)}</div>
+                <div className="w-10 h-10 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-semibold text-sm">{group.doctorName.charAt(0)}</div>
                 <div className="flex-1">
                   <p className="font-semibold text-gray-900">Dr. {group.doctorName}</p>
                   <p className="text-xs text-gray-500">{group.doctorSpecialization} • {group.doctorLocation}</p>
@@ -87,7 +87,7 @@ const PatientAppointments = ({
                               setReviewModal(apt);
                               setReviewRating(0); setReviewText('');
                               setRatingProfessionalism(0); setRatingCommunication(0); setRatingWaitTime(0);
-                            }} className="text-xs text-[#A3B18A] hover:text-[#8FA076] font-medium border border-[#A3B18A] px-2 py-1 rounded">Leave a Review</button>
+                            }} className="text-xs text-[#4A7C59] hover:text-[#3d6b4a] font-medium border border-[#4A7C59] px-2 py-1 rounded">Leave a Review</button>
                           )}</div>
                         )}
                       </div>

@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -106,7 +106,7 @@ const AdminLogin = () => {
                   required
                   className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${
                     errors.email ? 'border-red-300' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-[#A3B18A] focus:border-[#A3B18A] focus:z-10 sm:text-sm`}
+                  } placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-[#4A7C59] focus:border-[#4A7C59] focus:z-10 sm:text-sm`}
                   placeholder="Email address"
                   value={formData.email}
                   onChange={handleChange}
@@ -127,7 +127,7 @@ const AdminLogin = () => {
                   required
                   className={`appearance-none rounded-none relative block w-full px-3 py-2 border ${
                     errors.password ? 'border-red-300' : 'border-gray-300'
-                  } placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-[#A3B18A] focus:border-[#A3B18A] focus:z-10 sm:text-sm`}
+                  } placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-[#4A7C59] focus:border-[#4A7C59] focus:z-10 sm:text-sm`}
                   placeholder="Password"
                   value={formData.password}
                   onChange={handleChange}
@@ -151,7 +151,7 @@ const AdminLogin = () => {
                 className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${
                   isSubmitting 
                     ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-[#A3B18A] hover:bg-[#8FA076] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#A3B18A]'
+                    : 'bg-[#4A7C59] hover:bg-[#3d6b4a] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#4A7C59]'
                 } transition-colors`}
               >
                 {isSubmitting ? 'Signing in...' : 'Sign in'}

@@ -18,6 +18,7 @@ const DashboardHeader = ({
   userName = '',
   userEmail = '',
   userPrefix = '',
+  userSub = '',
   notifType,
   notifId,
   onNotifNavigate,
@@ -53,9 +54,9 @@ const DashboardHeader = ({
           <div className="flex items-center space-x-3 pl-4 border-l border-gray-200">
             <div className="text-right">
               <p className="text-sm font-medium text-gray-800">{displayName}</p>
-              <p className="text-xs text-gray-500">{userEmail}</p>
+              <p className="text-xs text-gray-500">{userSub || userEmail}</p>
             </div>
-            <div className="w-10 h-10 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center text-white font-semibold shadow-md">
+            <div className="w-10 h-10 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-semibold shadow-md">
               {initial}
             </div>
           </div>

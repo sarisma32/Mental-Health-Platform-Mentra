@@ -66,7 +66,7 @@ const Chatbot = ({ isOpen, onClose }) => {
     <div className="fixed bottom-6 right-6 z-50 flex flex-col w-[380px] max-w-[calc(100vw-2rem)] h-[580px] max-h-[calc(100vh-5rem)] bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden">
 
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#A3B18A] to-[#8FA076] px-5 py-4 flex items-center justify-between flex-shrink-0">
+      <div className="bg-gradient-to-r from-[#4A7C59] to-[#3d6b4a] px-5 py-4 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
             <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -100,7 +100,7 @@ const Chatbot = ({ isOpen, onClose }) => {
         {/* Typing indicator */}
         {isTyping && (
           <div className="flex items-end gap-2">
-            <div className="w-7 h-7 bg-[#A3B18A] rounded-full flex items-center justify-center flex-shrink-0">
+            <div className="w-7 h-7 bg-[#4A7C59] rounded-full flex items-center justify-center flex-shrink-0">
               <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
@@ -127,7 +127,7 @@ const Chatbot = ({ isOpen, onClose }) => {
               <button
                 key={qr.value}
                 onClick={() => handleQuickReply(qr.value)}
-                className="text-xs px-3 py-1.5 bg-[#DCE4D4] text-[#5a7a4a] rounded-full hover:bg-[#A3B18A] hover:text-white transition-colors font-medium"
+                className="text-xs px-3 py-1.5 bg-[#d0e8dc] text-[#5a7a4a] rounded-full hover:bg-[#4A7C59] hover:text-white transition-colors font-medium"
               >
                 {qr.label}
               </button>
@@ -138,7 +138,7 @@ const Chatbot = ({ isOpen, onClose }) => {
 
       {/* Input */}
       <div className="px-4 py-3 bg-white border-t border-gray-100 flex-shrink-0">
-        <div className="flex items-center gap-2 bg-gray-50 rounded-xl border border-gray-200 px-3 py-2 focus-within:border-[#A3B18A] focus-within:ring-1 focus-within:ring-[#A3B18A] transition-all">
+        <div className="flex items-center gap-2 bg-gray-50 rounded-xl border border-gray-200 px-3 py-2 focus-within:border-[#4A7C59] focus-within:ring-1 focus-within:ring-[#4A7C59] transition-all">
           <input
             ref={inputRef}
             type="text"
@@ -151,7 +151,7 @@ const Chatbot = ({ isOpen, onClose }) => {
           <button
             onClick={() => handleSend()}
             disabled={!input.trim()}
-            className="w-8 h-8 bg-[#A3B18A] hover:bg-[#8FA076] disabled:bg-gray-200 rounded-lg flex items-center justify-center transition-colors flex-shrink-0"
+            className="w-8 h-8 bg-[#4A7C59] hover:bg-[#3d6b4a] disabled:bg-gray-200 rounded-lg flex items-center justify-center transition-colors flex-shrink-0"
           >
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />

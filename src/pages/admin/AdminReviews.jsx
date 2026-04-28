@@ -55,7 +55,7 @@ const AdminReviews = () => {
       {/* Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Reviews', value: stats.total || 0, color: 'bg-[#A3B18A]' },
+          { label: 'Total Reviews', value: stats.total || 0, color: 'bg-[#4A7C59]' },
           { label: 'Approved', value: stats.visible || 0, color: 'bg-green-500' },
           { label: 'Pending/Hidden', value: stats.hidden || 0, color: 'bg-yellow-500' },
           { label: 'Avg Rating', value: stats.avg_rating ? `${stats.avg_rating} ★` : 'N/A', color: 'bg-purple-500' },
@@ -78,7 +78,7 @@ const AdminReviews = () => {
       <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex gap-2">
         {['all', 'hidden', 'visible'].map(f => (
           <button key={f} onClick={() => setFilter(f)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${filter === f ? 'bg-[#A3B18A] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${filter === f ? 'bg-[#4A7C59] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
             {f === 'hidden' ? 'Pending Approval' : f === 'visible' ? 'Approved' : 'All'}
           </button>
         ))}
@@ -94,7 +94,7 @@ const AdminReviews = () => {
           <h3 className="font-semibold text-gray-900">Reviews ({filteredReviews.length})</h3>
         </div>
         {loading ? (
-          <div className="text-center py-16"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#A3B18A] mx-auto mb-3"></div></div>
+          <div className="text-center py-16"><div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#4A7C59] mx-auto mb-3"></div></div>
         ) : filteredReviews.length === 0 ? (
           <div className="text-center py-16 text-gray-400"><p className="text-sm">No reviews found</p></div>
         ) : (
@@ -112,7 +112,7 @@ const AdminReviews = () => {
                   <tr key={review.id} className="hover:bg-[#F5F5F0] transition-colors cursor-pointer" onClick={() => setSelectedReview(review)}>
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#A3B18A] to-[#8FA076] flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">
                           {review.patient_first_name?.charAt(0)}{review.patient_last_name?.charAt(0)}
                         </div>
                         <div>
@@ -122,7 +122,7 @@ const AdminReviews = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-sm font-medium text-[#A3B18A]">Dr. {review.doctor_full_name}</p>
+                      <p className="text-sm font-medium text-[#4A7C59]">Dr. {review.doctor_full_name}</p>
                       <p className="text-xs text-gray-400">{review.doctor_specialization}</p>
                     </td>
                     <td className="px-6 py-4">
@@ -172,7 +172,7 @@ const AdminReviews = () => {
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="font-semibold text-gray-900">{selectedReview.patient_first_name} {selectedReview.patient_last_name}</span>
                   <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
-                  <span className="font-semibold text-[#A3B18A]">Dr. {selectedReview.doctor_full_name}</span>
+                  <span className="font-semibold text-[#4A7C59]">Dr. {selectedReview.doctor_full_name}</span>
                 </div>
                 <p className="text-gray-400 text-xs mt-1">{selectedReview.doctor_specialization} • {new Date(selectedReview.created_at).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
               </div>
@@ -181,7 +181,7 @@ const AdminReviews = () => {
                 <div className="flex items-center gap-3">
                   <span className="text-yellow-400 text-2xl">{'★'.repeat(selectedReview.rating)}{'☆'.repeat(5 - selectedReview.rating)}</span>
                   <span className="text-lg font-bold text-gray-800">{selectedReview.rating}/5</span>
-                  <span className="text-sm text-[#A3B18A] font-medium">{ratingLabel[selectedReview.rating]}</span>
+                  <span className="text-sm text-[#4A7C59] font-medium">{ratingLabel[selectedReview.rating]}</span>
                 </div>
               </div>
               <div className="bg-gray-50 rounded-xl p-4">
@@ -219,7 +219,7 @@ const AdminReviews = () => {
               </div>
             </div>
             <div className="px-6 py-4 border-t border-gray-100">
-              <button onClick={() => setSelectedReview(null)} className="w-full py-2.5 bg-[#A3B18A] hover:bg-[#8FA076] text-white rounded-xl font-medium text-sm transition-colors">Close</button>
+              <button onClick={() => setSelectedReview(null)} className="w-full py-2.5 bg-[#4A7C59] hover:bg-[#3d6b4a] text-white rounded-xl font-medium text-sm transition-colors">Close</button>
             </div>
           </div>
         </div>

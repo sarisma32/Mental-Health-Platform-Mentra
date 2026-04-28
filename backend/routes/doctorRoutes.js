@@ -13,7 +13,8 @@ import {
   getDoctorVideos,
   deleteDoctorVideo,
   sendDoctorEmailVerification,
-  verifyDoctorEmailOTP
+  verifyDoctorEmailOTP,
+  changePassword
 } from "../controllers/doctorController.js";
 import { validateDoctorRegistration, validateLogin } from "../middleware/validation.js";
 import { verifyToken, verifyDoctor } from "../middleware/auth.js";
@@ -36,6 +37,7 @@ router.get("/profile", verifyToken, verifyDoctor, getDoctorProfile);
 router.put("/profile", verifyToken, verifyDoctor, updateDoctorProfile);
 router.put("/profile/info", verifyToken, verifyDoctor, updateDoctorProfileInfo);
 router.put("/profile/complete", verifyToken, verifyDoctor, updateCompleteProfile);
+router.put("/change-password", verifyToken, verifyDoctor, changePassword);
 router.post("/profile/photo", verifyToken, verifyDoctor, uploadProfileImage, handleUploadError, uploadProfilePhoto);
 
 // Video routes

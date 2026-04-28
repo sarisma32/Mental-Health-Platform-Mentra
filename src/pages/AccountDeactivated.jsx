@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -56,10 +56,10 @@ const AccountDeactivated = () => {
               </p>
               <div className="space-y-1">
                 <p className="text-sm font-medium text-gray-900">
-                  ðŸ“§ Email: support@mentra.com
+                  📧 Email: support@mentra.com
                 </p>
                 <p className="text-sm font-medium text-gray-900">
-                  ðŸ“ž Phone: +1 (555) 123-4567
+                  📞 Phone: +1 (555) 123-4567
                 </p>
               </div>
             </div>
@@ -67,7 +67,7 @@ const AccountDeactivated = () => {
             {/* Action Button */}
             <button
               onClick={handleBackToLogin}
-              className="w-full bg-[#A3B18A] hover:bg-[#8FA076] text-white font-medium py-3 px-4 rounded-lg transition-colors"
+              className="w-full bg-[#4A7C59] hover:bg-[#3d6b4a] text-white font-medium py-3 px-4 rounded-lg transition-colors"
             >
               Back to Login
             </button>

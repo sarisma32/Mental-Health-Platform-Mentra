@@ -60,7 +60,16 @@ export const API_ENDPOINTS = {
   // Video endpoints
   DOCTOR_VIDEOS: '/api/doctors',
   UPLOAD_VIDEO: '/api/doctors/videos',
-  DELETE_VIDEO: '/api/doctors/videos'
+  DELETE_VIDEO: '/api/doctors/videos',
+
+  // Therapy Homework endpoints
+  THERAPY_ASSIGN: '/api/therapy/assign',
+  THERAPY_DOCTOR_TASKS: '/api/therapy/doctor/tasks',
+  THERAPY_PATIENT_TASKS: '/api/therapy/patient/tasks',
+  THERAPY_COMPLETE: '/api/therapy/patient/tasks',
+  THERAPY_FEEDBACK: '/api/therapy/patient/tasks',
+  THERAPY_PATIENT_PROGRESS: '/api/therapy/patient/progress',
+  THERAPY_DOCTOR_PROGRESS: '/api/therapy/doctor/patient',
 };
 
 // Helper function to build full URL

@@ -3,12 +3,19 @@ import { buildApiUrl, API_ENDPOINTS } from '../config/api.js';
 
 const typeIcon = (type) => {
   switch (type) {
-    case 'new_appointment': return '';
-    case 'session_completed': return '';
-    case 'new_user': return '';
-    case 'new_doctor': return '';
-    case 'new_review': return '';
-    default: return '';
+    case 'new_appointment':       return '📅';
+    case 'appointment_booked':    return '✅';
+    case 'appointment_confirmed': return '🎉';
+    case 'appointment_cancelled': return '❌';
+    case 'session_completed':     return '✔️';
+    case 'task_assigned':         return '📋';
+    case 'task_completed':        return '✅';
+    case 'prescription_added':    return '💊';
+    case 'new_user':              return '👤';
+    case 'new_doctor':            return '👨‍⚕️';
+    case 'new_review':            return '⭐';
+    case 'account_deleted':       return '🗑️';
+    default:                      return '🔔';
   }
 };
 
@@ -17,6 +24,7 @@ const doctorSectionMap = {
   new_appointment: 'appointments',
   session_completed: 'appointments',
   new_review: 'reviews',
+  task_completed: 'therapy',
 };
 
 // Maps notification type → dashboard section for admin
@@ -26,6 +34,17 @@ const adminSectionMap = {
   new_user: 'users',
   new_doctor: 'doctors',
   new_review: 'reviews',
+  account_deleted: 'users',
+};
+
+// Maps notification type → dashboard section for patient
+const patientSectionMap = {
+  appointment_booked: 'appointments',
+  appointment_confirmed: 'appointments',
+  appointment_cancelled: 'appointments',
+  session_completed: 'appointments',
+  task_assigned: 'therapy',
+  prescription_added: 'prescriptions',
 };
 
 const NotificationBell = ({ recipientType, recipientId, onNavigate }) => {
@@ -34,14 +53,37 @@ const NotificationBell = ({ recipientType, recipientId, onNavigate }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
+  // Load user preferences from localStorage
+  const getPrefs = () => {
+    try { return JSON.parse(localStorage.getItem('mentra_prefs_' + recipientId)) || {}; } catch { return {}; }
+  };
+
+  // Map notification type → preference key
+  const prefKeyForType = (type) => {
+    if (['appointment_booked', 'appointment_confirmed', 'appointment_cancelled', 'new_appointment'].includes(type))
+      return 'appointmentReminders';
+    if (['session_completed'].includes(type))
+      return 'sessionUpdates';
+    return 'emailNotifications';
+  };
+
+  const isNotifAllowed = (type) => {
+    const prefs = getPrefs();
+    const key = prefKeyForType(type);
+    // Default true if not set
+    return prefs[key] !== false;
+  };
+
   const fetchNotifications = async () => {
     try {
       const id = recipientId || 'all';
       const res = await fetch(buildApiUrl(`${API_ENDPOINTS.NOTIFICATIONS}/${recipientType}/${id}`));
       const data = await res.json();
       if (data.success) {
-        setNotifications(data.notifications);
-        setUnreadCount(data.unreadCount);
+        // Filter out notifications the user has disabled in preferences
+        const filtered = data.notifications.filter(n => isNotifAllowed(n.type));
+        setNotifications(filtered);
+        setUnreadCount(filtered.filter(n => !n.is_read).length);
       }
     } catch (e) {
       console.error('Notification fetch error:', e);
@@ -89,7 +131,7 @@ const NotificationBell = ({ recipientType, recipientId, onNavigate }) => {
     if (!n.is_read) await handleMarkAsRead(n.id);
 
     // Navigate to relevant section
-    const sectionMap = recipientType === 'doctor' ? doctorSectionMap : adminSectionMap;
+    const sectionMap = recipientType === 'doctor' ? doctorSectionMap : recipientType === 'patient' ? patientSectionMap : adminSectionMap;
     const section = sectionMap[n.type];
     if (section && onNavigate) {
       onNavigate(section);
@@ -133,7 +175,7 @@ const NotificationBell = ({ recipientType, recipientId, onNavigate }) => {
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllRead}
-                  className="text-xs text-[#A3B18A] hover:text-[#8FA076] font-medium"
+                  className="text-xs text-[#4A7C59] hover:text-[#3d6b4a] font-medium"
                 >
                   Mark all read
                 </button>
@@ -157,14 +199,14 @@ const NotificationBell = ({ recipientType, recipientId, onNavigate }) => {
               </div>
             ) : (
               notifications.map((n) => {
-                const sectionMap = recipientType === 'doctor' ? doctorSectionMap : adminSectionMap;
+                const sectionMap = recipientType === 'doctor' ? doctorSectionMap : recipientType === 'patient' ? patientSectionMap : adminSectionMap;
                 const hasLink = !!sectionMap[n.type];
                 return (
                   <div
                     key={n.id}
                     onClick={() => handleNotificationClick(n)}
                     className={`px-4 py-3 border-b border-gray-50 transition-colors
-                      ${hasLink ? 'cursor-pointer hover:bg-[#DCE4D4]/40' : 'cursor-default hover:bg-gray-50'}
+                      ${hasLink ? 'cursor-pointer hover:bg-[#d0e8dc]/40' : 'cursor-default hover:bg-gray-50'}
                       ${!n.is_read ? 'bg-[#F5F5F0]' : 'bg-white'}`}
                   >
                     <div className="flex items-start gap-3">
@@ -175,14 +217,14 @@ const NotificationBell = ({ recipientType, recipientId, onNavigate }) => {
                             {n.title}
                           </p>
                           {!n.is_read && (
-                            <span className="w-2 h-2 bg-[#A3B18A] rounded-full flex-shrink-0"></span>
+                            <span className="w-2 h-2 bg-[#4A7C59] rounded-full flex-shrink-0"></span>
                           )}
                         </div>
                         <p className="text-xs text-gray-600 mt-0.5 leading-relaxed">{n.message}</p>
                         <div className="flex items-center justify-between mt-1">
                           <p className="text-xs text-gray-400">{formatTime(n.created_at)}</p>
                           {hasLink && (
-                            <span className="text-xs text-[#A3B18A] font-medium">View →</span>
+                            <span className="text-xs text-[#4A7C59] font-medium">View →</span>
                           )}
                         </div>
                       </div>

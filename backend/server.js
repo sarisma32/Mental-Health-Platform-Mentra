@@ -13,6 +13,9 @@ import dashboardRoutes from "./routes/dashboardRoutes.js";
 import scheduleRoutes from "./routes/scheduleRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
+import chatbotRoutes from "./routes/chatbotRoutes.js";
+import therapyRoutes from "./routes/therapyRoutes.js";
+import prescriptionRoutes from "./routes/prescriptionRoutes.js";
 import { testConnection, initializeDatabase } from "./db/init.js";
 import { startAppointmentScheduler } from "./utils/appointmentScheduler.js";
 
@@ -73,6 +76,12 @@ app.use("/api/reviews", reviewRoutes);
 console.log(' Review routes mounted at /api/reviews');
 app.use("/api/notifications", notificationRoutes);
 console.log(' Notification routes mounted at /api/notifications');
+app.use("/api/chatbot", chatbotRoutes);
+console.log(' Chatbot routes mounted at /api/chatbot');
+app.use("/api/therapy", therapyRoutes);
+console.log(' Therapy routes mounted at /api/therapy');
+app.use("/api/prescriptions", prescriptionRoutes);
+console.log(' Prescription routes mounted at /api/prescriptions');
 
 // Health check route
 app.get("/api/health", (req, res) => {

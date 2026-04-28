@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { buildApiUrl, API_ENDPOINTS } from '../config/api.js';
 
@@ -23,7 +23,7 @@ const UserRegister = () => {
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Invalid email address';
     if (!formData.phoneNumber.trim()) newErrors.phoneNumber = 'Phone number is required';
     if (!formData.age.trim()) newErrors.age = 'Age is required';
-    else { const a = parseInt(formData.age); if (isNaN(a) || a < 13 || a > 120) newErrors.age = 'Age must be 13â€“120'; }
+    else { const a = parseInt(formData.age); if (isNaN(a) || a < 13 || a > 120) newErrors.age = 'Age must be 13–120'; }
     if (!formData.password) newErrors.password = 'Password is required';
     else {
       const errs = [];
@@ -95,7 +95,7 @@ const UserRegister = () => {
     setIsSubmitting(false);
   };
 
-  const inputClass = (field) => `w-full px-4 py-3.5 rounded-xl border text-sm outline-none transition-all focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent bg-gray-50 focus:bg-white ${errors[field] ? 'border-red-300' : 'border-gray-200'}`;
+  const inputClass = (field) => `w-full px-4 py-3.5 rounded-xl border text-sm outline-none transition-all focus:ring-2 focus:ring-[#4A7C59] focus:border-transparent bg-gray-50 focus:bg-white ${errors[field] ? 'border-red-300' : 'border-gray-200'}`;
 
   return (
     <div className="h-screen overflow-hidden bg-white flex flex-col">
@@ -103,7 +103,7 @@ const UserRegister = () => {
       {/* Nav */}
       <nav className="flex items-center justify-between px-8 py-4 border-b border-gray-100 flex-shrink-0">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#A3B18A] rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-[#4A7C59] rounded-lg flex items-center justify-center">
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
@@ -112,7 +112,7 @@ const UserRegister = () => {
         </Link>
         <div className="flex items-center gap-4 text-sm">
           <span className="text-gray-400">Already have an account?</span>
-          <Link to="/login" className="bg-[#A3B18A] hover:bg-[#8FA076] text-white px-4 py-2 rounded-lg font-medium transition-colors">Sign in</Link>
+          <Link to="/login" className="bg-[#4A7C59] hover:bg-[#3d6b4a] text-white px-4 py-2 rounded-lg font-medium transition-colors">Sign in</Link>
         </div>
       </nav>
 
@@ -121,11 +121,11 @@ const UserRegister = () => {
 
         {/* Left decorative */}
         <div className="hidden lg:flex lg:w-1/2 bg-[#F5F5F0] items-center justify-center relative overflow-hidden">
-          <div className="absolute top-10 right-10 w-64 h-64 bg-[#DCE4D4] rounded-full opacity-60" />
-          <div className="absolute bottom-10 left-10 w-48 h-48 bg-[#A3B18A]/20 rounded-full" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#DCE4D4]/40 rounded-full" />
+          <div className="absolute top-10 right-10 w-64 h-64 bg-[#d0e8dc] rounded-full opacity-60" />
+          <div className="absolute bottom-10 left-10 w-48 h-48 bg-[#4A7C59]/20 rounded-full" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#d0e8dc]/40 rounded-full" />
           <div className="relative z-10 text-center px-12">
-            <div className="w-20 h-20 bg-[#A3B18A] rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <div className="w-20 h-20 bg-[#4A7C59] rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
               <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
               </svg>
@@ -135,7 +135,7 @@ const UserRegister = () => {
             <div className="mt-8 grid grid-cols-3 gap-4">
               {[{ n: '10K+', l: 'Users' }, { n: '500+', l: 'Therapists' }, { n: '24/7', l: 'Support' }].map(({ n, l }) => (
                 <div key={l} className="bg-white rounded-2xl p-4 shadow-sm">
-                  <p className="text-lg font-bold text-[#A3B18A]">{n}</p>
+                  <p className="text-lg font-bold text-[#4A7C59]">{n}</p>
                   <p className="text-xs text-gray-500 mt-0.5">{l}</p>
                 </div>
               ))}
@@ -178,12 +178,12 @@ const UserRegister = () => {
                 <div className="flex gap-2">
                   <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="you@example.com"
                     disabled={emailVerified}
-                    className={`flex-1 px-4 py-3.5 rounded-xl border text-sm outline-none transition-all focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent bg-gray-50 focus:bg-white ${errors.email ? 'border-red-300' : emailVerified ? 'border-green-400 bg-green-50' : 'border-gray-200'}`} />
+                    className={`flex-1 px-4 py-3.5 rounded-xl border text-sm outline-none transition-all focus:ring-2 focus:ring-[#4A7C59] focus:border-transparent bg-gray-50 focus:bg-white ${errors.email ? 'border-red-300' : emailVerified ? 'border-green-400 bg-green-50' : 'border-gray-200'}`} />
                   {emailVerified ? (
-                    <span className="flex items-center gap-1 px-3 py-2 bg-green-100 text-green-700 rounded-xl text-xs font-medium whitespace-nowrap">âœ“ Verified</span>
+                    <span className="flex items-center gap-1 px-3 py-2 bg-green-100 text-green-700 rounded-xl text-xs font-medium whitespace-nowrap">✓ Verified</span>
                   ) : (
                     <button type="button" onClick={handleSendOtp} disabled={sendingOtp || !formData.email}
-                      className="px-4 py-2 bg-[#A3B18A] hover:bg-[#8FA076] text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap">
+                      className="px-4 py-2 bg-[#4A7C59] hover:bg-[#3d6b4a] text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap">
                       {sendingOtp ? '...' : 'Verify'}
                     </button>
                   )}
@@ -195,9 +195,9 @@ const UserRegister = () => {
                     <div className="flex gap-2">
                       <input type="text" value={otp} onChange={(e) => { setOtp(e.target.value.replace(/\D/g,'').slice(0,6)); setOtpError(''); }}
                         placeholder="6-digit code" maxLength={6}
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-center tracking-widest font-mono focus:ring-2 focus:ring-[#A3B18A] outline-none bg-white" />
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm text-center tracking-widest font-mono focus:ring-2 focus:ring-[#4A7C59] outline-none bg-white" />
                       <button type="button" onClick={handleVerifyOtp} disabled={verifyingOtp || otp.length !== 6}
-                        className="px-3 py-2 bg-[#A3B18A] text-white rounded-lg text-xs font-medium disabled:opacity-50">
+                        className="px-3 py-2 bg-[#4A7C59] text-white rounded-lg text-xs font-medium disabled:opacity-50">
                         {verifyingOtp ? '...' : 'Confirm'}
                       </button>
                     </div>
@@ -230,13 +230,13 @@ const UserRegister = () => {
 
               {/* Terms */}
               <div className="flex items-start gap-2 pt-1">
-                <input type="checkbox" name="agreeToTerms" checked={formData.agreeToTerms} onChange={handleInputChange} className="mt-0.5 w-4 h-4 text-[#A3B18A] rounded" />
-                <label className="text-xs text-gray-500">I agree to the <a href="#" className="text-[#A3B18A] underline">terms</a> & <a href="#" className="text-[#A3B18A] underline">privacy policy</a></label>
+                <input type="checkbox" name="agreeToTerms" checked={formData.agreeToTerms} onChange={handleInputChange} className="mt-0.5 w-4 h-4 text-[#4A7C59] rounded" />
+                <label className="text-xs text-gray-500">I agree to the <a href="#" className="text-[#4A7C59] underline">terms</a> & <a href="#" className="text-[#4A7C59] underline">privacy policy</a></label>
               </div>
               {errors.agreeToTerms && <p className="text-xs text-red-500">{errors.agreeToTerms}</p>}
 
               <button type="submit" disabled={isSubmitting || !emailVerified}
-                className={`w-full py-3 rounded-xl font-semibold text-sm transition-all mt-1 ${isSubmitting || !emailVerified ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#A3B18A] hover:bg-[#8FA076] text-white'}`}>
+                className={`w-full py-3 rounded-xl font-semibold text-sm transition-all mt-1 ${isSubmitting || !emailVerified ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-[#4A7C59] hover:bg-[#3d6b4a] text-white'}`}>
                 {isSubmitting ? 'Creating Account...' : !emailVerified ? 'Verify Email to Continue' : 'Create Account'}
               </button>
             </form>

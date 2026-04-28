@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import Breadcrumb from '../components/Breadcrumb';
 import Footer from '../components/Footer';
@@ -26,7 +26,7 @@ const ProfessionalsPage = () => {
       const data = await res.json();
       if (data.success) setSpecializations(data.specializations.map(s => s.name));
     } catch (e) {
-      // fallback to empty â€” filter will still work
+      // fallback to empty — filter will still work
     }
   };
 
@@ -45,8 +45,9 @@ const ProfessionalsPage = () => {
           experience: doctor.years_experience ? `${doctor.years_experience} years` : doctor.experience,
           rating: doctor.rating || 0,
           reviews: doctor.review_count || 0,
-          image: doctor.profile_photo ? `http://localhost:5002/${doctor.profile_photo}` : 
-                 "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=300&h=300&fit=crop&crop=face",
+          image: doctor.profile_photo 
+            ? (doctor.profile_photo.startsWith('http') ? doctor.profile_photo : `http://localhost:5002/${doctor.profile_photo}`)
+            : "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=300&h=300&fit=crop&crop=face",
           bio: doctor.bio || "Experienced mental health professional dedicated to helping clients achieve their wellness goals.",
           credentials: doctor.credentials || "Licensed Professional",
           location: doctor.location || doctor.hospital_name,
@@ -94,10 +95,10 @@ const ProfessionalsPage = () => {
     const hasHalfStar = rating % 1 !== 0;
 
     for (let i = 0; i < fullStars; i++) {
-      stars.push(<span key={i} className="text-yellow-400">â˜…</span>);
+      stars.push(<span key={i} className="text-yellow-400">★</span>);
     }
     if (hasHalfStar) {
-      stars.push(<span key="half" className="text-yellow-400">â˜†</span>);
+      stars.push(<span key="half" className="text-yellow-400">☆</span>);
     }
     return stars;
   };
@@ -196,7 +197,7 @@ const ProfessionalsPage = () => {
             </div>
           ) : filteredProfessionals.length === 0 ? (
             <div className="text-center py-12">
-              <div className="text-6xl mb-4">ðŸ”</div>
+              <div className="text-6xl mb-4">🔍</div>
               <h3 className="text-2xl font-bold text-gray-900 mb-2">No professionals found</h3>
               <p className="text-gray-600 mb-6">Try adjusting your search criteria or browse all professionals.</p>
               <button

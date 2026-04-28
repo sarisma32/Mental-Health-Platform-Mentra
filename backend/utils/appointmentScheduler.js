@@ -60,17 +60,35 @@ const sendAppointmentReminders = async () => {
   }
 };
 
+// Delete past schedule slots that ended more than 24 hours ago
+const cleanupPastSchedules = async () => {
+  try {
+    const result = await pool.query(
+      `DELETE FROM doctor_schedules
+       WHERE (schedule_date + end_time::interval) < (NOW() - INTERVAL '24 hours')
+       RETURNING id`
+    );
+    if (result.rows.length > 0) {
+      console.log(` Cleaned up ${result.rows.length} expired schedule slot(s)`);
+    }
+  } catch (err) {
+    console.error(' Schedule cleanup error:', err.message);
+  }
+};
+
 // Start the scheduler — runs every 15 minutes
 export const startAppointmentScheduler = () => {
-  console.log(' Appointment scheduler started (auto-confirm + reminders, every 15 min)');
+  console.log(' Appointment scheduler started (auto-confirm + reminders + schedule cleanup, every 15 min)');
 
   // Run immediately on startup
   autoConfirmPendingAppointments();
   sendAppointmentReminders();
+  cleanupPastSchedules();
 
   // Then every 15 minutes
   setInterval(() => {
     autoConfirmPendingAppointments();
     sendAppointmentReminders();
+    cleanupPastSchedules();
   }, 15 * 60 * 1000);
 };

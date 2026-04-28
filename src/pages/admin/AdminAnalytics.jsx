@@ -72,7 +72,7 @@ const AdminAnalytics = () => {
 
   if (loading) return (
     <div className="text-center py-20">
-      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#A3B18A] mx-auto mb-3"></div>
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#4A7C59] mx-auto mb-3"></div>
       <p className="text-gray-500 text-sm">Loading analytics...</p>
     </div>
   );
@@ -85,10 +85,10 @@ const AdminAnalytics = () => {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { label: 'Total Revenue', value: `Rs ${data.revenue.toLocaleString()}`, sub: 'From completed sessions', color: 'bg-[#A3B18A]', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" /> },
+          { label: 'Total Revenue', value: `Rs ${data.revenue.toLocaleString()}`, sub: 'From completed sessions', color: 'bg-[#4A7C59]', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" /> },
           { label: 'Total Appointments', value: data.appointments.total, sub: `${data.appointments.completed} completed`, color: 'bg-blue-500', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /> },
           { label: 'Active Patients', value: data.users.active, sub: `${data.users.total} total registered`, color: 'bg-purple-500', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /> },
-          { label: 'Total Doctors', value: data.doctors.total, sub: `${data.doctors.approved} approved`, color: 'bg-[#8FA076]', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /> },
+          { label: 'Total Doctors', value: data.doctors.total, sub: `${data.doctors.approved} approved`, color: 'bg-[#3d6b4a]', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /> },
         ].map(card => (
           <div key={card.label} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100">
             <div className="flex items-start justify-between">
@@ -133,7 +133,7 @@ const AdminAnalytics = () => {
           <h3 className="font-semibold text-gray-800 mb-5">Doctor Status</h3>
           <div className="space-y-4">
             {[
-              { label: 'Approved', value: data.doctors.approved, total: data.doctors.total, color: 'bg-[#A3B18A]' },
+              { label: 'Approved', value: data.doctors.approved, total: data.doctors.total, color: 'bg-[#4A7C59]' },
               { label: 'Pending', value: data.doctors.pending, total: data.doctors.total, color: 'bg-yellow-400' },
               { label: 'Rejected', value: data.doctors.rejected, total: data.doctors.total, color: 'bg-red-400' },
             ].map(item => (
@@ -162,7 +162,7 @@ const AdminAnalytics = () => {
                     <span className="font-semibold text-gray-900 flex-shrink-0">{count} doctor{count !== 1 ? 's' : ''}</span>
                   </div>
                   <div className="w-full bg-gray-100 rounded-full h-2">
-                    <div className="bg-[#A3B18A] h-2 rounded-full" style={{ width: `${(count / maxSpec) * 100}%` }} />
+                    <div className="bg-[#4A7C59] h-2 rounded-full" style={{ width: `${(count / maxSpec) * 100}%` }} />
                   </div>
                 </div>
               ))}
@@ -220,11 +220,11 @@ const AdminAnalytics = () => {
               <div className="flex flex-col justify-between text-xs text-gray-300 text-right pb-6" style={{minWidth:'24px', height:`${H}px`}}>{yTicks.map(v => <span key={v}>{v}</span>)}</div>
               <div className="flex-1 min-w-0">
                 <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{height:`${H}px`}} preserveAspectRatio="none">
-                  <defs><linearGradient id="aptAreaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#A3B18A" stopOpacity="0.25"/><stop offset="100%" stopColor="#A3B18A" stopOpacity="0"/></linearGradient></defs>
+                  <defs><linearGradient id="aptAreaGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#4A7C59" stopOpacity="0.25"/><stop offset="100%" stopColor="#4A7C59" stopOpacity="0"/></linearGradient></defs>
                   {yTicks.map((v, i) => { const y = H - PAD - ((v / maxVal) * (H - PAD * 2)); return <line key={i} x1={PAD} y1={y} x2={W - PAD} y2={y} stroke="#f3f4f6" strokeWidth="1" strokeDasharray="4,4"/>; })}
                   {areaPath && <path d={areaPath} fill="url(#aptAreaGrad)"/>}
-                  {linePath && <path d={linePath} fill="none" stroke="#A3B18A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>}
-                  {coords.map(([x, y], i) => (<g key={i}><circle cx={x} cy={y} r="5" fill="white" stroke="#A3B18A" strokeWidth="2.5"/>{pts[i] > 0 && <text x={x} y={y - 10} textAnchor="middle" fontSize="10" fill="#6b7280" fontWeight="600">{pts[i]}</text>}</g>))}
+                  {linePath && <path d={linePath} fill="none" stroke="#4A7C59" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>}
+                  {coords.map(([x, y], i) => (<g key={i}><circle cx={x} cy={y} r="5" fill="white" stroke="#4A7C59" strokeWidth="2.5"/>{pts[i] > 0 && <text x={x} y={y - 10} textAnchor="middle" fontSize="10" fill="#6b7280" fontWeight="600">{pts[i]}</text>}</g>))}
                 </svg>
                 <div className="flex justify-between text-xs text-gray-400 mt-1 px-1">{data.months.map(m => <span key={m.label}>{m.label}</span>)}</div>
               </div>
@@ -240,7 +240,7 @@ const AdminAnalytics = () => {
           <div className="flex border border-gray-200 rounded-lg overflow-hidden text-xs font-medium">
             {['patients','doctors'].map(tab => (
               <button key={tab} onClick={() => setRegTab(tab)}
-                className={`px-4 py-1.5 capitalize transition-colors ${regTab === tab ? 'bg-[#A3B18A] text-white' : 'bg-white text-gray-500 hover:bg-gray-50'}`}>
+                className={`px-4 py-1.5 capitalize transition-colors ${regTab === tab ? 'bg-[#4A7C59] text-white' : 'bg-white text-gray-500 hover:bg-gray-50'}`}>
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
               </button>
             ))}
@@ -258,7 +258,7 @@ const AdminAnalytics = () => {
               <div className="flex flex-col justify-between text-xs text-gray-300 text-right pb-6" style={{minWidth:'24px', height:`${H}px`}}>{yTicks.map(v => <span key={v}>{v}</span>)}</div>
               <div className="flex-1 min-w-0">
                 <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{height:`${H}px`}} preserveAspectRatio="none">
-                  <defs><linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#A3B18A" stopOpacity="1"/><stop offset="100%" stopColor="#8FA076" stopOpacity="0.8"/></linearGradient></defs>
+                  <defs><linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#4A7C59" stopOpacity="1"/><stop offset="100%" stopColor="#3d6b4a" stopOpacity="0.8"/></linearGradient></defs>
                   {yTicks.map((v, i) => { const y = H - PAD - ((v / maxVal) * (H - PAD * 2)); return <line key={i} x1={PAD} y1={y} x2={W - PAD} y2={y} stroke="#f3f4f6" strokeWidth="1" strokeDasharray="4,4"/>; })}
                   <line x1={PAD} y1={H - PAD} x2={W - PAD} y2={H - PAD} stroke="#e5e7eb" strokeWidth="1"/>
                   {regData.map(({ count }, i) => {

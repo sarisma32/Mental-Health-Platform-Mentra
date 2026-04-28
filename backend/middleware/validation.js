@@ -6,11 +6,11 @@ export const handleValidationErrors = (req, res, next) => {
   if (!errors.isEmpty()) {
     return res.status(400).json({
       success: false,
-      message: 'Validation failed',
+      message: errors.array()[0].msg, // show the first specific error message
       errors: errors.array()
     });
   }
-  next(); // all good — proceed to registerPatient
+  next();
 };
 
 // Patient registration validation

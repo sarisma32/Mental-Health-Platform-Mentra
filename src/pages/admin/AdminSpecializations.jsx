@@ -76,9 +76,9 @@ const AdminSpecializations = () => {
         <h3 className="text-base font-semibold text-gray-800 mb-4">Add New Specialization</h3>
         <form onSubmit={handleAdd} className="flex gap-3">
           <input type="text" value={newName} onChange={e => setNewName(e.target.value)} placeholder="e.g. Trauma Therapy"
-            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent" />
+            className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#4A7C59] focus:border-transparent" />
           <button type="submit" disabled={adding || !newName.trim()}
-            className="px-5 py-2 bg-[#A3B18A] text-white rounded-lg text-sm font-medium hover:bg-[#8FA076] transition-colors disabled:opacity-50">
+            className="px-5 py-2 bg-[#4A7C59] text-white rounded-lg text-sm font-medium hover:bg-[#3d6b4a] transition-colors disabled:opacity-50">
             {adding ? 'Adding...' : 'Add'}
           </button>
         </form>
@@ -89,7 +89,7 @@ const AdminSpecializations = () => {
           <h3 className="font-semibold text-gray-800">All Specializations ({specializations.length})</h3>
         </div>
         {loading ? (
-          <div className="text-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#A3B18A] mx-auto"></div></div>
+          <div className="text-center py-12"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#4A7C59] mx-auto"></div></div>
         ) : specializations.length === 0 ? (
           <div className="text-center py-12 text-gray-400 text-sm">No specializations yet.</div>
         ) : (
@@ -99,15 +99,15 @@ const AdminSpecializations = () => {
                 {editingId === spec.id ? (
                   <div className="flex items-center gap-3 flex-1">
                     <input type="text" value={editName} onChange={e => setEditName(e.target.value)} autoFocus
-                      className="flex-1 px-3 py-1.5 border border-[#A3B18A] rounded-lg text-sm focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent" />
-                    <button onClick={() => handleEdit(spec.id)} className="px-3 py-1.5 bg-[#A3B18A] text-white rounded-lg text-xs font-medium hover:bg-[#8FA076] transition-colors">Save</button>
+                      className="flex-1 px-3 py-1.5 border border-[#4A7C59] rounded-lg text-sm focus:ring-2 focus:ring-[#4A7C59] focus:border-transparent" />
+                    <button onClick={() => handleEdit(spec.id)} className="px-3 py-1.5 bg-[#4A7C59] text-white rounded-lg text-xs font-medium hover:bg-[#3d6b4a] transition-colors">Save</button>
                     <button onClick={() => { setEditingId(null); setEditName(''); }} className="px-3 py-1.5 bg-gray-100 text-gray-600 rounded-lg text-xs font-medium hover:bg-gray-200 transition-colors">Cancel</button>
                   </div>
                 ) : (
                   <>
                     <div className="flex items-center gap-3 flex-1">
-                      <div className="w-8 h-8 bg-[#DCE4D4] rounded-lg flex items-center justify-center flex-shrink-0">
-                        <svg className="w-4 h-4 text-[#A3B18A]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+                      <div className="w-8 h-8 bg-[#d0e8dc] rounded-lg flex items-center justify-center flex-shrink-0">
+                        <svg className="w-4 h-4 text-[#4A7C59]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
                       </div>
                       <div>
                         <span className="text-sm font-medium text-gray-800">{spec.name}</span>

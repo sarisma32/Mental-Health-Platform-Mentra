@@ -1,4 +1,4 @@
-﻿import React, { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -189,7 +189,7 @@ const AppointmentConfirmationPage = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Location & Directions</h3>
               <div className="bg-gray-50 rounded-lg p-4">
                 <div className="flex items-start space-x-3">
-                  <span className="text-mentra-primary text-xl mt-1">ðŸ“</span>
+                  <span className="text-mentra-primary text-xl mt-1">📍</span>
                   <div>
                     <h4 className="font-semibold text-gray-900">{professional.location}</h4>
                     <p className="text-gray-600 mt-1">{professional.address}</p>
@@ -200,13 +200,13 @@ const AppointmentConfirmationPage = () => {
                         rel="noopener noreferrer"
                         className="text-mentra-primary hover:text-mentra-primary-hover font-medium text-sm"
                       >
-                        Get Directions â†’
+                        Get Directions →
                       </a>
                       <a 
                         href={`tel:${professional.phone}`}
                         className="text-mentra-primary hover:text-mentra-primary-hover font-medium text-sm"
                       >
-                        Call Clinic ’
+                        Call Clinic �
                       </a>
                     </div>
                   </div>

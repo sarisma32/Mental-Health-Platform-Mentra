@@ -47,13 +47,13 @@ const AdminDoctors = ({ doctors, filter, setFilter, searchTerm, setSearchTerm, u
               </div>
               <input type="text" placeholder="Search by name, email, or specialization..." value={searchTerm}
                 onChange={e => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent" />
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4A7C59] focus:border-transparent" />
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Status</label>
             <select value={filter} onChange={e => setFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent">
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4A7C59] focus:border-transparent">
               <option value="all">All Status</option>
               <option value="pending">Pending</option>
               <option value="approved">Approved</option>
@@ -87,7 +87,7 @@ const AdminDoctors = ({ doctors, filter, setFilter, searchTerm, setSearchTerm, u
                   className="hover:bg-[#F5F5F0] transition-colors cursor-pointer group">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#A3B18A] to-[#8FA076] flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">{doctor.full_name.charAt(0)}</div>
+                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">{doctor.full_name.charAt(0)}</div>
                       <div>
                         <p className="text-sm font-semibold text-gray-900">{doctor.full_name}</p>
                         <p className="text-xs text-gray-400">{doctor.email}</p>
@@ -127,7 +127,7 @@ const AdminDoctors = ({ doctors, filter, setFilter, searchTerm, setSearchTerm, u
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 sticky top-0 bg-white">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center text-white font-bold text-lg">{selectedDoctor.full_name.charAt(0)}</div>
+                <div className="w-12 h-12 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-bold text-lg">{selectedDoctor.full_name.charAt(0)}</div>
                 <div>
                   <h3 className="font-bold text-gray-900">{selectedDoctor.full_name}</h3>
                   <div className="flex items-center gap-2 mt-0.5">{getStatusBadge(selectedDoctor.approval_status)}<span className="text-xs text-gray-400">{selectedDoctor.specialization}</span></div>
@@ -161,8 +161,8 @@ const AdminDoctors = ({ doctors, filter, setFilter, searchTerm, setSearchTerm, u
               {selectedDoctor.document_path && (
                 <div>
                   <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">License Document</p>
-                  <a href={`http://localhost:5002/uploads/documents/${selectedDoctor.document_path.split('\\').pop()}`} target="_blank" rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 bg-[#DCE4D4] text-[#A3B18A] hover:bg-[#A3B18A] hover:text-white rounded-lg text-sm font-medium transition-colors">
+                  <a href={selectedDoctor.document_path?.startsWith('http') ? selectedDoctor.document_path : `http://localhost:5002/uploads/documents/${selectedDoctor.document_path?.split('\\').pop()}`} target="_blank" rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-4 py-2 bg-[#d0e8dc] text-[#4A7C59] hover:bg-[#4A7C59] hover:text-white rounded-lg text-sm font-medium transition-colors">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                     View Document
                   </a>
@@ -185,7 +185,7 @@ const AdminDoctors = ({ doctors, filter, setFilter, searchTerm, setSearchTerm, u
               </>)}
               {selectedDoctor.approval_status === 'approved' && <button onClick={() => { updateDoctorStatus(selectedDoctor.id, 'rejected'); setSelectedDoctor(null); }} className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium text-sm transition-colors">Revoke Approval</button>}
               {selectedDoctor.approval_status === 'rejected' && <button onClick={() => { updateDoctorStatus(selectedDoctor.id, 'approved'); setSelectedDoctor(null); }} className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium text-sm transition-colors">Approve</button>}
-              <button onClick={() => setSelectedDoctor(null)} className="flex-1 py-2.5 bg-[#A3B18A] hover:bg-[#8FA076] text-white rounded-xl font-medium text-sm transition-colors">Close</button>
+              <button onClick={() => setSelectedDoctor(null)} className="flex-1 py-2.5 bg-[#4A7C59] hover:bg-[#3d6b4a] text-white rounded-xl font-medium text-sm transition-colors">Close</button>
             </div>
           </div>
         </div>

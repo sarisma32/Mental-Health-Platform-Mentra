@@ -42,7 +42,7 @@ const DoctorCompleteSessionModal = ({
               Session Notes <span className="text-red-500">*</span>
             </label>
             <textarea value={sessionNotes} onChange={e => setSessionNotes(e.target.value)} rows={8}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent resize-none"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4A7C59] focus:border-transparent resize-none"
               placeholder="Enter session notes, observations, treatment plan, recommendations, etc..." required />
             <p className="text-xs text-gray-500 mt-2">These notes will be visible to the patient after the session is completed.</p>
           </div>
@@ -51,7 +51,7 @@ const DoctorCompleteSessionModal = ({
             <button onClick={onClose} disabled={completingSession}
               className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 font-medium transition-colors disabled:opacity-50">Cancel</button>
             <button onClick={handleCompleteSession} disabled={completingSession || !sessionNotes.trim()}
-              className="px-6 py-2 bg-[#A3B18A] hover:bg-[#8FA076] text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+              className="px-6 py-2 bg-[#4A7C59] hover:bg-[#3d6b4a] text-white rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
               {completingSession ? 'Completing...' : 'Complete Session'}
             </button>
           </div>

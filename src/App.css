@@ -2,11 +2,11 @@
 
 /* Custom Mentra Colors */
 :root {
-  --mentra-primary: #A3B18A;
-  --mentra-secondary: #DCE4D4;
+  --mentra-primary: #4A7C59;
+  --mentra-secondary: #dce8e0;
   --mentra-white: #F5F5F0;
-  --mentra-primary-hover: #8fa076;
-  --mentra-primary-dark: #7a8c61;
+  --mentra-primary-hover: #3d6b4a;
+  --mentra-primary-dark: #2d5238;
 }
 
 /* Custom color classes */

@@ -1,4 +1,4 @@
-﻿import React from 'react'
+import React from 'react'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import MentraLanding from './pages/MentraLanding'
 import SignupPage from './pages/SignupPage'
@@ -21,6 +21,7 @@ import AdminLogin from './pages/AdminLogin'
 import AdminDashboardNew from './pages/AdminDashboardNew'
 import AccountDeactivated from './pages/AccountDeactivated'
 import DoctorProfilePage from './pages/DoctorProfilePage'
+import ChatbotPage from './chatbot/ChatbotPage.jsx'
 import './App.css'
 
 function App() {
@@ -49,6 +50,7 @@ function App() {
           <Route path="/admin" element={<AdminDashboardNew />} />
           <Route path="/account-deactivated" element={<AccountDeactivated />} />
           <Route path="/doctor-profile/:doctorId" element={<DoctorProfilePage />} />
+          <Route path="/chatbot" element={<ChatbotPage />} />
         </Routes>
       </div>
     </Router>

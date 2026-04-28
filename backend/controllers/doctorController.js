@@ -1,9 +1,9 @@
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import pool from "../db/index.js";
-import path from "path";
 import { createNotification } from "./notificationController.js";
 import { sendOTPEmail } from "../utils/emailService.js";
+import { uploadToCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js";
 
 // REGISTER DOCTOR
 export const registerDoctor = async (req, res) => {
@@ -66,8 +66,17 @@ export const registerDoctor = async (req, res) => {
     const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Store document path
-    const documentPath = req.file.path;
+    // Upload document to Cloudinary in doctor's folder
+    // We use a temporary folder name based on email since we don't have doctorId yet
+    const sanitizedEmail = email.replace(/[^a-zA-Z0-9]/g, '_');
+    const cloudinaryResult = await uploadToCloudinary(req.file.buffer, {
+      folder: `mentra/doctors/pending_${sanitizedEmail}/documents`,
+      resource_type: 'auto',  // auto detects image or pdf
+      public_id: `license_${Date.now()}`,
+      use_filename: false,
+    });
+
+    const documentPath = cloudinaryResult.secure_url; // Cloudinary URL
 
     // Insert into database
     const newDoctor = await pool.query(
@@ -377,18 +386,21 @@ export const updateDoctorProfileInfo = async (req, res) => {
 // UPLOAD PROFILE PHOTO
 export const uploadProfilePhoto = async (req, res) => {
   try {
-    const doctorId = req.user.id; // From JWT token
+    const doctorId = req.user.id;
 
     if (!req.file) {
-      return res.status(400).json({
-        success: false,
-        message: "Please upload a profile photo."
-      });
+      return res.status(400).json({ success: false, message: "Please upload a profile photo." });
     }
 
-    // Store only the relative path (not the full system path)
-    // Convert backslashes to forward slashes for consistency
-    const photoPath = req.file.path.replace(/\\/g, '/').split('backend/')[1] || req.file.path;
+    // Upload to Cloudinary in doctor's folder
+    const cloudinaryResult = await uploadToCloudinary(req.file.buffer, {
+      folder: `mentra/doctors/doctor_${doctorId}/profile`,
+      resource_type: 'image',
+      public_id: `photo_${Date.now()}`,
+      transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'face' }]
+    });
+
+    const photoPath = cloudinaryResult.secure_url; // Cloudinary URL
 
     const updatedDoctor = await pool.query(
       `UPDATE doctors SET 
@@ -400,10 +412,7 @@ export const uploadProfilePhoto = async (req, res) => {
     );
 
     if (updatedDoctor.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Doctor not found."
-      });
+      return res.status(404).json({ success: false, message: "Doctor not found." });
     }
 
     res.json({
@@ -541,12 +550,20 @@ export const uploadDoctorVideo = async (req, res) => {
       return res.status(400).json({ success: false, message: "Video title is required." });
     }
 
-    const videoPath = `uploads/videos/${req.file.filename}`;
+    // Upload video to Cloudinary in doctor's dedicated folder
+    const cloudinaryResult = await uploadToCloudinary(req.file.buffer, {
+      folder: `mentra/doctors/doctor_${doctorId}/videos`,
+      resource_type: 'video',
+      public_id: `video_${Date.now()}`,
+    });
+
+    const videoPath = cloudinaryResult.secure_url;       // Cloudinary URL
+    const cloudinaryPublicId = cloudinaryResult.public_id; // for future deletion
 
     const result = await pool.query(
-      `INSERT INTO doctor_videos (doctor_id, title, description, video_path)
-       VALUES ($1, $2, $3, $4) RETURNING *`,
-      [doctorId, title.trim(), description || null, videoPath]
+      `INSERT INTO doctor_videos (doctor_id, title, description, video_path, cloudinary_public_id)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [doctorId, title.trim(), description || null, videoPath, cloudinaryPublicId]
     );
 
     res.status(201).json({ success: true, message: "Video uploaded successfully!", video: result.rows[0] });
@@ -584,6 +601,12 @@ export const deleteDoctorVideo = async (req, res) => {
 
     if (result.rows.length === 0) {
       return res.status(404).json({ success: false, message: "Video not found." });
+    }
+
+    // Also delete from Cloudinary if public_id is stored
+    const deleted = result.rows[0];
+    if (deleted.cloudinary_public_id) {
+      await deleteFromCloudinary(deleted.cloudinary_public_id, 'video');
     }
 
     res.json({ success: true, message: "Video deleted successfully." });
@@ -630,7 +653,7 @@ export const sendDoctorEmailVerification = async (req, res) => {
 
     // Send OTP email — log to console as fallback if delivery fails
     try {
-      const result = await sendOTPEmail(email, otp, 'Doctor');
+      const result = await sendOTPEmail(email, otp, 'Doctor', 'verification');
       if (!result.success) {
         console.log(`[DOCTOR EMAIL VERIFY] OTP for ${email}: ${otp}`);
       }
@@ -668,5 +691,25 @@ export const verifyDoctorEmailOTP = async (req, res) => {
   } catch (err) {
     console.error('Verify doctor email OTP error:', err);
     res.status(500).json({ success: false, message: 'Verification failed.' });
+  }
+};
+
+// CHANGE PASSWORD
+export const changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const doctorId = req.user.id;
+    if (!currentPassword || !newPassword) return res.status(400).json({ success: false, message: 'Both passwords are required.' });
+    if (newPassword.length < 8) return res.status(400).json({ success: false, message: 'New password must be at least 8 characters.' });
+    const result = await pool.query('SELECT password FROM doctors WHERE id = $1', [doctorId]);
+    if (!result.rows.length) return res.status(404).json({ success: false, message: 'Doctor not found.' });
+    const valid = await bcrypt.compare(currentPassword, result.rows[0].password);
+    if (!valid) return res.status(400).json({ success: false, message: 'Current password is incorrect.' });
+    const hashed = await bcrypt.hash(newPassword, 10);
+    await pool.query('UPDATE doctors SET password = $1 WHERE id = $2', [hashed, doctorId]);
+    res.json({ success: true, message: 'Password changed successfully.' });
+  } catch (err) {
+    console.error('Change password error:', err);
+    res.status(500).json({ success: false, message: 'Failed to change password.' });
   }
 };

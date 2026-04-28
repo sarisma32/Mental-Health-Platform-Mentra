@@ -91,9 +91,10 @@ const Header = () => {
               Home
               {renderActiveIndicator('/')}
             </Link>
-            <a href="#chatbot" className="text-gray-700 hover:text-mentra-primary hover:bg-mentra-secondary/20 transition-all duration-300 font-medium relative px-3 py-2 rounded-lg transform hover:scale-105">
+            <Link to="/chatbot" className={getNavClasses('/chatbot')}>
               Chatbot
-            </a>
+              {renderActiveIndicator('/chatbot')}
+            </Link>
             <Link to="/services" className={getNavClasses('/services')}>
               Services
               {renderActiveIndicator('/services')}
@@ -168,13 +169,16 @@ const Header = () => {
                   {isActive('/') && <span className="text-mentra-primary">•</span>}
                 </div>
               </Link>
-              <a 
-                href="#chatbot" 
-                className="text-gray-700 hover:text-mentra-primary hover:bg-mentra-secondary/20 font-medium px-3 py-2 rounded-lg transition-all duration-200"
+              <Link
+                to="/chatbot"
+                className={`${getNavClasses('/chatbot')} ${isActive('/chatbot') ? 'bg-mentra-secondary/50' : ''}`}
                 onClick={() => setIsMenuOpen(false)}
               >
-                Chatbot
-              </a>
+                <div className="flex items-center justify-between">
+                  <span>Chatbot</span>
+                  {isActive('/chatbot') && <span className="text-mentra-primary">•</span>}
+                </div>
+              </Link>
               <Link 
                 to="/services" 
                 className={`${getNavClasses('/services')} ${isActive('/services') ? 'bg-mentra-secondary/50' : ''}`}

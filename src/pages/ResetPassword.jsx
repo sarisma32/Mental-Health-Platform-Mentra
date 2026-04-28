@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { buildApiUrl, API_ENDPOINTS } from '../config/api.js';
 
@@ -33,7 +33,7 @@ const ResetPassword = () => {
     if (name === 'newPassword') setStrength(checkStrength(value));
   };
 
-  const strengthColor = (s) => s <= 2 ? 'bg-red-400' : s <= 3 ? 'bg-yellow-400' : s <= 4 ? 'bg-blue-400' : 'bg-[#A3B18A]';
+  const strengthColor = (s) => s <= 2 ? 'bg-red-400' : s <= 3 ? 'bg-yellow-400' : s <= 4 ? 'bg-blue-400' : 'bg-[#4A7C59]';
   const strengthText = (s) => s <= 2 ? 'Weak' : s <= 3 ? 'Fair' : s <= 4 ? 'Good' : 'Strong';
 
   const handleSubmit = async (e) => {
@@ -77,7 +77,7 @@ const ResetPassword = () => {
       {/* Nav */}
       <nav className="flex items-center justify-between px-8 py-5 border-b border-gray-100 flex-shrink-0">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#A3B18A] rounded-lg flex items-center justify-center">
+          <div className="w-8 h-8 bg-[#4A7C59] rounded-lg flex items-center justify-center">
             <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
@@ -86,7 +86,7 @@ const ResetPassword = () => {
         </Link>
         <div className="flex items-center gap-4 text-sm">
           <span className="text-gray-400">Remember your password?</span>
-          <Link to="/login" className="bg-[#A3B18A] hover:bg-[#8FA076] text-white px-4 py-2 rounded-lg font-medium transition-colors">
+          <Link to="/login" className="bg-[#4A7C59] hover:bg-[#3d6b4a] text-white px-4 py-2 rounded-lg font-medium transition-colors">
             Sign in
           </Link>
         </div>
@@ -95,13 +95,13 @@ const ResetPassword = () => {
       {/* Main */}
       <div className="flex-1 flex overflow-hidden">
 
-        {/* Decorative side â€” LEFT */}
+        {/* Decorative side — LEFT */}
         <div className="hidden lg:flex lg:w-1/2 bg-[#F5F5F0] items-center justify-center relative overflow-hidden">
-          <div className="absolute top-10 right-10 w-64 h-64 bg-[#DCE4D4] rounded-full opacity-60" />
-          <div className="absolute bottom-10 left-10 w-48 h-48 bg-[#A3B18A]/20 rounded-full" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#DCE4D4]/40 rounded-full" />
+          <div className="absolute top-10 right-10 w-64 h-64 bg-[#d0e8dc] rounded-full opacity-60" />
+          <div className="absolute bottom-10 left-10 w-48 h-48 bg-[#4A7C59]/20 rounded-full" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-[#d0e8dc]/40 rounded-full" />
           <div className="relative z-10 text-center px-12">
-            <div className="w-20 h-20 bg-[#A3B18A] rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+            <div className="w-20 h-20 bg-[#4A7C59] rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-lg">
               <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
               </svg>
@@ -113,7 +113,7 @@ const ResetPassword = () => {
             <div className="mt-8 grid grid-cols-3 gap-4">
               {[{ n: '10K+', l: 'Users' }, { n: '500+', l: 'Therapists' }, { n: '24/7', l: 'Support' }].map(({ n, l }) => (
                 <div key={l} className="bg-white rounded-2xl p-4 shadow-sm">
-                  <p className="text-lg font-bold text-[#A3B18A]">{n}</p>
+                  <p className="text-lg font-bold text-[#4A7C59]">{n}</p>
                   <p className="text-xs text-gray-500 mt-0.5">{l}</p>
                 </div>
               ))}
@@ -121,7 +121,7 @@ const ResetPassword = () => {
           </div>
         </div>
 
-        {/* Form side â€” RIGHT */}
+        {/* Form side — RIGHT */}
         <div className="w-full lg:w-1/2 flex items-center justify-center px-8 py-10">
           <div className="w-full max-w-sm">
 
@@ -145,7 +145,7 @@ const ResetPassword = () => {
                     type={showPassword ? 'text' : 'password'} name="newPassword"
                     value={formData.newPassword} onChange={handleInputChange}
                     placeholder="Enter new password" required disabled={loading}
-                    className="w-full px-4 py-3 pr-10 rounded-xl border-2 text-sm outline-none transition-all focus:border-[#A3B18A] border-gray-100 hover:border-gray-200"
+                    className="w-full px-4 py-3 pr-10 rounded-xl border-2 text-sm outline-none transition-all focus:border-[#4A7C59] border-gray-100 hover:border-gray-200"
                   />
                   <EyeIcon show={showPassword} toggle={() => setShowPassword(!showPassword)} />
                 </div>
@@ -174,7 +174,7 @@ const ResetPassword = () => {
                     type={showConfirm ? 'text' : 'password'} name="confirmPassword"
                     value={formData.confirmPassword} onChange={handleInputChange}
                     placeholder="Confirm new password" required disabled={loading}
-                    className={`w-full px-4 py-3 pr-10 rounded-xl border-2 text-sm outline-none transition-all focus:border-[#A3B18A] ${
+                    className={`w-full px-4 py-3 pr-10 rounded-xl border-2 text-sm outline-none transition-all focus:border-[#4A7C59] ${
                       formData.confirmPassword && formData.newPassword !== formData.confirmPassword
                         ? 'border-red-300' : 'border-gray-100 hover:border-gray-200'
                     }`}
@@ -185,7 +185,7 @@ const ResetPassword = () => {
                   <p className="mt-1 text-xs text-red-500">Passwords do not match</p>
                 )}
                 {formData.confirmPassword && formData.newPassword === formData.confirmPassword && (
-                  <p className="mt-1 text-xs text-[#A3B18A]">âœ“ Passwords match</p>
+                  <p className="mt-1 text-xs text-[#4A7C59]">✓ Passwords match</p>
                 )}
               </div>
 
@@ -212,7 +212,7 @@ const ResetPassword = () => {
                 className={`w-full py-3.5 rounded-xl font-semibold text-sm transition-all mt-1 ${
                   loading || strength.score < 5 || formData.newPassword !== formData.confirmPassword
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-[#A3B18A] hover:bg-[#8FA076] text-white'
+                    : 'bg-[#4A7C59] hover:bg-[#3d6b4a] text-white'
                 }`}>
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">

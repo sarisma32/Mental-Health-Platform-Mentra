@@ -46,16 +46,17 @@ const AdminUsers = ({ patients, patientSearchTerm, setPatientSearchTerm, userFil
               </div>
               <input type="text" placeholder="Search by name, email, or phone..." value={patientSearchTerm}
                 onChange={e => setPatientSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent" />
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4A7C59] focus:border-transparent" />
             </div>
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Filter by Status</label>
             <select value={userFilter} onChange={e => setUserFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#A3B18A] focus:border-transparent">
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#4A7C59] focus:border-transparent">
               <option value="all">All Users</option>
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
+              <option value="deleted">Deleted</option>
             </select>
           </div>
         </div>
@@ -84,19 +85,25 @@ const AdminUsers = ({ patients, patientSearchTerm, setPatientSearchTerm, userFil
                   className="hover:bg-[#F5F5F0] transition-colors cursor-pointer group">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">{patient.full_name.charAt(0).toUpperCase()}</div>
+                      <div className="w-9 h-9 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">{patient.full_name.charAt(0).toUpperCase()}</div>
                       <p className="text-sm font-semibold text-gray-900">{patient.full_name}</p>
                     </div>
                   </td>
                   <td className="px-6 py-4"><p className="text-sm text-gray-600">{patient.email}</p></td>
                   <td className="px-6 py-4"><p className="text-sm text-gray-500">{new Date(patient.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p></td>
                   <td className="px-6 py-4">
-                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${patient.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                      {patient.status === 'active' ? 'Active' : 'Inactive'}
+                    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                      patient.status === 'active' ? 'bg-green-100 text-green-800'
+                      : patient.status === 'deleted' ? 'bg-gray-100 text-gray-500'
+                      : 'bg-red-100 text-red-800'
+                    }`}>
+                      {patient.status === 'active' ? 'Active' : patient.status === 'deleted' ? 'Deleted' : 'Inactive'}
                     </span>
                   </td>
                   <td className="px-6 py-4" onClick={e => e.stopPropagation()}>
-                    {patient.status === 'active' ? (
+                    {patient.status === 'deleted' ? (
+                      <span className="px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">Removed</span>
+                    ) : patient.status === 'active' ? (
                       <button onClick={() => updatePatientStatus(patient.id, 'inactive')} className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 hover:bg-red-200 rounded-lg transition-colors">Deactivate</button>
                     ) : (
                       <button onClick={() => updatePatientStatus(patient.id, 'active')} className="px-3 py-1.5 text-xs font-medium text-green-700 bg-green-100 hover:bg-green-200 rounded-lg transition-colors">Activate</button>
@@ -118,11 +125,15 @@ const AdminUsers = ({ patients, patientSearchTerm, setPatientSearchTerm, userFil
           <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden">
             <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 bg-gradient-to-br from-[#A3B18A] to-[#8FA076] rounded-full flex items-center justify-center text-white font-bold text-lg">{selectedPatient.full_name.charAt(0).toUpperCase()}</div>
+                <div className="w-12 h-12 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-bold text-lg">{selectedPatient.full_name.charAt(0).toUpperCase()}</div>
                 <div>
                   <h3 className="font-bold text-gray-900">{selectedPatient.full_name}</h3>
-                  <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${selectedPatient.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                    {selectedPatient.status === 'active' ? 'Active' : 'Inactive'}
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
+                    selectedPatient.status === 'active' ? 'bg-green-100 text-green-800'
+                    : selectedPatient.status === 'deleted' ? 'bg-gray-100 text-gray-500'
+                    : 'bg-red-100 text-red-800'
+                  }`}>
+                    {selectedPatient.status === 'active' ? 'Active' : selectedPatient.status === 'deleted' ? 'Deleted' : 'Inactive'}
                   </span>
                 </div>
               </div>
@@ -151,12 +162,14 @@ const AdminUsers = ({ patients, patientSearchTerm, setPatientSearchTerm, userFil
               </div>
             </div>
             <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
-              {selectedPatient.status === 'active' ? (
+              {selectedPatient.status === 'deleted' ? (
+                <div className="flex-1 py-2.5 bg-gray-100 text-gray-400 rounded-xl font-medium text-sm text-center cursor-not-allowed">Account Deleted</div>
+              ) : selectedPatient.status === 'active' ? (
                 <button onClick={() => { updatePatientStatus(selectedPatient.id, 'inactive'); setSelectedPatient(null); }} className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium text-sm transition-colors">Deactivate Account</button>
               ) : (
                 <button onClick={() => { updatePatientStatus(selectedPatient.id, 'active'); setSelectedPatient(null); }} className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium text-sm transition-colors">Activate Account</button>
               )}
-              <button onClick={() => setSelectedPatient(null)} className="flex-1 py-2.5 bg-[#A3B18A] hover:bg-[#8FA076] text-white rounded-xl font-medium text-sm transition-colors">Close</button>
+              <button onClick={() => setSelectedPatient(null)} className="flex-1 py-2.5 bg-[#4A7C59] hover:bg-[#3d6b4a] text-white rounded-xl font-medium text-sm transition-colors">Close</button>
             </div>
           </div>
         </div>

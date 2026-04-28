@@ -3,7 +3,7 @@ import React from 'react';
 const PatientProfile = ({ user, stats }) => {
   return (
     <div className="space-y-6">
-      <div className="bg-gradient-to-r from-[#A3B18A] to-[#8FA076] rounded-xl p-8 shadow-lg text-white">
+      <div className="bg-gradient-to-r from-[#4A7C59] to-[#3d6b4a] rounded-xl p-8 shadow-lg text-white">
         <div className="flex items-center space-x-6">
           <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border-4 border-white/30">
             <span className="text-3xl font-bold text-white">{user.full_name.charAt(0)}</span>
@@ -17,7 +17,7 @@ const PatientProfile = ({ user, stats }) => {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="bg-gradient-to-r from-[#A3B18A] to-[#8FA076] px-6 py-4">
+        <div className="bg-gradient-to-r from-[#4A7C59] to-[#3d6b4a] px-6 py-4">
           <h3 className="text-lg font-semibold text-white">Account Information</h3>
         </div>
         <div className="p-6">
@@ -43,7 +43,7 @@ const PatientProfile = ({ user, stats }) => {
         <h3 className="text-lg font-semibold text-gray-800 mb-4">My Progress</h3>
         <div className="grid grid-cols-3 gap-4">
           {[
-            { label: 'Sessions Completed', value: stats.completed, color: 'text-[#A3B18A]' },
+            { label: 'Sessions Completed', value: stats.completed, color: 'text-[#4A7C59]' },
             { label: 'Upcoming', value: stats.upcoming, color: 'text-blue-600' },
             { label: 'Total Appointments', value: stats.total, color: 'text-gray-900' },
           ].map(({ label, value, color }) => (

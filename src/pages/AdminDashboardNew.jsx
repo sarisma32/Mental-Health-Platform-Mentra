@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { buildApiUrl } from '../config/api.js';
 import DashboardSidebar from '../components/DashboardSidebar';
@@ -10,6 +10,7 @@ import AdminAppointments from './admin/AdminAppointments';
 import AdminSpecializations from './admin/AdminSpecializations';
 import AdminReviews from './admin/AdminReviews';
 import AdminAnalytics from './admin/AdminAnalytics';
+import Settings from './shared/Settings.jsx';
 
 const AdminDashboardNew = () => {
   const navigate = useNavigate();
@@ -126,7 +127,7 @@ const AdminDashboardNew = () => {
           userName="Admin User"
           userEmail="admin@mentra.com"
           notifType="admin"
-          notifId="all"
+          notifId={1}
           onNotifNavigate={setActiveSection}
         />
 
@@ -167,10 +168,11 @@ const AdminDashboardNew = () => {
           {activeSection === 'analytics' && <AdminAnalytics />}
 
           {activeSection === 'settings' && (
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Settings</h3>
-              <p className="text-gray-600">System settings coming soon...</p>
-            </div>
+            <Settings
+              user={{ ...JSON.parse(localStorage.getItem('user') || '{}'), id: 1 }}
+              role="admin"
+              onLogout={() => { localStorage.removeItem('token'); localStorage.removeItem('user'); localStorage.removeItem('userRole'); window.location.href = '/'; }}
+            />
           )}
         </div>
       </div>
