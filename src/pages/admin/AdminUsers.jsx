@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 const AdminUsers = ({ patients, patientSearchTerm, setPatientSearchTerm, userFilter, setUserFilter, updatePatientStatus }) => {
   const [selectedPatient, setSelectedPatient] = useState(null);
+  const [errorDialog, setErrorDialog] = useState(null);
 
   const filteredPatients = patients.filter(patient => {
     const matchesSearch = patient.full_name.toLowerCase().includes(patientSearchTerm.toLowerCase()) ||
@@ -104,9 +105,15 @@ const AdminUsers = ({ patients, patientSearchTerm, setPatientSearchTerm, userFil
                     {patient.status === 'deleted' ? (
                       <span className="px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">Removed</span>
                     ) : patient.status === 'active' ? (
-                      <button onClick={() => updatePatientStatus(patient.id, 'inactive')} className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 hover:bg-red-200 rounded-lg transition-colors">Deactivate</button>
+                      <button onClick={async () => {
+                        const result = await updatePatientStatus(patient.id, 'inactive');
+                        if (result?.error) setErrorDialog({ message: result.error });
+                      }} className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 hover:bg-red-200 rounded-lg transition-colors">Deactivate</button>
                     ) : (
-                      <button onClick={() => updatePatientStatus(patient.id, 'active')} className="px-3 py-1.5 text-xs font-medium text-green-700 bg-green-100 hover:bg-green-200 rounded-lg transition-colors">Activate</button>
+                      <button onClick={async () => {
+                        const result = await updatePatientStatus(patient.id, 'active');
+                        if (result?.error) setErrorDialog({ message: result.error });
+                      }} className="px-3 py-1.5 text-xs font-medium text-green-700 bg-green-100 hover:bg-green-200 rounded-lg transition-colors">Activate</button>
                     )}
                   </td>
                 </tr>
@@ -165,12 +172,44 @@ const AdminUsers = ({ patients, patientSearchTerm, setPatientSearchTerm, userFil
               {selectedPatient.status === 'deleted' ? (
                 <div className="flex-1 py-2.5 bg-gray-100 text-gray-400 rounded-xl font-medium text-sm text-center cursor-not-allowed">Account Deleted</div>
               ) : selectedPatient.status === 'active' ? (
-                <button onClick={() => { updatePatientStatus(selectedPatient.id, 'inactive'); setSelectedPatient(null); }} className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium text-sm transition-colors">Deactivate Account</button>
+                <button onClick={async () => {
+                  const result = await updatePatientStatus(selectedPatient.id, 'inactive');
+                  if (!result?.error) setSelectedPatient(null);
+                  else setErrorDialog({ message: result.error });
+                }} className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium text-sm transition-colors">Deactivate Account</button>
               ) : (
-                <button onClick={() => { updatePatientStatus(selectedPatient.id, 'active'); setSelectedPatient(null); }} className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium text-sm transition-colors">Activate Account</button>
+                <button onClick={async () => {
+                  const result = await updatePatientStatus(selectedPatient.id, 'active');
+                  if (!result?.error) setSelectedPatient(null);
+                  else setErrorDialog({ message: result.error });
+                }} className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium text-sm transition-colors">Activate Account</button>
               )}
               <button onClick={() => setSelectedPatient(null)} className="flex-1 py-2.5 bg-[#4A7C59] hover:bg-[#3d6b4a] text-white rounded-xl font-medium text-sm transition-colors">Close</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error Dialog */}
+      {errorDialog && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-gray-800 mb-1">Cannot Deactivate User</h3>
+                <p className="text-sm text-gray-600">{errorDialog.message}</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setErrorDialog(null)}
+              className="w-full py-2.5 bg-[#4A7C59] hover:bg-[#3d6b4a] text-white rounded-xl text-sm font-semibold transition-colors">
+              Understood
+            </button>
           </div>
         </div>
       )}

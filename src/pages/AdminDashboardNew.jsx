@@ -75,8 +75,18 @@ const AdminDashboardNew = () => {
         method: 'PUT', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });
-      if (res.ok) { fetchDoctors(); fetchDashboardStats(); }
-    } catch (error) { console.error('Error updating doctor status:', error); }
+      const data = await res.json();
+      if (data.success) { 
+        fetchDoctors(); 
+        fetchDashboardStats(); 
+      } else {
+        // Return error message so AdminDoctors component can show it in a dialog
+        return { error: data.message || 'Failed to update doctor status.' };
+      }
+    } catch (error) { 
+      console.error('Error updating doctor status:', error);
+      return { error: 'An error occurred while updating doctor status.' };
+    }
   };
 
   const updatePatientStatus = async (patientId, newStatus) => {
@@ -86,8 +96,13 @@ const AdminDashboardNew = () => {
         method: 'PUT', headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })
       });
-      if (res.ok) fetchPatients();
-    } catch (error) { console.error('Error updating patient status:', error); }
+      const data = await res.json();
+      if (data.success) { fetchPatients(); }
+      else { return { error: data.message || 'Failed to update user status.' }; }
+    } catch (error) { 
+      console.error('Error updating patient status:', error);
+      return { error: 'An error occurred while updating user status.' };
+    }
   };
 
   const handleLogout = () => {

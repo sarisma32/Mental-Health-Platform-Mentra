@@ -16,6 +16,7 @@ export const getAllDoctors = async (req, res) => {
         location,
         document_path,
         approval_status,
+        status,
         bio,
         profile_photo,
         session_fee,
@@ -83,12 +84,29 @@ export const updatePatientStatus = async (req, res) => {
     const { patientId } = req.params;
     const { status } = req.body;
 
-    // Validate status
     if (!['active', 'inactive'].includes(status)) {
       return res.status(400).json({
         success: false,
         message: "Invalid status. Must be 'active' or 'inactive'"
       });
+    }
+
+    // Block deactivation if patient has upcoming appointments
+    if (status === 'inactive') {
+      const upcoming = await pool.query(
+        `SELECT COUNT(*) FROM appointments
+         WHERE patient_id = $1
+           AND status IN ('pending', 'confirmed', 'scheduled')
+           AND appointment_date >= CURRENT_DATE`,
+        [patientId]
+      );
+      const count = parseInt(upcoming.rows[0].count);
+      if (count > 0) {
+        return res.status(400).json({
+          success: false,
+          message: `Cannot deactivate this user. They have ${count} upcoming appointment${count > 1 ? 's' : ''}. Please cancel or wait for those appointments to finish first.`
+        });
+      }
     }
 
     // Update patient status
@@ -131,45 +149,43 @@ export const updateDoctorStatus = async (req, res) => {
     const { doctorId } = req.params;
     const { status } = req.body;
 
-    // Validate status
     if (!['pending', 'approved', 'rejected'].includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid status. Must be 'pending', 'approved', or 'rejected'"
-      });
+      return res.status(400).json({ success: false, message: "Invalid status." });
     }
 
-    // Update doctor status
+    // Block revoke (rejected) if doctor has upcoming appointments
+    if (status === 'rejected') {
+      const upcoming = await pool.query(
+        `SELECT COUNT(*) FROM appointments
+         WHERE doctor_id = $1
+           AND status IN ('pending', 'confirmed', 'scheduled')
+           AND appointment_date >= CURRENT_DATE`,
+        [doctorId]
+      );
+      const count = parseInt(upcoming.rows[0].count);
+      if (count > 0) {
+        return res.status(400).json({
+          success: false,
+          message: `Cannot revoke this doctor. They have ${count} upcoming appointment${count > 1 ? 's' : ''}. Please cancel or reassign those appointments to another doctor first.`
+        });
+      }
+    }
+
     const result = await pool.query(
-      `UPDATE doctors 
-       SET approval_status = $1, updated_at = CURRENT_TIMESTAMP 
-       WHERE id = $2 
-       RETURNING id, full_name, email, approval_status`,
+      `UPDATE doctors SET approval_status = $1, updated_at = CURRENT_TIMESTAMP
+       WHERE id = $2 RETURNING id, full_name, email, approval_status`,
       [status, doctorId]
     );
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({
-        success: false,
-        message: "Doctor not found"
-      });
-    }
+    if (result.rows.length === 0)
+      return res.status(404).json({ success: false, message: "Doctor not found" });
 
     const doctor = result.rows[0];
-
-    res.json({
-      success: true,
-      message: `Doctor ${doctor.full_name} status updated to ${status}`,
-      doctor: doctor
-    });
+    res.json({ success: true, message: `Doctor ${doctor.full_name} status updated to ${status}`, doctor });
 
   } catch (error) {
     console.error('Error updating doctor status:', error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to update doctor status",
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
-    });
+    res.status(500).json({ success: false, message: "Failed to update doctor status" });
   }
 };
 

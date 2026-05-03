@@ -269,28 +269,36 @@ export const getApprovedDoctors = async (req, res) => {
     const { specialization, page = 1, limit = 10 } = req.query;
     const offset = (page - 1) * limit;
 
-    let query = `
-      SELECT id, full_name, email, specialization, hospital_name, location, experience, 
-             bio, profile_photo, session_fee, initial_session_fee, followup_session_fee,
-             rating, review_count, years_experience, credentials, languages, 
-             availability_hours, phone_number, created_at
-      FROM doctors 
-      WHERE approval_status = 'approved'
-    `;
     let queryParams = [];
+    let whereExtra = '';
 
     if (specialization && specialization !== 'all') {
-      query += ` AND specialization = $${queryParams.length + 1}`;
       queryParams.push(specialization);
+      whereExtra = ` AND d.specialization = $${queryParams.length}`;
     }
 
-    query += ` ORDER BY created_at DESC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
     queryParams.push(limit, offset);
+    const limitParam = `$${queryParams.length - 1}`;
+    const offsetParam = `$${queryParams.length}`;
 
+    const query = `
+      SELECT d.id, d.full_name, d.email, d.specialization, d.hospital_name, d.location,
+             d.experience, d.bio, d.profile_photo, d.session_fee, d.initial_session_fee,
+             d.followup_session_fee, d.years_experience, d.credentials, d.languages,
+             d.availability_hours, d.phone_number, d.created_at,
+             COALESCE(ROUND(AVG(r.rating)::numeric, 1), 0) AS rating,
+             COUNT(r.id) AS review_count
+      FROM doctors d
+      LEFT JOIN reviews r ON r.doctor_id = d.id AND r.is_visible = true
+      WHERE d.approval_status = 'approved' AND d.status = 'active'${whereExtra}
+      GROUP BY d.id
+      ORDER BY d.created_at DESC
+      LIMIT ${limitParam} OFFSET ${offsetParam}
+    `
     const doctors = await pool.query(query, queryParams);
 
     // Get total count for pagination
-    let countQuery = `SELECT COUNT(*) FROM doctors WHERE approval_status = 'approved'`;
+    let countQuery = `SELECT COUNT(*) FROM doctors WHERE approval_status = 'approved' AND status = 'active'`;
     let countParams = [];
 
     if (specialization && specialization !== 'all') {
@@ -711,5 +719,108 @@ export const changePassword = async (req, res) => {
   } catch (err) {
     console.error('Change password error:', err);
     res.status(500).json({ success: false, message: 'Failed to change password.' });
+  }
+};
+
+// CHECK UPCOMING APPOINTMENTS (used before deactivation)
+export const checkUpcomingAppointments = async (req, res) => {
+  try {
+    const doctorId = req.user.id;
+    const result = await pool.query(
+      `SELECT COUNT(*) FROM appointments
+       WHERE doctor_id = $1
+         AND status IN ('pending', 'confirmed', 'scheduled')
+         AND appointment_date >= CURRENT_DATE`,
+      [doctorId]
+    );
+    const count = parseInt(result.rows[0].count);
+    res.json({ success: true, upcomingCount: count });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Failed to check appointments.' });
+  }
+};
+
+// DELETE ACCOUNT (soft delete — marks as deleted, allows re-registration)
+export const deleteAccount = async (req, res) => {
+  const client = await pool.connect();
+  try {
+    const doctorId = req.user.id;
+    await client.query('BEGIN');
+
+    // Get doctor info
+    const doctorResult = await client.query('SELECT full_name, email FROM doctors WHERE id = $1', [doctorId]);
+    if (!doctorResult.rows.length) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ success: false, message: 'Doctor not found.' });
+    }
+    const { full_name, email } = doctorResult.rows[0];
+
+    // Check for upcoming appointments
+    const upcomingCheck = await client.query(
+      `SELECT COUNT(*) FROM appointments
+       WHERE doctor_id = $1
+         AND status IN ('pending', 'confirmed', 'scheduled')
+         AND appointment_date >= CURRENT_DATE`,
+      [doctorId]
+    );
+    const upcomingCount = parseInt(upcomingCheck.rows[0].count);
+    if (upcomingCount > 0) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({
+        success: false,
+        message: `You have ${upcomingCount} upcoming appointment${upcomingCount > 1 ? 's' : ''}. You cannot delete your account until they are completed or cancelled.`
+      });
+    }
+
+    // Cancel all future appointments (if any remain)
+    await client.query(
+      `UPDATE appointments
+       SET status = 'cancelled',
+           updated_at = NOW()
+       WHERE doctor_id = $1
+         AND appointment_date >= CURRENT_DATE
+         AND status NOT IN ('completed', 'cancelled')`,
+      [doctorId]
+    );
+
+    // Anonymize past appointments
+    await client.query(
+      `UPDATE appointments
+       SET doctor_name = 'Deleted Doctor',
+           updated_at = NOW()
+       WHERE doctor_id = $1
+         AND appointment_date < CURRENT_DATE`,
+      [doctorId]
+    );
+
+    // Soft delete doctor account
+    await client.query(
+      `UPDATE doctors
+       SET email = $1,
+           status = 'deleted',
+           approval_status = 'rejected',
+           updated_at = NOW()
+       WHERE id = $2`,
+      [`deleted_${Date.now()}_${email}`, doctorId]
+    );
+
+    // Create admin notification
+    await client.query(`
+      INSERT INTO notifications (recipient_type, recipient_id, type, title, message, is_read, created_at)
+      VALUES ('admin', NULL, $1, $2, $3, false, NOW())
+    `, [
+      'account_deleted',
+      'Doctor Account Deleted',
+      `Dr. ${full_name} (${email}) has deleted their account.`
+    ]);
+
+    await client.query('COMMIT');
+    res.json({ success: true, message: 'Account deleted successfully.' });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    console.error('Delete doctor account error:', err);
+    res.status(500).json({ success: false, message: 'Failed to delete account.' });
+  } finally {
+    client.release();
   }
 };

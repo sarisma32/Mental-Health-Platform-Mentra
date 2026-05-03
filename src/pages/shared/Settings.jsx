@@ -65,7 +65,7 @@ const Settings = ({ user, role, onLogout }) => {
   const [msg, setMsg] = useState(null);
   const [passwords, setPasswords] = useState({ current: '', newPass: '', confirm: '' });
   const [show, setShow] = useState({ current: false, newPass: false, confirm: false });
-  const [dialog, setDialog] = useState(null); // { type: 'logout' | 'delete' }
+  const [dialog, setDialog] = useState(null); // { type: 'logout' | 'delete' | 'error', message?: string }
 
   const prefKey = 'mentra_prefs_' + user?.id;
   const [prefs, setPrefs] = useState(() => {
@@ -340,16 +340,62 @@ const Settings = ({ user, role, onLogout }) => {
             try {
               const token = localStorage.getItem('token');
               const endpoint = role === 'patient' ? '/api/patients/account' : '/api/doctors/account';
+              
+              console.log('Calling delete endpoint:', endpoint);
+              
               const res = await fetch(buildApiUrl(endpoint), {
                 method: 'DELETE',
                 headers: { 'Authorization': 'Bearer ' + token },
               });
+              
+              console.log('Delete response status:', res.status);
               const data = await res.json();
-              if (data.success) { localStorage.clear(); window.location.href = '/'; }
-              else showMsg(data.message || 'Failed to delete account.', 'error');
-            } catch { showMsg('Something went wrong.', 'error'); }
+              console.log('Delete response data:', data);
+              
+              if (data.success) { 
+                localStorage.clear(); 
+                window.location.href = '/'; 
+              } else {
+                // Show the specific error message from backend
+                console.error('Delete failed:', data.message);
+                setDialog({ 
+                  type: 'error', 
+                  message: data.message || 'Failed to delete account. Please try again later.' 
+                });
+              }
+            } catch (error) { 
+              console.error('Delete account error:', error);
+              setDialog({ 
+                type: 'error', 
+                message: 'Something went wrong while trying to delete your account. Please check your connection and try again.' 
+              });
+            }
           }}
         />
+      )}
+
+      {/* Error dialog */}
+      {dialog?.type === 'error' && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-gray-800 mb-1">Cannot Delete Account</h3>
+                <p className="text-sm text-gray-600">{dialog.message}</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => setDialog(null)}
+              className="w-full py-2.5 bg-[#4A7C59] hover:bg-[#3d6b4a] text-white rounded-xl text-sm font-semibold transition-colors">
+              Understood
+            </button>
+          </div>
+        </div>
       )}
 
     </div>

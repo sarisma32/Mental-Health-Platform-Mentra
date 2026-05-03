@@ -1,15 +1,22 @@
 import React, { useState } from 'react';
 
 const getStatusBadge = (status) => {
-  const styles = { pending: 'bg-yellow-100 text-yellow-800 border-yellow-200', approved: 'bg-green-100 text-green-800 border-green-200', rejected: 'bg-red-100 text-red-800 border-red-200' };
+  const styles = { 
+    pending: 'bg-yellow-100 text-yellow-800 border-yellow-200', 
+    approved: 'bg-green-100 text-green-800 border-green-200', 
+    rejected: 'bg-red-100 text-red-800 border-red-200',
+    deleted: 'bg-gray-100 text-gray-500 border-gray-200'
+  };
   return <span className={`px-3 py-1 rounded-full text-sm font-medium border ${styles[status] || styles.pending}`}>{status.charAt(0).toUpperCase() + status.slice(1)}</span>;
 };
 
 const AdminDoctors = ({ doctors, filter, setFilter, searchTerm, setSearchTerm, updateDoctorStatus, formatDate }) => {
   const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [errorDialog, setErrorDialog] = useState(null); // { message: string }
 
   const filteredDoctors = doctors.filter(doctor => {
-    const matchesFilter = filter === 'all' || doctor.approval_status === filter;
+    const matchesFilter = filter === 'all' || 
+      (filter === 'deleted' ? doctor.status === 'deleted' : doctor.approval_status === filter && doctor.status !== 'deleted');
     const matchesSearch = doctor.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       doctor.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       doctor.specialization.toLowerCase().includes(searchTerm.toLowerCase());
@@ -19,12 +26,13 @@ const AdminDoctors = ({ doctors, filter, setFilter, searchTerm, setSearchTerm, u
   return (
     <div className="space-y-6">
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         {[
           { label: 'Total Doctors', value: doctors.length, sub: 'All registrations', color: 'bg-blue-50', iconColor: 'text-blue-600' },
-          { label: 'Pending Approval', value: doctors.filter(d => d.approval_status === 'pending').length, sub: 'Awaiting review', color: 'bg-yellow-50', iconColor: 'text-yellow-600' },
-          { label: 'Approved Doctors', value: doctors.filter(d => d.approval_status === 'approved').length, sub: 'Active providers', color: 'bg-green-50', iconColor: 'text-green-600' },
-          { label: 'Rejected Doctors', value: doctors.filter(d => d.approval_status === 'rejected').length, sub: 'Declined applications', color: 'bg-red-50', iconColor: 'text-red-600' },
+          { label: 'Pending Approval', value: doctors.filter(d => d.approval_status === 'pending' && d.status !== 'deleted').length, sub: 'Awaiting review', color: 'bg-yellow-50', iconColor: 'text-yellow-600' },
+          { label: 'Approved Doctors', value: doctors.filter(d => d.approval_status === 'approved' && d.status !== 'deleted').length, sub: 'Active providers', color: 'bg-green-50', iconColor: 'text-green-600' },
+          { label: 'Rejected Doctors', value: doctors.filter(d => d.approval_status === 'rejected' && d.status !== 'deleted').length, sub: 'Declined applications', color: 'bg-red-50', iconColor: 'text-red-600' },
+          { label: 'Deleted Doctors', value: doctors.filter(d => d.status === 'deleted').length, sub: 'Self-deleted accounts', color: 'bg-gray-50', iconColor: 'text-gray-500' },
         ].map(card => (
           <div key={card.label} className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
             <div>
@@ -58,6 +66,7 @@ const AdminDoctors = ({ doctors, filter, setFilter, searchTerm, setSearchTerm, u
               <option value="pending">Pending</option>
               <option value="approved">Approved</option>
               <option value="rejected">Rejected</option>
+              <option value="deleted">Deleted</option>
             </select>
           </div>
         </div>
@@ -82,37 +91,61 @@ const AdminDoctors = ({ doctors, filter, setFilter, searchTerm, setSearchTerm, u
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
-              {filteredDoctors.map(doctor => (
-                <tr key={doctor.id} onClick={() => setSelectedDoctor(doctor)}
-                  className="hover:bg-[#F5F5F0] transition-colors cursor-pointer group">
+              {filteredDoctors.map(doctor => {
+                const isDeleted = doctor.status === 'deleted';
+                return (
+                <tr key={doctor.id} onClick={() => !isDeleted && setSelectedDoctor(doctor)}
+                  className={`transition-colors ${isDeleted ? 'bg-gray-50 opacity-60' : 'hover:bg-[#F5F5F0] cursor-pointer'} group`}>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] flex items-center justify-center text-white font-semibold text-xs flex-shrink-0">{doctor.full_name.charAt(0)}</div>
+                      <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white font-semibold text-xs flex-shrink-0 ${isDeleted ? 'bg-gray-400' : 'bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a]'}`}>{doctor.full_name.charAt(0)}</div>
                       <div>
-                        <p className="text-sm font-semibold text-gray-900">{doctor.full_name}</p>
+                        <p className={`text-sm font-semibold ${isDeleted ? 'text-gray-400 line-through' : 'text-gray-900'}`}>{doctor.full_name}</p>
                         <p className="text-xs text-gray-400">{doctor.email}</p>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4"><p className="text-sm text-gray-700">{doctor.specialization}</p></td>
+                  <td className="px-6 py-4"><p className={`text-sm ${isDeleted ? 'text-gray-400' : 'text-gray-700'}`}>{doctor.specialization}</p></td>
                   <td className="px-6 py-4">
-                    <p className="text-sm text-gray-700">{doctor.hospital_name}</p>
+                    <p className={`text-sm ${isDeleted ? 'text-gray-400' : 'text-gray-700'}`}>{doctor.hospital_name}</p>
                     <p className="text-xs text-gray-400">{doctor.location || '—'}</p>
                   </td>
                   <td className="px-6 py-4"><p className="text-sm text-gray-500">{new Date(doctor.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p></td>
-                  <td className="px-6 py-4">{getStatusBadge(doctor.approval_status)}</td>
+                  <td className="px-6 py-4">
+                    {isDeleted 
+                      ? <span className="px-3 py-1 rounded-full text-sm font-medium border bg-gray-100 text-gray-500 border-gray-200">Deleted</span>
+                      : getStatusBadge(doctor.approval_status)
+                    }
+                  </td>
                   <td className="px-6 py-4" onClick={e => e.stopPropagation()}>
                     <div className="flex gap-2">
-                      {doctor.approval_status === 'pending' && (<>
-                        <button onClick={() => updateDoctorStatus(doctor.id, 'approved')} className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs transition-colors">Approve</button>
-                        <button onClick={() => updateDoctorStatus(doctor.id, 'rejected')} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs transition-colors">Reject</button>
+                      {isDeleted ? (
+                        <button disabled className="bg-gray-200 text-gray-400 px-3 py-1 rounded text-xs cursor-not-allowed">Removed</button>
+                      ) : (<>
+                        {doctor.approval_status === 'pending' && (<>
+                          <button onClick={async () => {
+                            const result = await updateDoctorStatus(doctor.id, 'approved');
+                            if (result?.error) setErrorDialog({ message: result.error });
+                          }} className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs transition-colors">Approve</button>
+                          <button onClick={async () => {
+                            const result = await updateDoctorStatus(doctor.id, 'rejected');
+                            if (result?.error) setErrorDialog({ message: result.error });
+                          }} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs transition-colors">Reject</button>
+                        </>)}
+                        {doctor.approval_status === 'approved' && <button onClick={async () => {
+                          const result = await updateDoctorStatus(doctor.id, 'rejected');
+                          if (result?.error) setErrorDialog({ message: result.error });
+                        }} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs transition-colors">Revoke</button>}
+                        {doctor.approval_status === 'rejected' && <button onClick={async () => {
+                          const result = await updateDoctorStatus(doctor.id, 'approved');
+                          if (result?.error) setErrorDialog({ message: result.error });
+                        }} className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs transition-colors">Approve</button>}
                       </>)}
-                      {doctor.approval_status === 'approved' && <button onClick={() => updateDoctorStatus(doctor.id, 'rejected')} className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-xs transition-colors">Revoke</button>}
-                      {doctor.approval_status === 'rejected' && <button onClick={() => updateDoctorStatus(doctor.id, 'approved')} className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-xs transition-colors">Approve</button>}
                     </div>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
@@ -180,13 +213,53 @@ const AdminDoctors = ({ doctors, filter, setFilter, searchTerm, setSearchTerm, u
             </div>
             <div className="px-6 py-4 border-t border-gray-100 flex gap-3">
               {selectedDoctor.approval_status === 'pending' && (<>
-                <button onClick={() => { updateDoctorStatus(selectedDoctor.id, 'approved'); setSelectedDoctor(null); }} className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium text-sm transition-colors">Approve</button>
-                <button onClick={() => { updateDoctorStatus(selectedDoctor.id, 'rejected'); setSelectedDoctor(null); }} className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium text-sm transition-colors">Reject</button>
+                <button onClick={async () => { 
+                  const result = await updateDoctorStatus(selectedDoctor.id, 'approved'); 
+                  if (!result?.error) setSelectedDoctor(null);
+                  else setErrorDialog({ message: result.error });
+                }} className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium text-sm transition-colors">Approve</button>
+                <button onClick={async () => { 
+                  const result = await updateDoctorStatus(selectedDoctor.id, 'rejected'); 
+                  if (!result?.error) setSelectedDoctor(null);
+                  else setErrorDialog({ message: result.error });
+                }} className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium text-sm transition-colors">Reject</button>
               </>)}
-              {selectedDoctor.approval_status === 'approved' && <button onClick={() => { updateDoctorStatus(selectedDoctor.id, 'rejected'); setSelectedDoctor(null); }} className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium text-sm transition-colors">Revoke Approval</button>}
-              {selectedDoctor.approval_status === 'rejected' && <button onClick={() => { updateDoctorStatus(selectedDoctor.id, 'approved'); setSelectedDoctor(null); }} className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium text-sm transition-colors">Approve</button>}
+              {selectedDoctor.approval_status === 'approved' && <button onClick={async () => { 
+                const result = await updateDoctorStatus(selectedDoctor.id, 'rejected'); 
+                if (!result?.error) setSelectedDoctor(null);
+                else setErrorDialog({ message: result.error });
+              }} className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium text-sm transition-colors">Revoke Approval</button>}
+              {selectedDoctor.approval_status === 'rejected' && <button onClick={async () => { 
+                const result = await updateDoctorStatus(selectedDoctor.id, 'approved'); 
+                if (!result?.error) setSelectedDoctor(null);
+                else setErrorDialog({ message: result.error });
+              }} className="flex-1 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium text-sm transition-colors">Approve</button>}
               <button onClick={() => setSelectedDoctor(null)} className="flex-1 py-2.5 bg-[#4A7C59] hover:bg-[#3d6b4a] text-white rounded-xl font-medium text-sm transition-colors">Close</button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error Dialog */}
+      {errorDialog && (
+        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-gray-800 mb-1">Cannot Revoke Doctor</h3>
+                <p className="text-sm text-gray-600">{errorDialog.message}</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => setErrorDialog(null)}
+              className="w-full py-2.5 bg-[#4A7C59] hover:bg-[#3d6b4a] text-white rounded-xl text-sm font-semibold transition-colors">
+              Understood
+            </button>
           </div>
         </div>
       )}
