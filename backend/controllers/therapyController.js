@@ -26,11 +26,22 @@ export const assignTask = async (req, res) => {
 
     // Get doctor name for notification
     const doc = await pool.query('SELECT full_name FROM doctors WHERE id=$1', [doctorId]);
+    const pat = await pool.query('SELECT full_name FROM patients WHERE id=$1', [patientId]);
+    
+    // Notify patient about new task
     createNotification({
       recipientType: 'patient', recipientId: patientId,
       type: 'task_assigned',
       title: 'New Therapy Task Assigned',
       message: `Dr. ${doc.rows[0]?.full_name} assigned you a new task: "${title}". Due: ${new Date(deadline).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}.`,
+    });
+
+    // Notify admin about task assignment
+    createNotification({
+      recipientType: 'admin',
+      type: 'task_assigned',
+      title: 'Therapy Task Assigned',
+      message: `Dr. ${doc.rows[0]?.full_name} assigned a ${type} task "${title}" to ${pat.rows[0]?.full_name}.`,
     });
 
     res.status(201).json({ success: true, task });
@@ -174,7 +185,7 @@ export const submitFeedback = async (req, res) => {
     const { difficulty, comment } = req.body;
     if (!difficulty) return res.status(400).json({ success: false, message: 'Difficulty is required.' });
 
-    const check = await pool.query('SELECT id FROM therapy_tasks WHERE id=$1 AND patient_id=$2', [taskId, patientId]);
+    const check = await pool.query('SELECT * FROM therapy_tasks WHERE id=$1 AND patient_id=$2', [taskId, patientId]);
     if (!check.rows.length) return res.status(404).json({ success: false, message: 'Task not found.' });
 
     await pool.query(
@@ -183,6 +194,20 @@ export const submitFeedback = async (req, res) => {
        ON CONFLICT (task_id) DO UPDATE SET difficulty=$2, comment=$3`,
       [taskId, difficulty, comment || null]
     );
+
+    // Notify doctor about feedback submission
+    const task = check.rows[0];
+    const pat = await pool.query('SELECT full_name FROM patients WHERE id=$1', [patientId]);
+    const difficultyText = difficulty === 'easy' ? 'Easy' : difficulty === 'medium' ? 'Medium' : 'Hard';
+    
+    createNotification({
+      recipientType: 'doctor',
+      recipientId: task.doctor_id,
+      type: 'task_feedback',
+      title: 'Task Feedback Received',
+      message: `${pat.rows[0]?.full_name} submitted feedback for "${task.title}" - Difficulty: ${difficultyText}${comment ? '. Comment: ' + comment.substring(0, 50) + (comment.length > 50 ? '...' : '') : ''}.`,
+    });
+
     res.json({ success: true, message: 'Feedback submitted.' });
   } catch (err) {
     console.error('Submit feedback error:', err);

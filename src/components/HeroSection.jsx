@@ -1,7 +1,9 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import heroImage from '../assets/heroSectionImage.png';
 
 const HeroSection = () => {
+  const navigate = useNavigate();
   return (
     <section className="py-20 lg:py-28 bg-gradient-mentra-hero relative overflow-hidden">
       {/* Background decorative elements */}
@@ -18,17 +20,16 @@ const HeroSection = () => {
                 <span className="text-mentra-primary block lg:inline"> Mental Health</span>
               </h1>
               <p className="text-lg sm:text-xl text-gray-600 leading-relaxed max-w-2xl">
-                Get the support you need with our safe, private mental health platform. 
-                Connect with AI-powered tools and qualified professionals for personalized care 
-                that fits your lifestyle and needs.
+                Your mental health matters. Healing is possible, happiness is real, and you deserve to feel well — 
+                one step at a time, with the right support by your side.
               </p>
             </div>
             
             <div className="flex flex-col sm:flex-row gap-4">
-              <button className="bg-mentra-primary hover:bg-mentra-primary-hover text-white px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+              <button onClick={() => navigate('/professionals')} className="bg-mentra-primary hover:bg-mentra-primary-hover text-white px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                 Start Your Wellness Journey
               </button>
-              <button className="border-2 border-mentra-primary text-mentra-primary hover:bg-mentra-primary hover:text-white px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300">
+              <button onClick={() => navigate('/about')} className="border-2 border-mentra-primary text-mentra-primary hover:bg-mentra-primary hover:text-white px-8 py-4 rounded-full text-lg font-semibold transition-all duration-300">
                 Learn More
               </button>
             </div>

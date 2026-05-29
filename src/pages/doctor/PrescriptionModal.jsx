@@ -73,7 +73,7 @@ const PrescriptionModal = ({ appointment, onClose, onSaved }) => {
   const inputCls = "w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-[#4A7C59] bg-gray-50 focus:bg-white transition-all";
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 backdrop-blur-md bg-white/30 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
 
         {/* Header */}
@@ -113,7 +113,7 @@ const PrescriptionModal = ({ appointment, onClose, onSaved }) => {
           {/* Medications */}
           <div>
             <div className="flex items-center justify-between mb-3">
-              <h4 className="text-sm font-semibold text-gray-700">💊 Medications</h4>
+              <h4 className="text-sm font-semibold text-gray-700"> Medications</h4>
               <button type="button" onClick={addMed}
                 className="flex items-center gap-1 text-xs text-[#4A7C59] hover:text-[#3d6b4a] font-medium border border-[#dce8e0] hover:border-[#4A7C59] px-3 py-1.5 rounded-lg transition-all">
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" /></svg>
@@ -165,7 +165,7 @@ const PrescriptionModal = ({ appointment, onClose, onSaved }) => {
 
           {/* Lifestyle Advice */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">🌿 Lifestyle Suggestions</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2"> Lifestyle Suggestions</label>
             <textarea value={lifestyleAdvice} onChange={e => setLifestyleAdvice(e.target.value)}
               placeholder="e.g. Sleep 8 hours, avoid caffeine after 3pm, 30 min walk daily..."
               rows={3} className={inputCls + ' resize-none'} />
@@ -173,7 +173,7 @@ const PrescriptionModal = ({ appointment, onClose, onSaved }) => {
 
           {/* Follow-up Date */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">📅 Follow-up Date</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2"> Follow-up Date</label>
             <input type="date" value={followUpDate} onChange={e => setFollowUpDate(e.target.value)}
               min={new Date().toISOString().split('T')[0]}
               className={inputCls} />

@@ -10,6 +10,8 @@ const AdminSpecializations = () => {
   const [editName, setEditName] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [specializationToDelete, setSpecializationToDelete] = useState(null);
 
   const fetchSpecializations = async () => {
     try {
@@ -58,13 +60,27 @@ const AdminSpecializations = () => {
   };
 
   const handleDelete = async (id, name) => {
-    if (!window.confirm(`Delete "${name}"? This cannot be undone.`)) return;
-    try {
-      const res = await fetch(buildApiUrl(`/api/admin/specializations/${id}`), { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) { fetchSpecializations(); showMsg('success', data.message); }
-      else showMsg('error', data.message || 'Failed to delete');
-    } catch { showMsg('error', 'Network error'); }
+    setSpecializationToDelete({ id, name });
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (specializationToDelete) {
+      try {
+        const res = await fetch(buildApiUrl(`/api/admin/specializations/${specializationToDelete.id}`), { method: 'DELETE' });
+        const data = await res.json();
+        if (data.success) { 
+          fetchSpecializations(); 
+          showMsg('success', data.message); 
+        } else {
+          showMsg('error', data.message || 'Failed to delete');
+        }
+      } catch { 
+        showMsg('error', 'Network error'); 
+      }
+      setShowDeleteModal(false);
+      setSpecializationToDelete(null);
+    }
   };
 
   return (
@@ -135,6 +151,54 @@ const AdminSpecializations = () => {
           </ul>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 backdrop-blur-md bg-white/30 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-gray-900">Delete Specialization</h3>
+              <button 
+                onClick={() => setShowDeleteModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="px-6 py-5">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </div>
+                <p className="text-gray-700 mb-2">
+                  Are you sure you want to delete "{specializationToDelete?.name}"?
+                </p>
+                <p className="text-sm text-gray-500">This action cannot be undone. The specialization will be permanently removed from the system.</p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="flex-1 border border-gray-300 text-gray-700 hover:bg-gray-50 py-3 px-4 rounded-lg font-semibold transition-all duration-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-lg font-semibold transition-all duration-300"
+                >
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

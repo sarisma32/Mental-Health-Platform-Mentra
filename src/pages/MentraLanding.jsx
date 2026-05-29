@@ -1,11 +1,35 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Header from '../components/Header';
 import HeroSection from '../components/HeroSection';
 import CallToAction from '../components/CallToAction';
 import Footer from '../components/Footer';
+import SystemReviewModal from '../components/SystemReviewModal';
+import { buildApiUrl } from '../config/api.js';
+
+const StarRating = ({ rating }) => (
+  <div className="flex text-yellow-400">
+    {[...Array(5)].map((_, i) => (
+      <svg key={i} className={`w-5 h-5 ${i < rating ? 'fill-current' : 'text-gray-200 fill-current'}`} viewBox="0 0 24 24">
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+      </svg>
+    ))}
+  </div>
+);
 
 const MentraLanding = () => {
+  const [reviews, setReviews] = useState([]);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const isLoggedIn = !!localStorage.getItem('token');
+  const isPatient = localStorage.getItem('userRole') === 'patient';
+
+  useEffect(() => {
+    fetch(buildApiUrl('/api/system-reviews/public'))
+      .then(r => r.json())
+      .then(d => { if (d.success) setReviews(d.reviews); })
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="min-h-screen bg-mentra-white">
       <Header />
@@ -121,7 +145,7 @@ const MentraLanding = () => {
                 <p className="text-sm text-gray-600 mt-2">Dr. Emily R.</p>
               </div>
               <div className="text-center">
-                <img src="https://images.unsplash.com/photo-1594824475317-87dfe8de8b87?w=150&h=150&fit=crop&crop=face" alt="Dr. James Wilson" className="w-24 h-24 lg:w-28 lg:h-28 rounded-full object-cover shadow-lg hover:shadow-xl transition-shadow" />
+                <img src="https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=150&h=150&fit=crop&crop=face" alt="Dr. James Wilson" className="w-24 h-24 lg:w-28 lg:h-28 rounded-full object-cover shadow-lg hover:shadow-xl transition-shadow" />
                 <p className="text-sm text-gray-600 mt-2">Dr. James W.</p>
               </div>
               <div className="text-center">
@@ -140,93 +164,52 @@ const MentraLanding = () => {
       {/* Testimonials Section */}
       <section className="py-20 bg-mentra-secondary">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-gray-900 mb-4">
-              Stories of Hope
-            </h2>
-            <p className="text-xl text-gray-600">
-              Real experiences from people who found their path to better mental health
-            </p>
+          <div className="text-center mb-10">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Stories of Hope</h2>
+            <p className="text-xl text-gray-600">Real experiences from people who found their path to better mental health</p>
+            {isLoggedIn && isPatient && (
+              <button onClick={() => setShowReviewModal(true)}
+                className="mt-6 inline-flex items-center gap-2 px-6 py-3 bg-[#4A7C59] hover:bg-[#3d6b4a] text-white rounded-full font-semibold text-sm transition-all shadow-md hover:shadow-lg">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                </svg>
+                Leave a Review
+              </button>
+            )}
           </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Testimonial 1 */}
-            <div className="bg-mentra-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
-              <div className="flex items-center mb-4">
-                <div className="flex text-yellow-400">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                    </svg>
-                  ))}
-                </div>
-              </div>
-              <p className="text-gray-700 mb-6 italic leading-relaxed">
-                "Mentra helped me find the right therapist when I needed it most. The platform is 
-                so easy to use and I felt safe sharing my concerns. The matching process was incredible 
-                and really understood my specific needs."
-              </p>
-              <div className="flex items-center">
-                <img src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=50&h=50&fit=crop&crop=face" alt="Sarah M." className="w-12 h-12 rounded-full mr-4" />
-                <div>
-                  <span className="text-gray-900 font-semibold">Sarah M.</span>
-                  <p className="text-gray-500 text-sm">Marketing Professional</p>
-                </div>
-              </div>
-            </div>
 
-            {/* Testimonial 2 */}
-            <div className="bg-mentra-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
-              <div className="flex items-center mb-4">
-                <div className="flex text-yellow-400">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                    </svg>
-                  ))}
+          {reviews.length > 0 ? (
+            <div className="grid md:grid-cols-3 gap-8">
+              {reviews.map(review => (
+                <div key={review.id} className="bg-mentra-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
+                  <StarRating rating={review.rating} />
+                  <p className="text-gray-700 my-5 italic leading-relaxed">"{review.message}"</p>
+                  <div className="flex items-center">
+                    <div className="w-12 h-12 rounded-full mr-4 overflow-hidden bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] flex items-center justify-center flex-shrink-0">
+                      {review.profile_photo ? (
+                        <img src={review.profile_photo} alt={review.full_name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-white font-bold text-lg">{review.full_name?.charAt(0)}</span>
+                      )}
+                    </div>
+                    <span className="text-gray-900 font-semibold">{review.full_name}</span>
+                  </div>
                 </div>
-              </div>
-              <p className="text-gray-700 mb-6 italic leading-relaxed">
-                "The AI chatbot provided immediate support during my anxiety attacks. Having 24/7 
-                access to mental health resources changed my life completely. I can't imagine going 
-                back to how things were before."
-              </p>
-              <div className="flex items-center">
-                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=50&h=50&fit=crop&crop=face" alt="James K." className="w-12 h-12 rounded-full mr-4" />
-                <div>
-                  <span className="text-gray-900 font-semibold">James K.</span>
-                  <p className="text-gray-500 text-sm">Software Engineer</p>
-                </div>
-              </div>
+              ))}
             </div>
-
-            {/* Testimonial 3 */}
-            <div className="bg-mentra-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-shadow">
-              <div className="flex items-center mb-4">
-                <div className="flex text-yellow-400">
-                  {[...Array(5)].map((_, i) => (
-                    <svg key={i} className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                    </svg>
-                  ))}
-                </div>
-              </div>
-              <p className="text-gray-700 mb-6 italic leading-relaxed">
-                "I was skeptical about online therapy, but the professionals on Mentra are incredibly 
-                qualified and caring. The convenience of having sessions from home made all the difference. 
-                Highly recommend to anyone seeking help!"
-              </p>
-              <div className="flex items-center">
-                <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=50&h=50&fit=crop&crop=face" alt="Maria L." className="w-12 h-12 rounded-full mr-4" />
-                <div>
-                  <span className="text-gray-900 font-semibold">Maria L.</span>
-                  <p className="text-gray-500 text-sm">Teacher</p>
-                </div>
-              </div>
+          ) : (
+            <div className="text-center py-12">
+              {isLoggedIn && isPatient ? (
+                <p className="text-gray-500">Be the first to share your experience with Mentra!</p>
+              ) : (
+                <p className="text-gray-500">No reviews yet. Login as a patient to share your experience!</p>
+              )}
             </div>
-          </div>
+          )}
         </div>
       </section>
+
+      {showReviewModal && <SystemReviewModal onClose={() => setShowReviewModal(false)} />}
 
       <CallToAction />
 

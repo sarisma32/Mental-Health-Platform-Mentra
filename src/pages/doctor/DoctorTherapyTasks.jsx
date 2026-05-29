@@ -106,7 +106,7 @@ const DoctorTherapyTasks = ({ patients = [], preSelectedPatient = null, onClearP
 
       {msg && (
         <div className={`px-4 py-3 rounded-xl text-sm font-medium border ${msg.type === 'error' ? 'bg-red-50 text-red-700 border-red-100' : 'bg-[#f0f7f4] text-[#4A7C59] border-[#dce8e0]'}`}>
-          {msg.type === 'error' ? '❌' : '✅'} {msg.text}
+          {msg.type === 'error' ? '' : ''} {msg.text}
         </div>
       )}
 
@@ -218,7 +218,7 @@ const DoctorTherapyTasks = ({ patients = [], preSelectedPatient = null, onClearP
 
       {/* Delete Confirmation Dialog */}
       {deleteConfirm && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 backdrop-blur-md bg-white/30 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
             <h3 className="text-base font-semibold text-gray-800 mb-2">Delete Task</h3>
             <p className="text-sm text-gray-500 mb-1">Are you sure you want to delete this task?</p>
@@ -238,7 +238,7 @@ const DoctorTherapyTasks = ({ patients = [], preSelectedPatient = null, onClearP
       )}
 
       {/* Assign Task Modal */}
-      {showForm && (        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      {showForm && (        <div className="fixed inset-0 backdrop-blur-md bg-white/30 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="text-base font-semibold text-gray-800">{editTask ? 'Edit Therapy Task' : 'Assign Therapy Task'}</h3>

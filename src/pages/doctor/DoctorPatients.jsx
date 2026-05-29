@@ -62,8 +62,12 @@ const DoctorPatients = ({ patients, doctorId, onRefresh }) => {
               className="border border-gray-200 rounded-xl p-4 hover:shadow-md hover:border-[#4A7C59] transition-all cursor-pointer group">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-semibold shadow-sm">
-                    {patient.patient_first_name.charAt(0)}{patient.patient_last_name.charAt(0)}
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-semibold shadow-sm overflow-hidden">
+                    {patient.patient_photo ? (
+                      <img src={patient.patient_photo} alt={patient.patient_first_name} className="w-full h-full object-cover" />
+                    ) : (
+                      <>{patient.patient_first_name.charAt(0)}{patient.patient_last_name.charAt(0)}</>
+                    )}
                   </div>
                   <div>
                     <h4 className="font-semibold text-gray-900">{patient.patient_first_name} {patient.patient_last_name}</h4>
@@ -101,12 +105,16 @@ const DoctorPatients = ({ patients, doctorId, onRefresh }) => {
 
       {/* Patient History Modal */}
       {selectedPatient && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 backdrop-blur-md bg-white/30 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 sticky top-0 bg-white">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-bold">
-                  {selectedPatient.patient_first_name.charAt(0)}{selectedPatient.patient_last_name.charAt(0)}
+                <div className="w-11 h-11 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-bold overflow-hidden">
+                  {selectedPatient.patient_photo ? (
+                    <img src={selectedPatient.patient_photo} alt={selectedPatient.patient_first_name} className="w-full h-full object-cover" />
+                  ) : (
+                    <>{selectedPatient.patient_first_name.charAt(0)}{selectedPatient.patient_last_name.charAt(0)}</>
+                  )}
                 </div>
                 <div>
                   <h3 className="font-bold text-gray-900">{selectedPatient.patient_first_name} {selectedPatient.patient_last_name}</h3>

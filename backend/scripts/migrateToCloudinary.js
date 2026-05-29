@@ -56,17 +56,17 @@ const uploadFile = async (localPath, options) => {
 };
 
 const migrate = async () => {
-  console.log('🚀 Starting Cloudinary migration...\n');
+  console.log(' Starting Cloudinary migration...\n');
 
   // ── 1. Migrate doctor profile photos ──────────────────────────────────────
-  console.log('📸 Migrating profile photos...');
+  console.log(' Migrating profile photos...');
   const doctors = await pool.query(
     "SELECT id, full_name, profile_photo FROM doctors WHERE profile_photo IS NOT NULL"
   );
 
   for (const doctor of doctors.rows) {
     if (isAlreadyUrl(doctor.profile_photo)) {
-      console.log(`  ✓ Dr. ${doctor.full_name} — already on Cloudinary, skipping`);
+      console.log(`   Dr. ${doctor.full_name} — already on Cloudinary, skipping`);
       continue;
     }
 
@@ -83,23 +83,23 @@ const migrate = async () => {
         "UPDATE doctors SET profile_photo = $1 WHERE id = $2",
         [result.secure_url, doctor.id]
       );
-      console.log(`  ✓ Dr. ${doctor.full_name} — photo migrated`);
+      console.log(`   Dr. ${doctor.full_name} — photo migrated`);
     }
   }
 
   // ── 2. Migrate doctor license documents ───────────────────────────────────
-  console.log('\n📄 Migrating license documents...');
+  console.log('\n Migrating license documents...');
   const doctorsWithDocs = await pool.query(
     "SELECT id, full_name, email, document_path FROM doctors WHERE document_path IS NOT NULL"
   );
 
   for (const doctor of doctorsWithDocs.rows) {
     if (isAlreadyUrl(doctor.document_path)) {
-      console.log(`  ✓ Dr. ${doctor.full_name} — document already on Cloudinary, skipping`);
+      console.log(`   Dr. ${doctor.full_name} — document already on Cloudinary, skipping`);
       continue;
     }
 
-    console.log(`  → Uploading document for Dr. ${doctor.full_name} (${doctor.document_path})`);
+    console.log(`   Uploading document for Dr. ${doctor.full_name} (${doctor.document_path})`);
     const result = await uploadFile(doctor.document_path, {
       folder: `mentra/doctors/doctor_${doctor.id}/documents`,
       resource_type: 'auto',
@@ -112,23 +112,23 @@ const migrate = async () => {
         "UPDATE doctors SET document_path = $1 WHERE id = $2",
         [result.secure_url, doctor.id]
       );
-      console.log(`  ✓ Dr. ${doctor.full_name} — document migrated`);
+      console.log(`   Dr. ${doctor.full_name} — document migrated`);
     }
   }
 
   // ── 3. Migrate doctor videos ───────────────────────────────────────────────
-  console.log('\n🎥 Migrating videos...');
+  console.log('\n Migrating videos...');
   const videos = await pool.query(
     "SELECT id, doctor_id, title, video_path FROM doctor_videos"
   );
 
   for (const video of videos.rows) {
     if (isAlreadyUrl(video.video_path)) {
-      console.log(`  ✓ Video "${video.title}" — already on Cloudinary, skipping`);
+      console.log(`   Video "${video.title}" — already on Cloudinary, skipping`);
       continue;
     }
 
-    console.log(`  → Uploading video "${video.title}" (${video.video_path})`);
+    console.log(`   Uploading video "${video.title}" (${video.video_path})`);
     const result = await uploadFile(video.video_path, {
       folder: `mentra/doctors/doctor_${video.doctor_id}/videos`,
       resource_type: 'video',
@@ -141,11 +141,11 @@ const migrate = async () => {
         "UPDATE doctor_videos SET video_path = $1, cloudinary_public_id = $2 WHERE id = $3",
         [result.secure_url, result.public_id, video.id]
       );
-      console.log(`  ✓ Video "${video.title}" — migrated`);
+      console.log(`   Video "${video.title}" — migrated`);
     }
   }
 
-  console.log('\n✅ Migration complete!');
+  console.log('\n Migration complete!');
   process.exit(0);
 };
 

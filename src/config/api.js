@@ -62,6 +62,16 @@ export const API_ENDPOINTS = {
   UPLOAD_VIDEO: '/api/doctors/videos',
   DELETE_VIDEO: '/api/doctors/videos',
 
+  // Dispute endpoints
+  SUBMIT_DISPUTE: '/api/disputes/submit',
+  CHECK_DISPUTE: '/api/disputes/check',
+  PATIENT_DISPUTES: '/api/disputes/patient',
+  DOCTOR_DISPUTES: '/api/disputes/doctor',
+  ADMIN_DISPUTES: '/api/disputes/admin/all',
+  ADMIN_UPDATE_DISPUTE: '/api/disputes/admin',
+  DOCTOR_WARNINGS: '/api/disputes/doctor',
+  MARK_WARNING_READ: '/api/disputes/warnings',
+
   // Therapy Homework endpoints
   THERAPY_ASSIGN: '/api/therapy/assign',
   THERAPY_DOCTOR_TASKS: '/api/therapy/doctor/tasks',
@@ -74,3 +84,38 @@ export const API_ENDPOINTS = {
 
 // Helper function to build full URL
 export const buildApiUrl = (endpoint) => `${API_BASE_URL}${endpoint}`;
+
+// Enhanced fetch function with automatic logout on account status errors
+export const apiRequest = async (url, options = {}) => {
+  try {
+    const response = await fetch(url, options);
+    
+    // Check for 403 errors with account status
+    if (response.status === 403) {
+      const data = await response.json();
+      
+      // Check if it's an account status issue
+      if (data.accountStatus) {
+        // Clear all auth data
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('doctor');
+        
+        // Store the error message for display on login page
+        localStorage.setItem('accountStatusError', JSON.stringify({
+          message: data.message,
+          status: data.accountStatus
+        }));
+        
+        // Redirect to login page
+        window.location.href = '/login';
+        return null;
+      }
+    }
+    
+    return response;
+  } catch (error) {
+    throw error;
+  }
+};

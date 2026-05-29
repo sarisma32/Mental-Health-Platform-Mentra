@@ -11,7 +11,7 @@ const ReviewDetailModal = ({ review, onClose }) => {
   const ratingLabel = { 1: 'Poor', 2: 'Fair', 3: 'Good', 4: 'Very Good', 5: 'Excellent' };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 backdrop-blur-md bg-white/30 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden">
         <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
           <h3 className="text-lg font-bold text-gray-900">Review Details</h3>
@@ -22,8 +22,12 @@ const ReviewDetailModal = ({ review, onClose }) => {
 
         <div className="px-6 py-5 space-y-5">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-bold">
-              {review.patient_first_name?.charAt(0)}{review.patient_last_name?.charAt(0)}
+            <div className="w-12 h-12 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-bold overflow-hidden">
+              {review.patient_photo ? (
+                <img src={review.patient_photo} alt={review.patient_first_name} className="w-full h-full object-cover" />
+              ) : (
+                <>{review.patient_first_name?.charAt(0)}{review.patient_last_name?.charAt(0)}</>
+              )}
             </div>
             <div>
               <p className="font-semibold text-gray-900">{review.patient_first_name} {review.patient_last_name}</p>
@@ -136,8 +140,12 @@ const DoctorReviews = ({ doctorId }) => {
                 className="px-6 py-4 cursor-pointer hover:bg-[#F5F5F0] transition-colors group">
                 <div className="flex items-start justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                      {review.patient_first_name?.charAt(0)}{review.patient_last_name?.charAt(0)}
+                    <div className="w-10 h-10 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-semibold text-sm overflow-hidden">
+                      {review.patient_photo ? (
+                        <img src={review.patient_photo} alt={review.patient_first_name} className="w-full h-full object-cover" />
+                      ) : (
+                        <>{review.patient_first_name?.charAt(0)}{review.patient_last_name?.charAt(0)}</>
+                      )}
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 text-sm">{review.patient_first_name} {review.patient_last_name}</p>

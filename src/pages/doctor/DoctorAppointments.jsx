@@ -6,6 +6,9 @@ const DoctorAppointments = ({ appointments, refreshing, onRefresh, onCompleteSes
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedDetail, setSelectedDetail] = useState(null);
   const [prescriptionApt, setPrescriptionApt] = useState(null);
+  const [confirmDialog, setConfirmDialog] = useState(null); // { message, onConfirm }
+
+  const showConfirm = (message, onConfirm) => setConfirmDialog({ message, onConfirm });
 
   const handleConfirmAppointment = async (appointmentId) => {
     try {
@@ -21,17 +24,34 @@ const DoctorAppointments = ({ appointments, refreshing, onRefresh, onCompleteSes
   };
 
   const handleCancelAppointment = async (appointmentId) => {
-    if (!window.confirm('Cancel this appointment?')) return;
-    try {
-      const token = localStorage.getItem('token');
-      const res = await fetch(buildApiUrl(`/api/appointments/${appointmentId}`), {
-        method: 'DELETE',
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      const data = await res.json();
-      if (data.success) onRefresh();
-      else alert(data.message || 'Failed to cancel');
-    } catch { alert('Failed to cancel appointment'); }
+    showConfirm('Cancel this appointment?', async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(buildApiUrl(`/api/appointments/${appointmentId}`), {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) onRefresh();
+        else showConfirm(data.message || 'Failed to cancel', null);
+      } catch { showConfirm('Failed to cancel appointment', null); }
+    });
+  };
+
+  const handleNoShow = async (appointmentId) => {
+    showConfirm('Mark this appointment as No Show?', async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch(buildApiUrl(`/api/appointments/${appointmentId}/status`), {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'no_show' }),
+        });
+        const data = await res.json();
+        if (data.success) onRefresh();
+        else showConfirm(data.message || 'Failed to update status', null);
+      } catch { showConfirm('Failed to update appointment', null); }
+    });
   };
 
   const filtered = [...appointments]
@@ -63,6 +83,7 @@ const DoctorAppointments = ({ appointments, refreshing, onRefresh, onCompleteSes
               <option value="confirmed">Confirmed</option>
               <option value="completed">Completed</option>
               <option value="cancelled">Cancelled</option>
+              <option value="no_show">No Show</option>
             </select>
           </div>
         </div>
@@ -74,8 +95,12 @@ const DoctorAppointments = ({ appointments, refreshing, onRefresh, onCompleteSes
                 className="border border-gray-200 rounded-xl p-4 hover:shadow-md hover:border-[#4A7C59] transition-all cursor-pointer group">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-semibold shadow-sm flex-shrink-0">
-                      {apt.patient_first_name.charAt(0)}{apt.patient_last_name.charAt(0)}
+                    <div className="w-12 h-12 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-semibold shadow-sm flex-shrink-0 overflow-hidden">
+                      {apt.patient_photo ? (
+                        <img src={apt.patient_photo} alt={apt.patient_first_name} className="w-full h-full object-cover" />
+                      ) : (
+                        <>{apt.patient_first_name.charAt(0)}{apt.patient_last_name.charAt(0)}</>
+                      )}
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
@@ -104,8 +129,12 @@ const DoctorAppointments = ({ appointments, refreshing, onRefresh, onCompleteSes
                         </>
                       )}
                       {(apt.status === 'confirmed' || apt.status === 'scheduled') && (
-                        <button onClick={e => { e.stopPropagation(); onCompleteSession(apt); }}
-                          className="px-3 py-1.5 bg-blue-100 text-blue-700 text-xs rounded-md hover:bg-blue-200 transition-colors font-medium">Complete Session</button>
+                        <>
+                          <button onClick={e => { e.stopPropagation(); onCompleteSession(apt); }}
+                            className="px-3 py-1.5 bg-blue-100 text-blue-700 text-xs rounded-md hover:bg-blue-200 transition-colors font-medium">Complete Session</button>
+                          <button onClick={e => { e.stopPropagation(); handleNoShow(apt.id); }}
+                            className="px-3 py-1.5 bg-orange-100 text-orange-700 text-xs rounded-md hover:bg-orange-200 transition-colors font-medium">No Show</button>
+                        </>
                       )}
                       {apt.status === 'completed' && (
                         <button onClick={e => { e.stopPropagation(); setPrescriptionApt(apt); }}
@@ -136,12 +165,16 @@ const DoctorAppointments = ({ appointments, refreshing, onRefresh, onCompleteSes
 
       {/* Detail Modal */}
       {selectedDetail && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 backdrop-blur-md bg-white/30 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
             <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 sticky top-0 bg-white">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-bold text-sm">
-                  {selectedDetail.patient_first_name.charAt(0)}{selectedDetail.patient_last_name.charAt(0)}
+                <div className="w-10 h-10 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-bold text-sm overflow-hidden">
+                  {selectedDetail.patient_photo ? (
+                    <img src={selectedDetail.patient_photo} alt={selectedDetail.patient_first_name} className="w-full h-full object-cover" />
+                  ) : (
+                    <>{selectedDetail.patient_first_name.charAt(0)}{selectedDetail.patient_last_name.charAt(0)}</>
+                  )}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
@@ -201,8 +234,12 @@ const DoctorAppointments = ({ appointments, refreshing, onRefresh, onCompleteSes
                 </>
               )}
               {(selectedDetail.status === 'confirmed' || selectedDetail.status === 'scheduled') && (
-                <button onClick={() => { onCompleteSession(selectedDetail); setSelectedDetail(null); }}
-                  className="flex-1 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-medium text-sm transition-colors">Complete Session</button>
+                <>
+                  <button onClick={() => { onCompleteSession(selectedDetail); setSelectedDetail(null); }}
+                    className="flex-1 py-2.5 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-medium text-sm transition-colors">Complete Session</button>
+                  <button onClick={() => { handleNoShow(selectedDetail.id); setSelectedDetail(null); }}
+                    className="flex-1 py-2.5 bg-orange-500 hover:bg-orange-600 text-white rounded-xl font-medium text-sm transition-colors">No Show</button>
+                </>
               )}
               {selectedDetail.status === 'completed' && (
                 <button onClick={() => { setPrescriptionApt(selectedDetail); setSelectedDetail(null); }}
@@ -225,6 +262,27 @@ const DoctorAppointments = ({ appointments, refreshing, onRefresh, onCompleteSes
           onClose={() => setPrescriptionApt(null)}
           onSaved={onRefresh}
         />
+      )}
+
+      {/* Confirm Dialog */}
+      {confirmDialog && (
+        <div className="fixed inset-0 backdrop-blur-md bg-white/30 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+            <p className="text-sm text-gray-700 mb-6 text-center">{confirmDialog.message}</p>
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmDialog(null)}
+                className="flex-1 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+                Cancel
+              </button>
+              {confirmDialog.onConfirm && (
+                <button onClick={() => { setConfirmDialog(null); confirmDialog.onConfirm(); }}
+                  className="flex-1 py-2.5 bg-[#4A7C59] hover:bg-[#3d6b4a] text-white rounded-xl text-sm font-semibold transition-colors">
+                  Confirm
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

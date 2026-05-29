@@ -5,7 +5,7 @@ export const getNotifications = async (req, res) => {
   try {
     const { recipientType, recipientId } = req.params;
 
-    let query = `SELECT * FROM notifications WHERE recipient_type = $1`;
+    let query = `SELECT id, recipient_type, recipient_id, type, title, message, is_read, created_at, COALESCE(metadata, '{}') as metadata FROM notifications WHERE recipient_type = $1`;
     const params = [recipientType];
 
     if ((recipientType === 'doctor' || recipientType === 'patient') && recipientId && recipientId !== 'all') {
@@ -62,12 +62,12 @@ export const markAllAsRead = async (req, res) => {
 };
 
 // Helper: create a notification (used internally by other controllers)
-export const createNotification = async ({ recipientType, recipientId = null, type, title, message }) => {
+export const createNotification = async ({ recipientType, recipientId = null, type, title, message, metadata = {} }) => {
   try {
     await pool.query(
-      `INSERT INTO notifications (recipient_type, recipient_id, type, title, message)
-       VALUES ($1, $2, $3, $4, $5)`,
-      [recipientType, recipientId, type, title, message]
+      `INSERT INTO notifications (recipient_type, recipient_id, type, title, message, metadata)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [recipientType, recipientId, type, title, message, JSON.stringify(metadata)]
     );
   } catch (err) {
     console.error("Create notification error:", err);

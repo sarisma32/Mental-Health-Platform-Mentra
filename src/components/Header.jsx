@@ -1,10 +1,23 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
-const Header = () => {
+const Header = ({ authMode }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [user, setUser] = useState(null);
-  const [userRole, setUserRole] = useState(null);
+
+  // Initialize directly from localStorage to avoid flash on first render
+  const [user, setUser] = useState(() => {
+    try {
+      const token = localStorage.getItem('token');
+      const userData = localStorage.getItem('user');
+      const role = localStorage.getItem('userRole');
+      if (token && userData && role !== 'admin') return JSON.parse(userData);
+    } catch {}
+    return null;
+  });
+  const [userRole, setUserRole] = useState(() => {
+    const role = localStorage.getItem('userRole');
+    return role !== 'admin' ? role : null;
+  });
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -29,9 +42,12 @@ const Header = () => {
 
     // Listen for storage changes (when user logs in/out in another tab)
     window.addEventListener('storage', checkAuthStatus);
+    // Listen for same-tab profile updates (e.g. photo upload)
+    window.addEventListener('userUpdated', checkAuthStatus);
     
     return () => {
       window.removeEventListener('storage', checkAuthStatus);
+      window.removeEventListener('userUpdated', checkAuthStatus);
     };
   }, []);
 
@@ -85,7 +101,8 @@ const Header = () => {
             <span className="text-2xl font-bold text-mentra-primary-dark tracking-tight">MENTRA</span>
           </Link>
 
-          {/* Desktop Navigation */}
+          {/* Desktop Navigation — hidden in auth mode */}
+          {!authMode && (
           <nav className="hidden md:flex items-center space-x-2">
             <Link to="/" className={getNavClasses('/')}>
               Home
@@ -108,31 +125,46 @@ const Header = () => {
               {renderActiveIndicator('/about')}
             </Link>
           </nav>
+          )}
 
           {/* Login/Signup or Profile Section */}
           <div className="flex items-center space-x-3">
-            {user ? (
+            {authMode ? (
+              // Auth mode: show label + pill button
+              <>
+                <span className="text-gray-400 text-sm hidden sm:inline whitespace-nowrap">{authMode.label}</span>
+                <Link to={authMode.to} className="flex-shrink-0">
+                  <button className="bg-mentra-primary hover:bg-mentra-primary-hover text-white px-6 py-2.5 rounded-full transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 text-sm whitespace-nowrap">
+                    {authMode.buttonText}
+                  </button>
+                </Link>
+              </>
+            ) : user ? (
               // Profile Icon for logged in users
               <Link to={
                 userRole === 'admin' ? '/admin-dashboard' :
                 userRole === 'doctor' ? '/doctor-dashboard' :
                 '/dashboard'
               }>
-                <button className="w-10 h-10 bg-mentra-primary hover:bg-mentra-primary-hover rounded-full flex items-center justify-center text-white font-semibold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg">
-                  {(user.full_name || user.email).charAt(0).toUpperCase()}
+                <button className="w-10 h-10 bg-mentra-primary hover:bg-mentra-primary-hover rounded-full flex items-center justify-center text-white font-semibold text-lg transition-all duration-200 transform hover:scale-105 shadow-lg flex-shrink-0 overflow-hidden">
+                  {user.profile_photo ? (
+                    <img src={user.profile_photo} alt={user.full_name} className="w-full h-full object-cover" />
+                  ) : (
+                    (user.full_name || user.email).charAt(0).toUpperCase()
+                  )}
                 </button>
               </Link>
             ) : (
               // Login and Signup buttons for non-logged in users
               <>
                 <Link to="/login">
-                  <button className="text-mentra-primary hover:text-mentra-primary-hover px-4 py-2 rounded-full transition-all duration-200 font-medium">
+                  <button className="text-mentra-primary hover:text-mentra-primary-hover px-4 py-2 rounded-full transition-all duration-200 font-medium whitespace-nowrap flex-shrink-0">
                     Login
                   </button>
                 </Link>
                 
-                <Link to="/signup">
-                  <button className="bg-mentra-primary hover:bg-mentra-primary-hover text-white px-6 py-2.5 rounded-full transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105">
+                <Link to="/signup" className="flex-shrink-0">
+                  <button className="bg-mentra-primary hover:bg-mentra-primary-hover text-white px-6 py-2.5 rounded-full transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 whitespace-nowrap">
                     Sign up
                   </button>
                 </Link>
@@ -140,7 +172,8 @@ const Header = () => {
             )}
           </div>
 
-          {/* Mobile menu button */}
+          {/* Mobile menu button — hidden in auth mode */}
+          {!authMode && (
           <button 
             className="md:hidden p-2 rounded-lg hover:bg-mentra-secondary transition-colors"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -153,6 +186,7 @@ const Header = () => {
               )}
             </svg>
           </button>
+          )}
         </div>
 
         {/* Mobile Navigation */}
@@ -212,15 +246,19 @@ const Header = () => {
               
               {/* Mobile Login/Profile Section */}
               <div className="pt-4 border-t border-mentra-secondary/50 mt-4">
-                {user ? (
+                ) : user ? (
                   // Profile section for logged in users
                   <Link 
                     to="/dashboard" 
                     className="flex items-center space-x-3 px-3 py-2 bg-mentra-secondary/20 hover:bg-mentra-secondary/30 rounded-lg transition-all duration-200"
                     onClick={() => setIsMenuOpen(false)}
                   >
-                    <div className="w-10 h-10 bg-mentra-primary rounded-full flex items-center justify-center text-white font-semibold">
-                      {(user.full_name || user.email).charAt(0).toUpperCase()}
+                    <div className="w-10 h-10 bg-mentra-primary rounded-full flex items-center justify-center text-white font-semibold overflow-hidden">
+                      {user.profile_photo ? (
+                        <img src={user.profile_photo} alt={user.full_name} className="w-full h-full object-cover" />
+                      ) : (
+                        (user.full_name || user.email).charAt(0).toUpperCase()
+                      )}
                     </div>
                     <div>
                       <p className="font-medium text-gray-900 text-sm">Go to Dashboard</p>

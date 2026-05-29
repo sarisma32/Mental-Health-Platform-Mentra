@@ -55,8 +55,12 @@ const PatientPrescriptions = () => {
                 onClick={() => setExpanded(expanded === presc.id ? null : presc.id)}
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                    {presc.doctor_name?.charAt(0)}
+                  <div className="w-10 h-10 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0 overflow-hidden">
+                    {presc.doctor_photo ? (
+                      <img src={presc.doctor_photo} alt={presc.doctor_name} className="w-full h-full object-cover" />
+                    ) : (
+                      presc.doctor_name?.charAt(0)
+                    )}
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-gray-800">Dr. {presc.doctor_name}</p>
@@ -84,7 +88,7 @@ const PatientPrescriptions = () => {
                   {/* Diagnosis */}
                   {presc.diagnosis && (
                     <div>
-                      <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">🩺 Diagnosis</h4>
+                      <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2"> Diagnosis</h4>
                       <div className="bg-blue-50 rounded-xl p-4">
                         <p className="text-sm text-blue-800 leading-relaxed">{presc.diagnosis}</p>
                       </div>
@@ -93,7 +97,7 @@ const PatientPrescriptions = () => {
 
                   {/* Medications */}
                   <div>
-                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">💊 Medications</h4>
+                    <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3"> Medications</h4>
                     <div className="space-y-3">
                       {presc.medications.map((med, idx) => (
                         <div key={idx} className="bg-gray-50 rounded-xl p-4">
@@ -112,7 +116,7 @@ const PatientPrescriptions = () => {
                             </span>
                           </div>
                           {med.instructions && (
-                            <p className="text-xs text-gray-500 mt-2 italic">📝 {med.instructions}</p>
+                            <p className="text-xs text-gray-500 mt-2 italic"> {med.instructions}</p>
                           )}
                         </div>
                       ))}
@@ -122,7 +126,7 @@ const PatientPrescriptions = () => {
                   {/* Therapy Advice */}
                   {presc.therapy_advice && (
                     <div>
-                      <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">🧘 Therapy Recommendation</h4>
+                      <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2"> Therapy Recommendation</h4>
                       <div className="bg-teal-50 rounded-xl p-4">
                         <p className="text-sm text-teal-800 leading-relaxed">{presc.therapy_advice}</p>
                       </div>
@@ -132,7 +136,7 @@ const PatientPrescriptions = () => {
                   {/* Lifestyle Advice */}
                   {presc.lifestyle_advice && (
                     <div>
-                      <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">🌿 Lifestyle Suggestions</h4>
+                      <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2"> Lifestyle Suggestions</h4>
                       <div className="bg-green-50 rounded-xl p-4">
                         <p className="text-sm text-green-800 leading-relaxed">{presc.lifestyle_advice}</p>
                       </div>
@@ -143,7 +147,7 @@ const PatientPrescriptions = () => {
                     Issued: {new Date(presc.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     {presc.follow_up_date && (
                       <span className="ml-3 text-[#4A7C59] font-medium">
-                        📅 Follow-up: {new Date(presc.follow_up_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                         Follow-up: {new Date(presc.follow_up_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </span>
                     )}
                   </p>

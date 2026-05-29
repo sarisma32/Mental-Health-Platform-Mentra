@@ -9,6 +9,8 @@ const AdminReviews = () => {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [selectedReview, setSelectedReview] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [reviewToDelete, setReviewToDelete] = useState(null);
 
   const fetchReviews = async () => {
     try {
@@ -36,12 +38,23 @@ const AdminReviews = () => {
 
   const handleDelete = async (e, reviewId) => {
     e && e.stopPropagation();
-    if (!window.confirm('Delete this review? This cannot be undone.')) return;
-    try {
-      const res = await fetch(buildApiUrl(`/api/reviews/admin/${reviewId}`), { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) { fetchReviews(); if (selectedReview?.id === reviewId) setSelectedReview(null); }
-    } catch (e) { console.error(e); }
+    setReviewToDelete(reviewId);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = async () => {
+    if (reviewToDelete) {
+      try {
+        const res = await fetch(buildApiUrl(`/api/reviews/admin/${reviewToDelete}`), { method: 'DELETE' });
+        const data = await res.json();
+        if (data.success) { 
+          fetchReviews(); 
+          if (selectedReview?.id === reviewToDelete) setSelectedReview(null); 
+        }
+      } catch (e) { console.error(e); }
+      setShowDeleteModal(false);
+      setReviewToDelete(null);
+    }
   };
 
   const filteredReviews = reviews.filter(r => {
@@ -159,7 +172,7 @@ const AdminReviews = () => {
 
       {/* Detail Modal */}
       {selectedReview && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 backdrop-blur-md bg-white/30 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden">
             <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
               <h3 className="text-lg font-bold text-gray-900">Review Details</h3>
@@ -220,6 +233,52 @@ const AdminReviews = () => {
             </div>
             <div className="px-6 py-4 border-t border-gray-100">
               <button onClick={() => setSelectedReview(null)} className="w-full py-2.5 bg-[#4A7C59] hover:bg-[#3d6b4a] text-white rounded-xl font-medium text-sm transition-colors">Close</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 backdrop-blur-md bg-white/30 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-gray-900">Delete Review</h3>
+              <button 
+                onClick={() => setShowDeleteModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="px-6 py-5">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </div>
+                <p className="text-gray-700 mb-2">Are you sure you want to delete this review?</p>
+                <p className="text-sm text-gray-500">This action cannot be undone. The review will be permanently removed from the system.</p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowDeleteModal(false)}
+                  className="flex-1 border border-gray-300 text-gray-700 hover:bg-gray-50 py-3 px-4 rounded-lg font-semibold transition-all duration-300"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  className="flex-1 bg-red-600 hover:bg-red-700 text-white py-3 px-4 rounded-lg font-semibold transition-all duration-300"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
           </div>
         </div>

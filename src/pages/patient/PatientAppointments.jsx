@@ -7,6 +7,7 @@ const PatientAppointments = ({
   navigate, fetchAppointments, user,
   setReviewRating, setReviewText, setRatingProfessionalism,
   setRatingCommunication, setRatingWaitTime,
+  setDisputeModal, disputedAppointments,
 }) => {
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
@@ -39,17 +40,28 @@ const PatientAppointments = ({
             filteredAppointments.slice().sort((a, b) => new Date(`${b.appointment_date}T${b.appointment_time}`) - new Date(`${a.appointment_date}T${a.appointment_time}`))
               .reduce((groups, apt) => {
                 const key = apt.doctor_id;
-                if (!groups[key]) groups[key] = { doctorName: apt.doctor_name, doctorSpecialization: apt.doctor_specialization, doctorLocation: apt.doctor_location, appointments: [] };
+                if (!groups[key]) groups[key] = { doctorName: apt.doctor_name, doctorSpecialization: apt.doctor_specialization, doctorLocation: apt.doctor_location, doctorActive: apt.doctor_active !== false, doctorPhoto: apt.doctor_photo || null, appointments: [] };
                 groups[key].appointments.push(apt);
                 return groups;
               }, {})
           ).map(([doctorId, group]) => (
             <div key={doctorId} className="border border-gray-200 rounded-xl overflow-hidden">
               <div className="bg-[#F5F5F0] px-4 py-3 flex items-center gap-3 border-b border-gray-200">
-                <div className="w-10 h-10 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-semibold text-sm">{group.doctorName.charAt(0)}</div>
+                <div className="w-10 h-10 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-semibold text-sm overflow-hidden flex-shrink-0">
+                  {group.doctorPhoto ? (
+                    <img src={group.doctorPhoto} alt={group.doctorName} className="w-full h-full object-cover" />
+                  ) : (
+                    group.doctorName.charAt(0)
+                  )}
+                </div>
                 <div className="flex-1">
                   <p className="font-semibold text-gray-900">Dr. {group.doctorName}</p>
                   <p className="text-xs text-gray-500">{group.doctorSpecialization} • {group.doctorLocation}</p>
+                  {!group.doctorActive && (
+                    <p className="text-xs text-red-500 mt-0.5 flex items-center gap-1">
+                      <span>⚠️</span> This doctor is no longer active on the platform
+                    </p>
+                  )}
                 </div>
                 <span className="text-xs text-gray-400 font-medium">{group.appointments.length} session{group.appointments.length !== 1 ? 's' : ''}</span>
               </div>
@@ -80,15 +92,22 @@ const PatientAppointments = ({
                           ) : <div><span className="text-xs text-gray-400">Cannot cancel</span></div>;
                         })()}
                         {apt.status === 'completed' && (
-                          <div>{reviewedAppointments.has(apt.id) ? (
-                            <span className="text-xs text-green-600 font-medium flex items-center justify-end"><span className="mr-1">★</span> Reviewed</span>
-                          ) : (
-                            <button onClick={() => {
-                              setReviewModal(apt);
-                              setReviewRating(0); setReviewText('');
-                              setRatingProfessionalism(0); setRatingCommunication(0); setRatingWaitTime(0);
-                            }} className="text-xs text-[#4A7C59] hover:text-[#3d6b4a] font-medium border border-[#4A7C59] px-2 py-1 rounded">Leave a Review</button>
-                          )}</div>
+                          <div className="flex flex-col gap-1 items-end">
+                            {reviewedAppointments.has(apt.id) ? (
+                              <span className="text-xs text-green-600 font-medium flex items-center justify-end"><span className="mr-1">★</span> Reviewed</span>
+                            ) : (
+                              <button onClick={() => {
+                                setReviewModal(apt);
+                                setReviewRating(0); setReviewText('');
+                                setRatingProfessionalism(0); setRatingCommunication(0); setRatingWaitTime(0);
+                              }} className="text-xs text-[#4A7C59] hover:text-[#3d6b4a] font-medium border border-[#4A7C59] px-2 py-1 rounded">Leave a Review</button>
+                            )}
+                            {disputedAppointments?.has(apt.id) ? (
+                              <span className="text-xs text-red-500 font-medium">Dispute Raised</span>
+                            ) : (
+                              <button onClick={() => setDisputeModal(apt)} className="text-xs text-red-500 hover:text-red-700 font-medium border border-red-400 px-2 py-1 rounded">Raise a Dispute</button>
+                            )}
+                          </div>
                         )}
                       </div>
                     </div>

@@ -102,7 +102,7 @@ export const getPatientPrescriptions = async (req, res) => {
   try {
     const patientId = req.user.id;
     const prescs = await pool.query(
-      `SELECT p.*, d.full_name as doctor_name, d.specialization,
+      `SELECT p.*, d.full_name as doctor_name, d.specialization, d.profile_photo as doctor_photo,
               a.appointment_date, a.appointment_time
        FROM prescriptions p
        JOIN doctors d ON d.id = p.doctor_id
@@ -132,7 +132,7 @@ export const getDoctorPrescriptions = async (req, res) => {
   try {
     const doctorId = req.user.id;
     const prescs = await pool.query(
-      `SELECT p.*, pat.full_name as patient_name,
+      `SELECT p.*, pat.full_name as patient_name, pat.profile_photo as patient_photo,
               a.appointment_date
        FROM prescriptions p
        JOIN patients pat ON pat.id = p.patient_id

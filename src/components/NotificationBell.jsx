@@ -15,6 +15,16 @@ const typeIcon = (type) => {
     case 'new_doctor':            return '👨‍⚕️';
     case 'new_review':            return '⭐';
     case 'account_deleted':       return '🗑️';
+    case 'crisis_alert':          return '🚨';
+    case 'no_show_warning':       return '⚠️';
+    case 'no_show':               return '🚫';
+    case 'new_dispute':           return '⚠️';
+    case 'dispute_update':        return '📋';
+    case 'admin_warning':         return '🚨';
+    case 'system_review_submitted': return '⭐';
+    case 'system_review_approved':  return '✅';
+    case 'system_review_rejected':  return '❌';
+    case 'system_review_deleted':   return '🗑️';
     default:                      return '🔔';
   }
 };
@@ -25,6 +35,8 @@ const doctorSectionMap = {
   session_completed: 'appointments',
   new_review: 'reviews',
   task_completed: 'therapy',
+  crisis_alert: 'emergency',
+  admin_warning: 'warnings',
 };
 
 // Maps notification type → dashboard section for admin
@@ -35,6 +47,10 @@ const adminSectionMap = {
   new_doctor: 'doctors',
   new_review: 'reviews',
   account_deleted: 'users',
+  crisis_alert: 'crisis',
+  no_show: 'appointments',
+  new_dispute: 'disputes',
+  system_review_submitted: 'system-reviews',
 };
 
 // Maps notification type → dashboard section for patient
@@ -45,6 +61,12 @@ const patientSectionMap = {
   session_completed: 'appointments',
   task_assigned: 'therapy',
   prescription_added: 'prescriptions',
+  crisis_response: 'emergency',
+  no_show_warning: 'session-alerts',
+  dispute_update: 'disputes',
+  system_review_approved: 'settings',
+  system_review_rejected: 'settings',
+  system_review_deleted: 'settings',
 };
 
 const NotificationBell = ({ recipientType, recipientId, onNavigate }) => {
@@ -81,7 +103,12 @@ const NotificationBell = ({ recipientType, recipientId, onNavigate }) => {
       const data = await res.json();
       if (data.success) {
         // Filter out notifications the user has disabled in preferences
-        const filtered = data.notifications.filter(n => isNotifAllowed(n.type));
+        // Also filter out dispute_update for doctors (they get warnings separately)
+        const filtered = data.notifications.filter(n => {
+          if (!isNotifAllowed(n.type)) return false;
+          if (recipientType === 'doctor' && n.type === 'dispute_update') return false;
+          return true;
+        });
         setNotifications(filtered);
         setUnreadCount(filtered.filter(n => !n.is_read).length);
       }

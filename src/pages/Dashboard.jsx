@@ -2,14 +2,19 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardSidebar from '../components/DashboardSidebar';
 import DashboardHeader from '../components/DashboardHeader';
+import SuccessDialog from '../components/SuccessDialog';
 import PatientOverview from './patient/PatientOverview';
 import PatientAppointments from './patient/PatientAppointments';
 import PatientProfile from './patient/PatientProfile';
 import PatientReviewModal from './patient/PatientReviewModal';
 import PatientTherapyTasks from './patient/PatientTherapyTasks.jsx';
 import PatientPrescriptions from './patient/PatientPrescriptions.jsx';
+import PatientEmergencyMessages from './patient/PatientEmergencyMessages.jsx';
+import PatientSessionAlerts from './patient/PatientSessionAlerts.jsx';
+import PatientDisputes from './patient/PatientDisputes.jsx';
+import RaiseDisputeModal from './patient/RaiseDisputeModal.jsx';
 import Settings from './shared/Settings.jsx';
-import { buildApiUrl, API_ENDPOINTS } from '../config/api.js';
+import { buildApiUrl, API_ENDPOINTS, apiRequest } from '../config/api.js';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
@@ -26,6 +31,9 @@ const Dashboard = () => {
   const [ratingWaitTime, setRatingWaitTime] = useState(0);
   const [submittingReview, setSubmittingReview] = useState(false);
   const [reviewedAppointments, setReviewedAppointments] = useState(new Set());
+  const [disputeModal, setDisputeModal] = useState(null);
+  const [disputedAppointments, setDisputedAppointments] = useState(new Set());
+  const [successDialog, setSuccessDialog] = useState({ isOpen: false, title: '', message: '', isError: false });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -43,25 +51,49 @@ const Dashboard = () => {
   const fetchAppointments = async (patientId, token) => {
     try {
       setLoading(true);
-      const response = await fetch(buildApiUrl(`${API_ENDPOINTS.PATIENT_APPOINTMENTS}/${patientId}`), {
+      const response = await apiRequest(buildApiUrl(`${API_ENDPOINTS.PATIENT_APPOINTMENTS}/${patientId}`), {
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
       });
+      
+      if (!response) return; // apiRequest handles logout automatically
+      
       if (response.ok) {
         const data = await response.json();
         if (data.success) {
-          setAppointments(data.appointments || []);
+          // Fetch approved doctors to detect deleted ones and get profile photos
+          const approvedRes = await fetch(buildApiUrl('/api/doctors/approved?limit=200')).catch(() => ({ ok: false }));
+          const approvedData = approvedRes.ok ? await approvedRes.json() : { doctors: [] };
+          const activeDoctorIds = new Set((approvedData.doctors || []).map(d => d.id));
+          const doctorPhotoMap = {};
+          (approvedData.doctors || []).forEach(d => { if (d.profile_photo) doctorPhotoMap[d.id] = d.profile_photo; });
+
+          // Tag each appointment with doctor_active flag and photo
+          const tagged = (data.appointments || []).map(a => ({
+            ...a,
+            doctor_active: activeDoctorIds.has(a.doctor_id),
+            doctor_photo: doctorPhotoMap[a.doctor_id] || null,
+          }));
+
+          setAppointments(tagged);
           const now = new Date();
-          const upcoming = data.appointments.filter(a => new Date(a.appointment_date) >= now && a.status !== 'cancelled' && a.status !== 'completed').length;
-          const completed = data.appointments.filter(a => a.status === 'completed').length;
+          const upcoming = tagged.filter(a => new Date(a.appointment_date) >= now && a.status !== 'cancelled' && a.status !== 'completed').length;
+          const completed = tagged.filter(a => a.status === 'completed').length;
           setStats({
-            total: data.appointments.length, upcoming, completed,
-            past: data.appointments.filter(a => new Date(a.appointment_date) < now || a.status === 'completed' || a.status === 'cancelled').length
+            total: tagged.length, upcoming, completed,
+            past: tagged.filter(a => new Date(a.appointment_date) < now || a.status === 'completed' || a.status === 'cancelled').length
           });
-          const completedApts = data.appointments.filter(a => a.status === 'completed');
+          const completedApts = tagged.filter(a => a.status === 'completed');
           const checks = await Promise.all(completedApts.map(a =>
             fetch(buildApiUrl(`${API_ENDPOINTS.CHECK_REVIEW}/${a.id}`)).then(r => r.json()).then(d => d.hasReview ? a.id : null).catch(() => null)
           ));
           setReviewedAppointments(new Set(checks.filter(Boolean)));
+
+          const disputeChecks = await Promise.all(completedApts.map(a =>
+            fetch(buildApiUrl(`${API_ENDPOINTS.CHECK_DISPUTE}/${a.id}`), {
+              headers: { 'Authorization': `Bearer ${token}` }
+            }).then(r => r.json()).then(d => d.hasDispute ? a.id : null).catch(() => null)
+          ));
+          setDisputedAppointments(new Set(disputeChecks.filter(Boolean)));
         }
       }
     } catch (e) { console.error(e); } finally { setLoading(false); }
@@ -81,9 +113,28 @@ const Dashboard = () => {
         setReviewedAppointments(prev => new Set([...prev, reviewModal.id]));
         setReviewModal(null); setReviewRating(0); setReviewText('');
         setRatingProfessionalism(0); setRatingCommunication(0); setRatingWaitTime(0);
-        alert('Review submitted! It will appear after admin approval.');
-      } else alert(data.message || 'Failed to submit review');
-    } catch { alert('Failed to submit review'); } finally { setSubmittingReview(false); }
+        setSuccessDialog({
+          isOpen: true,
+          title: 'Review Submitted',
+          message: 'Thank you for your feedback! Your review has been submitted successfully.',
+          isError: false
+        });
+      } else {
+        setSuccessDialog({
+          isOpen: true,
+          title: 'Error',
+          message: data.message || 'Failed to submit review. Please try again.',
+          isError: true
+        });
+      }
+    } catch {
+      setSuccessDialog({
+        isOpen: true,
+        title: 'Error',
+        message: 'Failed to submit review. Please check your connection and try again.',
+        isError: true
+      });
+    } finally { setSubmittingReview(false); }
   };
 
   const handleCancelAppointment = async (appointmentId) => {
@@ -150,6 +201,21 @@ const Dashboard = () => {
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
       </svg>
     )},
+    { id: 'emergency', name: 'Emergency Messages', alert: true, icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+    )},
+    { id: 'session-alerts', name: 'Session Alerts', icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+      </svg>
+    )},
+    { id: 'disputes', name: 'My Disputes', icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+    )},
     { id: 'settings', name: 'Settings', icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -184,6 +250,7 @@ const Dashboard = () => {
           sectionTitle={menuItems.find(m => m.id === activeSection)?.name || 'Overview'}
           userName={user.full_name}
           userEmail="Patient"
+          userPhoto={user.profile_photo || null}
           notifType="patient"
           notifId={user?.id}
           onNotifNavigate={setActiveSection}
@@ -220,17 +287,25 @@ const Dashboard = () => {
               setRatingProfessionalism={setRatingProfessionalism}
               setRatingCommunication={setRatingCommunication}
               setRatingWaitTime={setRatingWaitTime}
+              setDisputeModal={setDisputeModal}
+              disputedAppointments={disputedAppointments}
               {...sharedProps}
             />
           )}
 
           {activeSection === 'profile' && (
-            <PatientProfile user={user} stats={stats} />
+            <PatientProfile user={user} stats={stats} onUserUpdate={setUser} />
           )}
 
           {activeSection === 'therapy' && <PatientTherapyTasks />}
 
           {activeSection === 'prescriptions' && <PatientPrescriptions />}
+
+          {activeSection === 'emergency' && user && <PatientEmergencyMessages patientId={user.id} />}
+
+          {activeSection === 'session-alerts' && user && <PatientSessionAlerts patientId={user.id} />}
+
+          {activeSection === 'disputes' && user && <PatientDisputes patientId={user.id} />}
 
           {activeSection === 'settings' && (
             <Settings user={user} role="patient" onLogout={handleLogout} />
@@ -254,6 +329,21 @@ const Dashboard = () => {
         submittingReview={submittingReview}
         handleSubmitReview={handleSubmitReview}
         formatDate={formatDate}
+      />
+
+      <RaiseDisputeModal
+        appointment={disputeModal}
+        onClose={() => setDisputeModal(null)}
+        onSubmitted={(aptId) => setDisputedAppointments(prev => new Set([...prev, aptId]))}
+        formatDate={formatDate}
+      />
+
+      <SuccessDialog
+        isOpen={successDialog.isOpen}
+        onClose={() => setSuccessDialog({ isOpen: false, title: '', message: '', isError: false })}
+        title={successDialog.title}
+        message={successDialog.message}
+        isError={successDialog.isError}
       />
     </div>
   );

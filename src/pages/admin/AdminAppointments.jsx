@@ -15,6 +15,24 @@ const AdminAppointments = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [stats, setStats] = useState({ total: 0, upcoming: 0, completed: 0, cancelled: 0 });
+  const [warningSent, setWarningSent] = useState({}); // appointmentId → true
+
+  const [dialog, setDialog] = useState(null);
+
+  const handleWarn = async (appointmentId) => {
+    try {
+      const res = await fetch(buildApiUrl(`/api/admin/appointments/${appointmentId}/warn`), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      const data = await res.json();
+      if (data.success) {
+        setWarningSent(prev => ({ ...prev, [appointmentId]: true }));
+      } else {
+        setDialog(data.message || 'Failed to send warning');
+      }
+    } catch { setDialog('Failed to send warning'); }
+  };
 
   const fetchAppointments = async () => {
     try {
@@ -31,7 +49,11 @@ const AdminAppointments = () => {
     finally { setLoading(false); }
   };
 
-  useEffect(() => { fetchAppointments(); }, [statusFilter]);
+  useEffect(() => {
+    fetchAppointments();
+    const interval = setInterval(fetchAppointments, 30000);
+    return () => clearInterval(interval);
+  }, [statusFilter]);
 
   return (
     <div className="space-y-6">
@@ -67,7 +89,7 @@ const AdminAppointments = () => {
             <button type="submit" className="px-4 py-2 bg-[#4A7C59] text-white rounded-lg text-sm font-medium hover:bg-[#3d6b4a] transition-colors">Search</button>
           </form>
           <div className="flex gap-2 flex-wrap">
-            {['all', 'confirmed', 'completed', 'cancelled'].map(s => (
+            {['all', 'confirmed', 'completed', 'cancelled', 'no_show'].map(s => (
               <button key={s} onClick={() => setStatusFilter(s)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors capitalize ${statusFilter === s ? 'bg-[#4A7C59] text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}>
                 {s === 'confirmed' ? 'Upcoming' : s.charAt(0).toUpperCase() + s.slice(1)}
@@ -95,7 +117,7 @@ const AdminAppointments = () => {
             <table className="min-w-full">
               <thead>
                 <tr className="border-b border-gray-100">
-                  {['Patient', 'Doctor', 'Specialty', 'Date & Time', 'Type', 'Fee', 'Status'].map(h => (
+                  {['Patient', 'Doctor', 'Specialty', 'Date & Time', 'Type', 'Status', 'Action'].map(h => (
                     <th key={h} className="px-6 py-3 text-left text-xs font-semibold text-gray-400 uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
@@ -121,8 +143,17 @@ const AdminAppointments = () => {
                       <p className="text-xs text-gray-400">{formatTime(apt.appointment_time)}</p>
                     </td>
                     <td className="px-6 py-4"><p className="text-sm text-gray-600 capitalize">{apt.appointment_type}</p></td>
-                    <td className="px-6 py-4"><p className="text-sm font-medium text-gray-800">Rs {apt.session_fee || 0}</p></td>
                     <td className="px-6 py-4">{getStatusBadge(apt.status)}</td>
+                    <td className="px-6 py-4">
+                      {apt.status === 'no_show' && (
+                        <button
+                          onClick={() => handleWarn(apt.id)}
+                          disabled={warningSent[apt.id]}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${warningSent[apt.id] ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-orange-100 hover:bg-orange-200 text-orange-700'}`}>
+                          {warningSent[apt.id] ? 'Warned' : 'Warn Patient'}
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

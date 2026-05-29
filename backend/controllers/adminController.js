@@ -1,4 +1,5 @@
 import pool from "../db/index.js";
+import { sendDoctorStatusEmail, sendDoctorRejectionEmail, sendPatientDeactivationEmail } from "../utils/emailService.js";
 
 // Get all doctors with their registration details
 export const getAllDoctors = async (req, res) => {
@@ -82,7 +83,7 @@ export const getAllPatients = async (req, res) => {
 export const updatePatientStatus = async (req, res) => {
   try {
     const { patientId } = req.params;
-    const { status } = req.body;
+    const { status, adminMessage } = req.body;
 
     if (!['active', 'inactive'].includes(status)) {
       return res.status(400).json({
@@ -127,6 +128,11 @@ export const updatePatientStatus = async (req, res) => {
 
     const patient = result.rows[0];
 
+    // Send email notification if patient is being deactivated
+    if (status === 'inactive') {
+      sendPatientDeactivationEmail(patient, adminMessage); // fire-and-forget
+    }
+
     res.json({
       success: true,
       message: `Patient ${patient.full_name} status updated to ${status}`,
@@ -147,7 +153,7 @@ export const updatePatientStatus = async (req, res) => {
 export const updateDoctorStatus = async (req, res) => {
   try {
     const { doctorId } = req.params;
-    const { status } = req.body;
+    const { status, adminMessage } = req.body;
 
     if (!['pending', 'approved', 'rejected'].includes(status)) {
       return res.status(400).json({ success: false, message: "Invalid status." });
@@ -181,6 +187,14 @@ export const updateDoctorStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: "Doctor not found" });
 
     const doctor = result.rows[0];
+
+    // Send email notification to doctor
+    if (status === 'approved') {
+      sendDoctorStatusEmail(doctor, status); // fire-and-forget, don't block response
+    } else if (status === 'rejected') {
+      sendDoctorRejectionEmail(doctor, adminMessage); // fire-and-forget with custom message
+    }
+
     res.json({ success: true, message: `Doctor ${doctor.full_name} status updated to ${status}`, doctor });
 
   } catch (error) {
@@ -502,5 +516,53 @@ export const deleteSpecialization = async (req, res) => {
   } catch (error) {
     console.error('Error deleting specialization:', error);
     res.status(500).json({ success: false, message: 'Failed to delete specialization' });
+  }
+};
+
+// Admin warns patient about no-show
+export const warnPatientNoShow = async (req, res) => {
+  try {
+    const { appointmentId } = req.params;
+
+    const aptResult = await pool.query(
+      `SELECT patient_id, patient_first_name, patient_last_name,
+              appointment_date, doctor_name, warned_at
+       FROM appointments WHERE id = $1`,
+      [appointmentId]
+    );
+
+    if (!aptResult.rows.length) {
+      return res.status(404).json({ success: false, message: 'Appointment not found' });
+    }
+
+    const apt = aptResult.rows[0];
+
+    if (apt.warned_at) {
+      return res.status(400).json({ success: false, message: 'Patient has already been warned for this appointment' });
+    }
+
+    const aptDate = new Date(apt.appointment_date).toLocaleDateString('en-US', {
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    });
+
+    await pool.query(
+      `INSERT INTO notifications (recipient_type, recipient_id, type, title, message)
+       VALUES ($1, $2, $3, $4, $5)`,
+      [
+        'patient',
+        apt.patient_id,
+        'no_show_warning',
+        'Session Attendance Notice',
+        `You did not attend your scheduled session with Dr. ${apt.doctor_name} on ${aptDate}. Please ensure you attend future appointments or cancel in advance. Repeated no-shows may affect your ability to book sessions.`,
+      ]
+    );
+
+    // Mark appointment as warned
+    await pool.query(`UPDATE appointments SET warned_at = CURRENT_TIMESTAMP WHERE id = $1`, [appointmentId]);
+
+    res.json({ success: true, message: 'Warning sent to patient' });
+  } catch (err) {
+    console.error('Warn patient error:', err);
+    res.status(500).json({ success: false, message: 'Failed to send warning' });
   }
 };

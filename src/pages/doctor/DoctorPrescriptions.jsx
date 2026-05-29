@@ -147,8 +147,12 @@ const DoctorPrescriptions = ({ appointments = [] }) => {
               {/* Row */}
               <div className="flex items-center gap-4 px-5 py-4 cursor-pointer hover:bg-gray-50/50 transition-colors"
                 onClick={() => setExpanded(expanded === presc.id ? null : presc.id)}>
-                <div className="w-10 h-10 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
-                  {presc.patient_name?.charAt(0)}
+                <div className="w-10 h-10 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0 overflow-hidden">
+                  {presc.patient_photo ? (
+                    <img src={presc.patient_photo} alt={presc.patient_name} className="w-full h-full object-cover" />
+                  ) : (
+                    presc.patient_name?.charAt(0)
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-800">{presc.patient_name}</p>
@@ -234,7 +238,7 @@ const DoctorPrescriptions = ({ appointments = [] }) => {
 
       {/* Patient Picker Modal */}
       {showPatientPicker && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 backdrop-blur-md bg-white/30 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="text-base font-semibold text-gray-800">New Prescription</h3>

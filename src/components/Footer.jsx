@@ -54,8 +54,8 @@ const Footer = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row items-center justify-between gap-2 text-xs text-[#7A9A7A]">
           <p>© 2026 Mentra. All Rights Reserved.</p>
           <div className="flex items-center gap-4">
-            <a href="#" className="hover:text-[#4A7C59] transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-[#4A7C59] transition-colors">Terms of Service</a>
+            <Link to="/privacy-policy" target="_blank" className="hover:text-[#4A7C59] transition-colors">Privacy Policy</Link>
+            <Link to="/terms" target="_blank" className="hover:text-[#4A7C59] transition-colors">Terms of Service</Link>
           </div>
         </div>
       </div>

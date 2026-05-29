@@ -28,7 +28,7 @@ export const verifyToken = async (req, res, next) => {
 export const verifyPatient = async (req, res, next) => {
   try {
     const patient = await pool.query(
-      'SELECT id, full_name, email FROM patients WHERE id = $1',
+      'SELECT id, full_name, email, status FROM patients WHERE id = $1',
       [req.user.id]
     );
 
@@ -36,6 +36,15 @@ export const verifyPatient = async (req, res, next) => {
       return res.status(403).json({
         success: false,
         message: 'Access denied. Patient not found.'
+      });
+    }
+
+    // Check if patient account is active
+    if (patient.rows[0].status !== 'active') {
+      return res.status(403).json({
+        success: false,
+        message: 'Account deactivated. Your account has been deactivated by the admin.',
+        accountStatus: 'deactivated'
       });
     }
 
@@ -61,6 +70,19 @@ export const verifyDoctor = async (req, res, next) => {
       return res.status(403).json({
         success: false,
         message: 'Access denied. Doctor not found.'
+      });
+    }
+
+    // Check if doctor is approved
+    if (doctor.rows[0].approval_status !== 'approved') {
+      const message = doctor.rows[0].approval_status === 'rejected' 
+        ? 'Account rejected. Your doctor application has been rejected by the admin.'
+        : 'Account pending. Your doctor application is still under review.';
+      
+      return res.status(403).json({
+        success: false,
+        message,
+        accountStatus: doctor.rows[0].approval_status
       });
     }
 

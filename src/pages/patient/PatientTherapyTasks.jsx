@@ -50,7 +50,7 @@ const PatientTherapyTasks = () => {
         method: 'PUT', headers: { Authorization: 'Bearer ' + token },
       });
       const data = await res.json();
-      if (data.success) { showMsg('Task marked as completed! 🎉'); fetchAll(); }
+      if (data.success) { showMsg('Task marked as completed! '); fetchAll(); }
       else showMsg(data.message, 'error');
     } catch { showMsg('Something went wrong.', 'error'); }
   };
@@ -85,7 +85,7 @@ const PatientTherapyTasks = () => {
 
       {msg && (
         <div className={`px-4 py-3 rounded-xl text-sm font-medium border ${msg.type === 'error' ? 'bg-red-50 text-red-700 border-red-100' : 'bg-[#f0f7f4] text-[#4A7C59] border-[#dce8e0]'}`}>
-          {msg.type === 'error' ? '❌' : '✅'} {msg.text}
+          {msg.type === 'error' ? '' : ''} {msg.text}
         </div>
       )}
 
@@ -100,7 +100,12 @@ const PatientTherapyTasks = () => {
             </div>
             <div className="text-center bg-white/10 rounded-xl px-4 py-2">
               <p className="text-2xl font-bold">{progress.streak}</p>
-              <p className="text-xs text-white/75">Day Streak 🔥</p>
+              <p className="text-xs text-white/75 flex items-center gap-1">
+                  Day Streak
+                  <svg className="w-3.5 h-3.5 text-white/75" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </p>
             </div>
           </div>
           {/* Progress bar */}
@@ -229,7 +234,7 @@ const PatientTherapyTasks = () => {
 
       {/* Feedback Modal */}
       {feedbackModal && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 backdrop-blur-md bg-white/30 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <h3 className="text-base font-semibold text-gray-800">Task Feedback</h3>
@@ -249,7 +254,7 @@ const PatientTherapyTasks = () => {
                           : 'border-red-500 bg-red-50 text-red-700'
                         : 'border-gray-200 text-gray-500 hover:border-gray-300'
                     }`}>
-                    {d === 'Easy' ? '😊' : d === 'Medium' ? '😐' : '😓'} {d}
+                    {d === 'Easy' ? '' : d === 'Medium' ? '' : ''} {d}
                   </button>
                 ))}
               </div>

@@ -16,6 +16,10 @@ import notificationRoutes from "./routes/notificationRoutes.js";
 import chatbotRoutes from "./routes/chatbotRoutes.js";
 import therapyRoutes from "./routes/therapyRoutes.js";
 import prescriptionRoutes from "./routes/prescriptionRoutes.js";
+import crisisMessageRoutes from "./routes/crisisMessageRoutes.js";
+import disputeRoutes from "./routes/disputeRoutes.js";
+import chatHistoryRoutes from "./routes/chatHistoryRoutes.js";
+import systemReviewRoutes from "./routes/systemReviewRoutes.js";
 import { testConnection, initializeDatabase } from "./db/init.js";
 import { startAppointmentScheduler } from "./utils/appointmentScheduler.js";
 
@@ -82,6 +86,14 @@ app.use("/api/therapy", therapyRoutes);
 console.log(' Therapy routes mounted at /api/therapy');
 app.use("/api/prescriptions", prescriptionRoutes);
 console.log(' Prescription routes mounted at /api/prescriptions');
+app.use("/api/crisis-messages", crisisMessageRoutes);
+console.log(' Crisis message routes mounted at /api/crisis-messages');
+app.use("/api/disputes", disputeRoutes);
+console.log(' Dispute routes mounted at /api/disputes');
+app.use("/api/chat-history", chatHistoryRoutes);
+console.log(' Chat history routes mounted at /api/chat-history');
+app.use("/api/system-reviews", systemReviewRoutes);
+console.log(' System review routes mounted at /api/system-reviews');
 
 // Health check route
 app.get("/api/health", (req, res) => {

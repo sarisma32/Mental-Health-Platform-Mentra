@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import pool from "../db/index.js";
 import { createNotification } from "./notificationController.js";
 import { sendOTPEmail } from "../utils/emailService.js";
+import { uploadToCloudinary } from "../utils/cloudinary.js";
 
 // REGISTER PATIENT
 export const registerPatient = async (req, res) => {
@@ -30,7 +31,7 @@ export const registerPatient = async (req, res) => {
     if (existingDoctor.rows.length > 0) {
       return res.status(400).json({
         success: false,
-        message: "This email is already registered as a doctor account. Please use a different email address."
+        message: "This email is already registered. Please use a different email address."
       });
     }
 
@@ -147,7 +148,7 @@ export const loginPatient = async (req, res) => {
 export const getPatientProfile = async (req, res) => {
   try {
     const patient = await pool.query(
-      "SELECT id, full_name, email, phone_number, age, created_at FROM patients WHERE id = $1",
+      "SELECT id, full_name, email, phone_number, age, profile_photo, created_at FROM patients WHERE id = $1",
       [req.user.id]
     );
 
@@ -214,13 +215,13 @@ export const sendEmailVerification = async (req, res) => {
     // Check if email already registered
     const existing = await pool.query('SELECT id FROM patients WHERE email = $1 AND status != \'deleted\'', [email]);
     if (existing.rows.length > 0) {
-      return res.status(400).json({ success: false, message: 'Email already registered. Please use a different email.' });
+      return res.status(400).json({ success: false, message: 'This email is already registered. Please use a different email address.' });
     }
 
     // Check if email is already used by a doctor
     const existingDoctor = await pool.query('SELECT id FROM doctors WHERE email = $1', [email]);
     if (existingDoctor.rows.length > 0) {
-      return res.status(400).json({ success: false, message: 'This email is already registered as a doctor account. Please use a different email.' });
+      return res.status(400).json({ success: false, message: 'This email is already registered. Please use a different email address.' });
     }
 
     // Generate 6-digit OTP
@@ -368,5 +369,39 @@ export const deleteAccount = async (req, res) => {
     res.status(500).json({ success: false, message: 'Failed to delete account.' });
   } finally {
     client.release();
+  }
+};
+
+// UPLOAD PATIENT PROFILE PHOTO
+export const uploadProfilePhoto = async (req, res) => {
+  try {
+    const patientId = req.user.id;
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Please upload a profile photo.' });
+    }
+
+    const cloudinaryResult = await uploadToCloudinary(req.file.buffer, {
+      folder: `mentra/patients/patient_${patientId}/profile`,
+      resource_type: 'image',
+      public_id: `photo_${Date.now()}`,
+      transformation: [{ width: 400, height: 400, crop: 'fill', gravity: 'face' }],
+    });
+
+    const photoUrl = cloudinaryResult.secure_url;
+
+    const result = await pool.query(
+      'UPDATE patients SET profile_photo = $1, updated_at = NOW() WHERE id = $2 RETURNING id, full_name, email, profile_photo',
+      [photoUrl, patientId]
+    );
+
+    if (!result.rows.length) {
+      return res.status(404).json({ success: false, message: 'Patient not found.' });
+    }
+
+    res.json({ success: true, message: 'Profile photo uploaded successfully.', patient: result.rows[0] });
+  } catch (err) {
+    console.error('Patient photo upload error:', err);
+    res.status(500).json({ success: false, message: 'Failed to upload photo.' });
   }
 };

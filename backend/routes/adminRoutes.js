@@ -11,7 +11,8 @@ import {
   getSpecializations,
   createSpecialization,
   updateSpecialization,
-  deleteSpecialization
+  deleteSpecialization,
+  warnPatientNoShow
 } from "../controllers/adminController.js";
 
 const router = express.Router();
@@ -30,6 +31,7 @@ router.get("/users", getAllPatients);
 router.put("/users/:patientId/status", updatePatientStatus);
 router.get("/stats", getAdminStats);
 router.get("/appointments", getAllAppointments);
+router.post("/appointments/:appointmentId/warn", warnPatientNoShow);
 
 // Specializations
 router.get("/specializations", getSpecializations);

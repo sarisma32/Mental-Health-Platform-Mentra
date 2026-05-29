@@ -1,5 +1,6 @@
 import express from "express";
 import { unifiedLogin, forgotPassword, verifyOTP, resetPassword, checkDoctorStatus } from "../controllers/authController.js";
+import { googleLogin, googleVerify } from "../controllers/googleAuthController.js";
 import { validateLogin, validateForgotPassword, validateVerifyOTP, validateResetPassword } from "../middleware/validation.js";
 
 const router = express.Router();
@@ -12,6 +13,10 @@ router.get("/test", (req, res) => {
 
 // Unified login route that checks both patients and doctors tables
 router.post("/login", validateLogin, unifiedLogin);
+
+// Google OAuth routes
+router.post("/google/login", googleLogin);
+router.post("/google/verify", googleVerify);
 
 // Forgot password routes
 router.post("/forgot-password", validateForgotPassword, forgotPassword);

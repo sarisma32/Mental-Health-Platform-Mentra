@@ -1,6 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { buildApiUrl, API_ENDPOINTS } from '../config/api.js';
+import Header from '../components/Header.jsx';
+
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || '';
 
 const UserRegister = () => {
   const navigate = useNavigate();
@@ -14,6 +17,66 @@ const UserRegister = () => {
   const [sendingOtp, setSendingOtp] = useState(false);
   const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [emailVerified, setEmailVerified] = useState(false);
+  const [googleVerified, setGoogleVerified] = useState(false); // email came from Google
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const googleBtnRef = useRef(null);
+
+  // Load Google Identity Services
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) return;
+    const script = document.createElement('script');
+    script.src = 'https://accounts.google.com/gsi/client';
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      window.google?.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleResponse,
+      });
+      window.google?.accounts.id.renderButton(googleBtnRef.current, {
+        theme: 'outline',
+        size: 'large',
+        width: googleBtnRef.current?.offsetWidth || 400,
+        text: 'continue_with',
+      });
+    };
+    document.body.appendChild(script);
+    return () => { document.body.removeChild(script); };
+  }, []);
+
+  const handleGoogleResponse = async (response) => {
+    setGoogleLoading(true);
+    setErrors({});
+    try {
+      const res = await fetch(buildApiUrl('/api/auth/google/verify'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: response.credential }),
+      });
+      const data = await res.json();
+      if (res.status === 409 && data.duplicate) {
+        setErrors({ google: 'An account with this Google email already exists. Please log in instead.' });
+      } else if (data.success) {
+        // Prefill name and email, mark email as verified via Google
+        setFormData(prev => ({
+          ...prev,
+          fullName: data.prefill.fullName || prev.fullName,
+          email: data.prefill.email,
+        }));
+        setEmailVerified(true);
+        setGoogleVerified(true);
+        setStep('form');
+      } else {
+        setErrors({ google: data.message || 'Google verification failed.' });
+      }
+    } catch {
+      setErrors({ google: 'Google verification failed. Please try again.' });
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const validateForm = () => {
     const newErrors = {};
@@ -69,7 +132,7 @@ const UserRegister = () => {
     const { name, value, type, checked } = e.target;
     setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
     if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
-    if (name === 'email') { setEmailVerified(false); setStep('form'); }
+    if (name === 'email') { setEmailVerified(false); setGoogleVerified(false); setStep('form'); }
   };
 
   const handleSubmit = async (e) => {
@@ -89,8 +152,14 @@ const UserRegister = () => {
           localStorage.setItem('userRole', 'patient');
           window.dispatchEvent(new Event('storage'));
           navigate('/');
-        } else { alert(data.message || 'Registration failed.'); }
-      } catch { alert('Registration failed. Please try again.'); }
+        } else { 
+          setErrorMessage(data.message || 'Registration failed.');
+          setShowErrorModal(true);
+        }
+      } catch { 
+        setErrorMessage('Registration failed. Please try again.');
+        setShowErrorModal(true);
+      }
     }
     setIsSubmitting(false);
   };
@@ -101,20 +170,7 @@ const UserRegister = () => {
     <div className="h-screen overflow-hidden bg-white flex flex-col">
 
       {/* Nav */}
-      <nav className="flex items-center justify-between px-8 py-4 border-b border-gray-100 flex-shrink-0">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-[#4A7C59] rounded-lg flex items-center justify-center">
-            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-          </div>
-          <span className="font-bold text-gray-900 text-lg">MENTRA</span>
-        </Link>
-        <div className="flex items-center gap-4 text-sm">
-          <span className="text-gray-400">Already have an account?</span>
-          <Link to="/login" className="bg-[#4A7C59] hover:bg-[#3d6b4a] text-white px-4 py-2 rounded-lg font-medium transition-colors">Sign in</Link>
-        </div>
-      </nav>
+      <Header authMode={{ label: "Already have an account?", buttonText: "Sign in", to: "/login" }} />
 
       {/* Main */}
       <div className="flex-1 flex overflow-hidden">
@@ -144,7 +200,7 @@ const UserRegister = () => {
         </div>
 
         {/* Right form */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center px-12 py-6 overflow-y-auto">
+        <div className="w-full lg:w-1/2 flex items-start justify-center px-12 py-6 overflow-y-auto">
           <div className="w-full max-w-md">
 
             <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 text-gray-400 hover:text-gray-700 text-sm mb-6 transition-colors">
@@ -156,6 +212,16 @@ const UserRegister = () => {
 
             <h1 className="text-2xl font-bold text-gray-900 mb-1">Create account</h1>
             <p className="text-gray-400 text-sm mb-6">Join Mentra to access therapists and AI support</p>
+
+            {/* Google verified banner — shown above form when Google was used */}
+            {googleVerified && (
+              <div className="mb-4 flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-xl text-xs text-green-700">
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                Google account verified. Complete the details below to finish registration.
+              </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Name + Age */}
@@ -180,7 +246,9 @@ const UserRegister = () => {
                     disabled={emailVerified}
                     className={`flex-1 px-4 py-3.5 rounded-xl border text-sm outline-none transition-all focus:ring-2 focus:ring-[#4A7C59] focus:border-transparent bg-gray-50 focus:bg-white ${errors.email ? 'border-red-300' : emailVerified ? 'border-green-400 bg-green-50' : 'border-gray-200'}`} />
                   {emailVerified ? (
-                    <span className="flex items-center gap-1 px-3 py-2 bg-green-100 text-green-700 rounded-xl text-xs font-medium whitespace-nowrap">✓ Verified</span>
+                    <span className="flex items-center gap-1 px-3 py-2 bg-green-100 text-green-700 rounded-xl text-xs font-medium whitespace-nowrap">
+                      {googleVerified ? '✓ Google' : '✓ Verified'}
+                    </span>
                   ) : (
                     <button type="button" onClick={handleSendOtp} disabled={sendingOtp || !formData.email}
                       className="px-4 py-2 bg-[#4A7C59] hover:bg-[#3d6b4a] text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-50 whitespace-nowrap">
@@ -231,7 +299,7 @@ const UserRegister = () => {
               {/* Terms */}
               <div className="flex items-start gap-2 pt-1">
                 <input type="checkbox" name="agreeToTerms" checked={formData.agreeToTerms} onChange={handleInputChange} className="mt-0.5 w-4 h-4 text-[#4A7C59] rounded" />
-                <label className="text-xs text-gray-500">I agree to the <a href="#" className="text-[#4A7C59] underline">terms</a> & <a href="#" className="text-[#4A7C59] underline">privacy policy</a></label>
+                <label className="text-xs text-gray-500">I agree to the <Link to="/terms" target="_blank" className="text-[#4A7C59] underline">terms</Link> & <Link to="/privacy-policy" target="_blank" className="text-[#4A7C59] underline">privacy policy</Link></label>
               </div>
               {errors.agreeToTerms && <p className="text-xs text-red-500">{errors.agreeToTerms}</p>}
 
@@ -241,9 +309,60 @@ const UserRegister = () => {
               </button>
             </form>
 
+            {/* Google Sign Up — below the form */}
+            {GOOGLE_CLIENT_ID && !googleVerified && (
+              <div className="mt-4">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="flex-1 h-px bg-gray-100" />
+                  <span className="text-xs text-gray-400">or</span>
+                  <div className="flex-1 h-px bg-gray-100" />
+                </div>
+                {errors.google && <p className="mb-2 text-xs text-red-500 text-center">{errors.google}</p>}
+                <div ref={googleBtnRef} className="w-full flex justify-center" />
+              </div>
+            )}
+
           </div>
         </div>
       </div>
+
+      {/* Error Modal */}
+      {showErrorModal && (
+        <div className="fixed inset-0 backdrop-blur-md bg-white/30 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-gray-900">Registration Error</h3>
+              <button 
+                onClick={() => setShowErrorModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="px-6 py-5">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <p className="text-gray-700 mb-2">{errorMessage}</p>
+                <p className="text-sm text-gray-500">Please check your information and try again.</p>
+              </div>
+
+              <button
+                onClick={() => setShowErrorModal(false)}
+                className="w-full bg-mentra-primary hover:bg-mentra-primary-hover text-white py-3 px-4 rounded-lg font-semibold transition-all duration-300"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -47,14 +47,14 @@ const DoctorPendingStatus = () => {
 
       // Check approval status and redirect accordingly
       if (data.approvalStatus === 'approved') {
-        setMessage('🎉 Your account has been approved! Redirecting to dashboard...');
+        setMessage(' Your account has been approved! Redirecting to dashboard...');
         setTimeout(() => {
           navigate('/doctor-dashboard');
         }, 2000);
       } else if (data.approvalStatus === 'rejected') {
-        setMessage('❌ Your account has been rejected. Please contact support for more information.');
+        setMessage(' Your account has been rejected. Please contact support for more information.');
       } else {
-        setMessage('⏳ Your account is still pending approval. Our team is reviewing your credentials.');
+        setMessage(' Your account is still pending approval. Our team is reviewing your credentials.');
       }
     } catch (error) {
       console.error('Error checking status:', error);

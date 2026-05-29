@@ -35,8 +35,8 @@ export const sendOTPEmail = async (email, otp, userName = '', type = 'reset') =>
       : 'Password Reset OTP - Mentra';
 
     const headerTitle = isVerification
-      ? '✉️ Email Verification'
-      : '🔐 Password Reset Request';
+      ? ' Email Verification'
+      : ' Password Reset Request';
 
     const bodyText = isVerification
       ? 'Please verify your email address to complete your Mentra registration.'
@@ -76,7 +76,7 @@ export const sendOTPEmail = async (email, otp, userName = '', type = 'reset') =>
               <div class="otp-box">${otp}</div>
               <p><strong>This OTP will expire in 10 minutes.</strong></p>
               <div class="warning">
-                <strong>⚠️ Security Notice:</strong> ${warningText}
+                <strong> Security Notice:</strong> ${warningText}
               </div>
               <p>For your security, never share this OTP with anyone, including Mentra staff.</p>
               <p>Best regards,<br><strong>The Mentra Team</strong></p>
@@ -255,7 +255,7 @@ export const sendAppointmentBookedEmail = async (appointment) => {
         <body>
           <div class="container">
             <div class="header">
-              <h1>📅 Appointment Booked</h1>
+              <h1> Appointment Booked</h1>
               <p>Your request has been received — awaiting doctor confirmation</p>
             </div>
             <div class="content">
@@ -263,7 +263,7 @@ export const sendAppointmentBookedEmail = async (appointment) => {
               <p>Your appointment has been successfully booked. Here are your booking details:</p>
 
               <div class="pending-box">
-                <p>⏳ Your appointment is pending confirmation from Dr. ${doctor_name}. You will receive another email once it is confirmed.</p>
+                <p> Your appointment is pending confirmation from Dr. ${doctor_name}. You will receive another email once it is confirmed.</p>
               </div>
 
               <div class="confirmation-box">
@@ -283,7 +283,7 @@ export const sendAppointmentBookedEmail = async (appointment) => {
               </table>
 
               <div class="info-box">
-                ℹ️ <strong>What happens next?</strong> The doctor will review and confirm your appointment. Please keep an eye on your email for the confirmation.
+                 <strong>What happens next?</strong> The doctor will review and confirm your appointment. Please keep an eye on your email for the confirmation.
               </div>
 
               <p>If you need to cancel or have any questions, please contact us through the Mentra platform.</p>
@@ -430,7 +430,7 @@ export const sendAppointmentConfirmedEmail = async (appointment) => {
     await transporter.sendMail({
       from: `"Mentra - Mental Health Platform" <${process.env.EMAIL_USER}>`,
       to: patient_email,
-      subject: `Appointment Confirmed ✅ - ${confirmation_number} | Mentra`,
+      subject: `Appointment Confirmed  - ${confirmation_number} | Mentra`,
       html: `
         <!DOCTYPE html><html><head><style>
           body{font-family:Arial,sans-serif;line-height:1.6;color:#333;margin:0;padding:0}
@@ -453,12 +453,12 @@ export const sendAppointmentConfirmedEmail = async (appointment) => {
         </style></head><body>
           <div class="container">
             <div class="header">
-              <h1>✅ Appointment Confirmed</h1>
+              <h1> Appointment Confirmed</h1>
               <p>Dr. ${doctor_name} has confirmed your appointment</p>
             </div>
             <div class="content">
               <p>Hi <strong>${patientName}</strong>,</p>
-              <div class="confirmed-box"><p>✅ Great news! Dr. ${doctor_name} has confirmed your appointment.</p></div>
+              <div class="confirmed-box"><p> Great news! Dr. ${doctor_name} has confirmed your appointment.</p></div>
               <div class="confirmation-box">
                 <div class="label">Confirmation Number</div>
                 <div class="number">${confirmation_number}</div>
@@ -473,7 +473,7 @@ export const sendAppointmentConfirmedEmail = async (appointment) => {
                 <tr><td>Duration</td><td>${duration_minutes} minutes</td></tr>
                 <tr><td>Session Fee</td><td>Rs ${session_fee}</td></tr>
               </table>
-              <div class="info-box">⏰ <strong>Reminder:</strong> Please arrive a few minutes early and bring any relevant medical records or previous therapy notes.</div>
+              <div class="info-box"> <strong>Reminder:</strong> Please arrive a few minutes early and bring any relevant medical records or previous therapy notes.</div>
               <p>Best regards,<br><strong>The Mentra Team</strong></p>
             </div>
             <div class="footer"><p>This is an automated email. Please do not reply.</p><p>&copy; 2026 Mentra. All rights reserved.</p></div>
@@ -595,6 +595,229 @@ export const sendAppointmentReminderEmail = async (appointment) => {
     return { success: true };
   } catch (error) {
     console.error(' Error sending reminder email:', error);
+    return { success: false };
+  }
+};
+
+// ── Doctor Approval / Rejection Email ────────────────────────────────────────
+export const sendDoctorStatusEmail = async (doctor, status) => {
+  try {
+    const transporter = createTransporter();
+    const isApproved = status === 'approved';
+
+    await transporter.sendMail({
+      from: `"Mentra - Mental Health Platform" <${process.env.EMAIL_USER}>`,
+      to: doctor.email,
+      subject: isApproved
+        ? ' Your Mentra Doctor Account Has Been Approved'
+        : 'Update on Your Mentra Doctor Application',
+      html: `
+        <!DOCTYPE html><html><head><style>
+          body{font-family:Arial,sans-serif;line-height:1.6;color:#333;margin:0;padding:0}
+          .container{max-width:600px;margin:0 auto;padding:20px;background-color:#f9f9f9}
+          .header{background:linear-gradient(135deg,${isApproved ? '#4A7C59,#3d6b4a' : '#c0392b,#a93226'});color:white;padding:30px 20px;text-align:center;border-radius:8px 8px 0 0}
+          .header h1{margin:0;font-size:24px}
+          .header p{margin:8px 0 0;opacity:.9;font-size:14px}
+          .content{background-color:white;padding:30px;border-radius:0 0 8px 8px}
+          .status-box{background-color:${isApproved ? '#d1fae5' : '#fee2e2'};border:2px solid ${isApproved ? '#10b981' : '#ef4444'};border-radius:8px;padding:20px;text-align:center;margin:20px 0}
+          .status-box p{margin:0;color:${isApproved ? '#065f46' : '#991b1b'};font-size:15px;font-weight:600}
+          .info-box{background-color:#F5F5F0;border-left:4px solid #4A7C59;padding:14px;margin:20px 0;border-radius:0 6px 6px 0;font-size:14px}
+          .footer{text-align:center;margin-top:20px;font-size:12px;color:#888}
+        </style></head><body>
+          <div class="container">
+            <div class="header">
+              <h1>${isApproved ? ' Account Approved' : '❌ Application Update'}</h1>
+              <p>${isApproved ? 'Welcome to the Mentra doctor network' : 'Regarding your Mentra doctor application'}</p>
+            </div>
+            <div class="content">
+              <p>Hi <strong>Dr. ${doctor.full_name}</strong>,</p>
+              ${isApproved ? `
+                <div class="status-box"><p> Your doctor account has been approved by the Mentra admin team.</p></div>
+                <p>You can now log in to your Mentra doctor dashboard and:</p>
+                <ul>
+                  <li>Set up your availability schedule</li>
+                  <li>Accept patient appointments</li>
+                  <li>Manage your profile and sessions</li>
+                </ul>
+                <div class="info-box"> Log in at <strong>mentra.com</strong> using your registered email and password.</div>
+              ` : `
+                <div class="status-box"><p> Unfortunately, your doctor account application has been rejected by the Mentra admin team.</p></div>
+                <p>This may be due to incomplete or unverifiable documentation. If you believe this is a mistake or would like to reapply, please contact our support team.</p>
+                <div class="info-box"> Reach out to us at <strong>support@mentra.com</strong> for further assistance.</div>
+              `}
+              <p>Best regards,<br><strong>The Mentra Team</strong></p>
+            </div>
+            <div class="footer">
+              <p>This is an automated email. Please do not reply to this message.</p>
+              <p>&copy; 2026 Mentra - Mental Health Platform. All rights reserved.</p>
+            </div>
+          </div>
+        </body></html>
+      `
+    });
+
+    console.log(`Doctor ${status} email sent to: ${doctor.email}`);
+    return { success: true };
+  } catch (err) {
+    console.error('Doctor status email error:', err);
+    return { success: false };
+  }
+};
+
+// ── Patient Account Deactivation Email ───────────────────────────────────────
+export const sendPatientDeactivationEmail = async (patient, adminMessage = '') => {
+  try {
+    const transporter = createTransporter();
+
+    await transporter.sendMail({
+      from: `"Mentra - Mental Health Platform" <${process.env.EMAIL_USER}>`,
+      to: patient.email,
+      subject: '⚠️ Your Mentra Account Has Been Deactivated',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }
+            .header { background: linear-gradient(135deg, #c0392b, #a93226); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+            .header h1 { margin: 0; font-size: 24px; }
+            .header p { margin: 8px 0 0; opacity: 0.9; font-size: 14px; }
+            .content { background-color: white; padding: 30px; border-radius: 0 0 8px 8px; }
+            .status-box { background-color: #fee2e2; border: 2px solid #ef4444; border-radius: 8px; padding: 16px; text-align: center; margin: 20px 0; }
+            .status-box p { margin: 0; color: #991b1b; font-size: 15px; font-weight: 600; }
+            .admin-message { background-color: #fff8e1; border: 1px solid #f59e0b; border-radius: 8px; padding: 16px; margin: 20px 0; }
+            .admin-message h4 { margin: 0 0 8px; color: #92400e; font-size: 14px; font-weight: 600; }
+            .admin-message p { margin: 0; color: #451a03; font-size: 14px; white-space: pre-line; }
+            .info-box { background-color: #F5F5F0; border-left: 4px solid #c0392b; padding: 14px; margin: 20px 0; border-radius: 0 6px 6px 0; font-size: 14px; }
+            .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #888; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>⚠️ Account Deactivated</h1>
+              <p>Your Mentra account has been deactivated</p>
+            </div>
+            <div class="content">
+              <p>Hi <strong>${patient.full_name}</strong>,</p>
+              
+              <div class="status-box">
+                <p>⚠️ Your Mentra patient account has been deactivated by the admin team.</p>
+              </div>
+
+              ${adminMessage ? `
+                <div class="admin-message">
+                  <h4>📝 Message from Admin:</h4>
+                  <p>${adminMessage}</p>
+                </div>
+              ` : `
+                <p>Your account has been deactivated due to a violation of our terms of service or community guidelines.</p>
+              `}
+
+              <p>This means you will no longer be able to:</p>
+              <ul>
+                <li>Log in to your Mentra account</li>
+                <li>Book new appointments</li>
+                <li>Access your appointment history</li>
+                <li>Use Mentra services</li>
+              </ul>
+
+              <div class="info-box">
+                📧 If you believe this is a mistake or would like to appeal this decision, please contact our support team at <strong>support@mentra.com</strong>
+              </div>
+
+              <p>Best regards,<br><strong>The Mentra Team</strong></p>
+            </div>
+            <div class="footer">
+              <p>This is an automated email. Please do not reply to this message.</p>
+              <p>&copy; 2026 Mentra - Mental Health Platform. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+    });
+
+    console.log(`Patient deactivation email sent to: ${patient.email}`);
+    return { success: true };
+  } catch (err) {
+    console.error('Patient deactivation email error:', err);
+    return { success: false };
+  }
+};
+
+// ── Doctor Rejection Email with Custom Message ───────────────────────────────
+export const sendDoctorRejectionEmail = async (doctor, adminMessage = '') => {
+  try {
+    const transporter = createTransporter();
+
+    await transporter.sendMail({
+      from: `"Mentra - Mental Health Platform" <${process.env.EMAIL_USER}>`,
+      to: doctor.email,
+      subject: 'Update on Your Mentra Doctor Application',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; }
+            .container { max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9f9f9; }
+            .header { background: linear-gradient(135deg, #c0392b, #a93226); color: white; padding: 30px 20px; text-align: center; border-radius: 8px 8px 0 0; }
+            .header h1 { margin: 0; font-size: 24px; }
+            .header p { margin: 8px 0 0; opacity: 0.9; font-size: 14px; }
+            .content { background-color: white; padding: 30px; border-radius: 0 0 8px 8px; }
+            .status-box { background-color: #fee2e2; border: 2px solid #ef4444; border-radius: 8px; padding: 16px; text-align: center; margin: 20px 0; }
+            .status-box p { margin: 0; color: #991b1b; font-size: 15px; font-weight: 600; }
+            .admin-message { background-color: #fff8e1; border: 1px solid #f59e0b; border-radius: 8px; padding: 16px; margin: 20px 0; }
+            .admin-message h4 { margin: 0 0 8px; color: #92400e; font-size: 14px; font-weight: 600; }
+            .admin-message p { margin: 0; color: #451a03; font-size: 14px; white-space: pre-line; }
+            .info-box { background-color: #F5F5F0; border-left: 4px solid #c0392b; padding: 14px; margin: 20px 0; border-radius: 0 6px 6px 0; font-size: 14px; }
+            .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #888; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>❌ Application Update</h1>
+              <p>Regarding your Mentra doctor application</p>
+            </div>
+            <div class="content">
+              <p>Hi <strong>Dr. ${doctor.full_name}</strong>,</p>
+              
+              <div class="status-box">
+                <p>❌ Unfortunately, your doctor account application has been rejected by the Mentra admin team.</p>
+              </div>
+
+              ${adminMessage ? `
+                <div class="admin-message">
+                  <h4>📝 Reason for Rejection:</h4>
+                  <p>${adminMessage}</p>
+                </div>
+              ` : `
+                <p>This may be due to incomplete or unverifiable documentation. If you believe this is a mistake or would like to reapply, please contact our support team.</p>
+              `}
+
+              <div class="info-box">
+                📧 If you would like to reapply or have questions about this decision, please reach out to us at <strong>support@mentra.com</strong>
+              </div>
+
+              <p>Best regards,<br><strong>The Mentra Team</strong></p>
+            </div>
+            <div class="footer">
+              <p>This is an automated email. Please do not reply to this message.</p>
+              <p>&copy; 2026 Mentra - Mental Health Platform. All rights reserved.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `
+    });
+
+    console.log(`Doctor rejection email sent to: ${doctor.email}`);
+    return { success: true };
+  } catch (err) {
+    console.error('Doctor rejection email error:', err);
     return { success: false };
   }
 };

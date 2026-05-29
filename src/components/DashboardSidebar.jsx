@@ -5,6 +5,7 @@ const DashboardSidebar = ({
   subtitle = 'Portal',
   userName = '',
   userSub = '',
+  userPhoto = null,
   userPrefix = '',
   menuItems = [],
   activeSection,
@@ -43,14 +44,14 @@ const DashboardSidebar = ({
             onClick={() => onNavigate && onNavigate(item.id)}
             className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-left group ${
               activeSection === item.id
-                ? 'bg-[#4A7C59] text-white shadow-sm'
-                : 'text-gray-600 hover:bg-[#f0f7f4] hover:text-[#4A7C59]'
+                ? item.alert ? 'bg-red-600 text-white shadow-sm' : 'bg-[#4A7C59] text-white shadow-sm'
+                : item.alert ? 'text-red-600 hover:bg-red-50' : 'text-gray-600 hover:bg-[#f0f7f4] hover:text-[#4A7C59]'
             }`}
           >
             <span className={`transition-colors duration-200 ${
               activeSection === item.id
                 ? 'text-white'
-                : 'text-gray-400 group-hover:text-[#4A7C59]'
+                : item.alert ? 'text-red-500' : 'text-gray-400 group-hover:text-[#4A7C59]'
             }`}>
               {item.icon}
             </span>
@@ -78,7 +79,7 @@ const DashboardSidebar = ({
 
       {/* Logout confirmation dialog */}
       {showConfirm && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 backdrop-blur-md bg-white/30 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
             <h3 className="text-base font-semibold text-gray-800 mb-2">Sign Out</h3>
             <p className="text-sm text-gray-500 mb-6">Are you sure you want to sign out of your account?</p>

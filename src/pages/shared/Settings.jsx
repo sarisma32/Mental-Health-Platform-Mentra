@@ -3,7 +3,7 @@ import { buildApiUrl } from '../../config/api.js';
 
 // Reusable confirmation dialog
 const ConfirmDialog = ({ title, message, onConfirm, onCancel, confirmLabel = 'Yes', confirmClass = 'bg-red-600 hover:bg-red-700' }) => (
-  <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+  <div className="fixed inset-0 backdrop-blur-md bg-white/30 z-50 flex items-center justify-center p-4">
     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
       <h3 className="text-base font-semibold text-gray-800 mb-2">{title}</h3>
       <p className="text-sm text-gray-500 mb-6">{message}</p>
@@ -141,7 +141,7 @@ const Settings = ({ user, role, onLogout }) => {
 
       {msg && (
         <div className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium border ${msg.type === 'error' ? 'bg-red-50 text-red-700 border-red-100' : 'bg-[#f0f7f4] text-[#4A7C59] border-[#dce8e0]'}`}>
-          <span>{msg.type === 'error' ? '❌' : '✅'}</span>
+          <span>{msg.type === 'error' ? '' : ''}</span>
           {msg.text}
         </div>
       )}
@@ -376,7 +376,7 @@ const Settings = ({ user, role, onLogout }) => {
 
       {/* Error dialog */}
       {dialog?.type === 'error' && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 backdrop-blur-md bg-white/30 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
             <div className="flex items-start gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">

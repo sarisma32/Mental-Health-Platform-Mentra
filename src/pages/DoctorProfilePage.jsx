@@ -20,6 +20,7 @@ const DoctorProfilePage = () => {
   const [reviewStats, setReviewStats] = useState({ total_reviews: 0, avg_rating: null });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('about');
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -51,8 +52,7 @@ const DoctorProfilePage = () => {
     const token = localStorage.getItem('token');
     const role = localStorage.getItem('userRole');
     if (!token || role !== 'patient') {
-      alert('Please login as a patient to book an appointment.');
-      navigate('/login');
+      setShowLoginModal(true);
     } else {
       navigate(`/book-appointment/${doctorId}`);
     }
@@ -60,7 +60,7 @@ const DoctorProfilePage = () => {
 
   const renderStars = (rating) => (
     <span className="text-yellow-400">
-      {'?'.repeat(Math.round(rating))}{'?'.repeat(5 - Math.round(rating))}
+      {'★'.repeat(Math.round(rating))}{'☆'.repeat(5 - Math.round(rating))}
     </span>
   );
 
@@ -107,7 +107,7 @@ const DoctorProfilePage = () => {
               <div className="flex flex-wrap items-center gap-4 mt-4 justify-center md:justify-start">
                 {reviewStats.avg_rating && (
                   <div className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full text-sm">
-                    <span className="text-yellow-300">?</span>
+                    <span className="text-yellow-300">★</span>
                     <span>{reviewStats.avg_rating} ({reviewStats.total_reviews} reviews)</span>
                   </div>
                 )}
@@ -269,7 +269,7 @@ const DoctorProfilePage = () => {
                 <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100 flex items-center gap-6">
                   <div className="text-center">
                     <p className="text-5xl font-bold text-gray-900">{reviewStats.avg_rating}</p>
-                    <p className="text-yellow-400 text-2xl mt-1">{'?'.repeat(Math.round(reviewStats.avg_rating))}</p>
+                    <p className="text-yellow-400 text-2xl mt-1">{'★'.repeat(Math.round(reviewStats.avg_rating))}</p>
                     <p className="text-sm text-gray-500 mt-1">{reviewStats.total_reviews} reviews</p>
                   </div>
                 </div>
@@ -286,7 +286,7 @@ const DoctorProfilePage = () => {
                           <p className="text-xs text-gray-400">{new Date(r.appointment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                         </div>
                       </div>
-                      <span className="text-yellow-400">{'?'.repeat(r.rating)}{'?'.repeat(5 - r.rating)}</span>
+                      <span className="text-yellow-400">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span>
                     </div>
                     {r.review_text && <p className="mt-3 text-sm text-gray-700">{r.review_text}</p>}
                   </div>
@@ -296,6 +296,65 @@ const DoctorProfilePage = () => {
           </div>
         )}
       </div>
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 backdrop-blur-md bg-white/30 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-gray-900">Login Required</h3>
+              <button 
+                onClick={() => setShowLoginModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="px-6 py-5">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-mentra-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-mentra-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <p className="text-gray-700 mb-2">Please login as a patient to book an appointment.</p>
+                <p className="text-sm text-gray-500">You need to be logged in as a patient to book sessions with this professional.</p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowLoginModal(false);
+                    navigate('/login');
+                  }}
+                  className="flex-1 bg-mentra-primary hover:bg-mentra-primary-hover text-white py-3 px-4 rounded-lg font-semibold transition-all duration-300"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => {
+                    setShowLoginModal(false);
+                    navigate('/register-user');
+                  }}
+                  className="flex-1 border border-mentra-primary text-mentra-primary hover:bg-mentra-primary hover:text-white py-3 px-4 rounded-lg font-semibold transition-all duration-300"
+                >
+                  Sign Up
+                </button>
+              </div>
+
+              <button
+                onClick={() => setShowLoginModal(false)}
+                className="w-full mt-3 text-gray-500 hover:text-gray-700 py-2 text-sm font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <Footer />
     </div>

@@ -11,6 +11,7 @@ const ProfessionalsPage = () => {
   const [professionals, setProfessionals] = useState([]);
   const [specializations, setSpecializations] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showLoginModal, setShowLoginModal] = useState(false);
   const navigate = useNavigate();
 
   // Scroll to top when component mounts
@@ -45,9 +46,9 @@ const ProfessionalsPage = () => {
           experience: doctor.years_experience ? `${doctor.years_experience} years` : doctor.experience,
           rating: doctor.rating || 0,
           reviews: doctor.review_count || 0,
-          image: doctor.profile_photo 
+          image: doctor.profile_photo && doctor.profile_photo.trim() !== ''
             ? (doctor.profile_photo.startsWith('http') ? doctor.profile_photo : `http://localhost:5002/${doctor.profile_photo}`)
-            : "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=300&h=300&fit=crop&crop=face",
+            : null,
           bio: doctor.bio || "Experienced mental health professional dedicated to helping clients achieve their wellness goals.",
           credentials: doctor.credentials || "Licensed Professional",
           location: doctor.location || doctor.hospital_name,
@@ -69,9 +70,8 @@ const ProfessionalsPage = () => {
     const userRole = localStorage.getItem('userRole');
     
     if (!token || userRole !== 'patient') {
-      // User is not logged in, show alert and redirect to login
-      alert('Please login or signup first to book an appointment.');
-      navigate('/login');
+      // User is not logged in, show modal instead of alert
+      setShowLoginModal(true);
     } else {
       // User is logged in, proceed to booking page
       navigate(`/book-appointment/${professionalId}`);
@@ -220,11 +220,26 @@ const ProfessionalsPage = () => {
                   {/* Professional Image and Basic Info */}
                   <div className="text-center mb-6">
                     <div className="w-24 h-24 mx-auto mb-4 rounded-full overflow-hidden">
-                      <img 
-                        src={professional.image} 
-                        alt={professional.name}
-                        className="w-full h-full object-cover"
-                      />
+                      {professional.image ? (
+                        <img 
+                          src={professional.image} 
+                          alt={professional.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.target.style.display = 'none';
+                            e.target.nextSibling.style.display = 'flex';
+                          }}
+                        />
+                      ) : null}
+                      <div 
+                        className="w-full h-full flex items-center justify-center text-white font-bold text-2xl"
+                        style={{
+                          background: 'linear-gradient(135deg, #4A7C59 0%, #3d6b4a 100%)',
+                          display: professional.image ? 'none' : 'flex'
+                        }}
+                      >
+                        {professional.name?.charAt(0)?.toUpperCase() || 'D'}
+                      </div>
                     </div>
                     <h3 className="text-lg font-bold text-gray-900 mb-1">{professional.name}</h3>
                     <p className="text-mentra-primary font-medium text-sm mb-3">{professional.specialization}</p>
@@ -309,6 +324,65 @@ const ProfessionalsPage = () => {
           )}
         </div>
       </section>
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 backdrop-blur-md bg-white/30 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-gray-900">Login Required</h3>
+              <button 
+                onClick={() => setShowLoginModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="px-6 py-5">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-mentra-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-mentra-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                </div>
+                <p className="text-gray-700 mb-2">Please login or signup first to book an appointment.</p>
+                <p className="text-sm text-gray-500">You need to be logged in as a patient to book sessions with our professionals.</p>
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowLoginModal(false);
+                    navigate('/login');
+                  }}
+                  className="flex-1 bg-mentra-primary hover:bg-mentra-primary-hover text-white py-3 px-4 rounded-lg font-semibold transition-all duration-300"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => {
+                    setShowLoginModal(false);
+                    navigate('/register-user');
+                  }}
+                  className="flex-1 border border-mentra-primary text-mentra-primary hover:bg-mentra-primary hover:text-white py-3 px-4 rounded-lg font-semibold transition-all duration-300"
+                >
+                  Sign Up
+                </button>
+              </div>
+
+              <button
+                onClick={() => setShowLoginModal(false)}
+                className="w-full mt-3 text-gray-500 hover:text-gray-700 py-2 text-sm font-medium"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
      
 

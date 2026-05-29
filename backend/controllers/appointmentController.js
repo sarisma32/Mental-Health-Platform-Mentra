@@ -186,22 +186,24 @@ export const getDoctorAppointments = async (req, res) => {
     const { status, date, limit = 10, offset = 0 } = req.query;
 
     let query = `
-      SELECT * FROM appointments 
-      WHERE doctor_id = $1
+      SELECT a.*, p.profile_photo as patient_photo
+      FROM appointments a
+      LEFT JOIN patients p ON p.id = a.patient_id
+      WHERE a.doctor_id = $1
     `;
     let queryParams = [doctorId];
 
     if (status) {
-      query += ` AND status = $${queryParams.length + 1}`;
+      query += ` AND a.status = $${queryParams.length + 1}`;
       queryParams.push(status);
     }
 
     if (date) {
-      query += ` AND appointment_date = $${queryParams.length + 1}`;
+      query += ` AND a.appointment_date = $${queryParams.length + 1}`;
       queryParams.push(date);
     }
 
-    query += ` ORDER BY appointment_date ASC, appointment_time ASC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
+    query += ` ORDER BY a.appointment_date ASC, a.appointment_time ASC LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}`;
     queryParams.push(limit, offset);
 
     const appointments = await pool.query(query, queryParams);
@@ -216,7 +218,7 @@ export const getDoctorAppointments = async (req, res) => {
     console.error('Get doctor appointments error:', err);
     res.status(500).json({
       success: false,
-      message: "Failed to fetch appointments.",
+      message: 'Failed to fetch appointments.',
       error: process.env.NODE_ENV === 'development' ? err.message : undefined
     });
   }
@@ -280,10 +282,23 @@ export const updateAppointmentStatus = async (req, res) => {
       });
     }
 
+    const apt = updatedAppointment.rows[0];
+
+    // Notify admin when doctor marks a no-show
+    if (status === 'no_show') {
+      createNotification({
+        recipientType: 'admin',
+        recipientId: null,
+        type: 'no_show',
+        title: 'Patient No-Show',
+        message: `${apt.patient_first_name} ${apt.patient_last_name} did not attend their session with Dr. ${apt.doctor_name} on ${new Date(apt.appointment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}. You can warn the patient from the Appointments section.`,
+      });
+    }
+
     res.json({
       success: true,
       message: "Appointment status updated successfully.",
-      appointment: updatedAppointment.rows[0]
+      appointment: apt
     });
 
   } catch (err) {
@@ -337,6 +352,14 @@ export const confirmAppointment = async (req, res) => {
       message: `Your appointment with Dr. ${updated.rows[0].doctor_name} on ${new Date(updated.rows[0].appointment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} has been confirmed.`,
     });
 
+    // Notify admin — appointment confirmed
+    createNotification({
+      recipientType: 'admin',
+      type: 'appointment_confirmed',
+      title: 'Appointment Confirmed',
+      message: `Dr. ${updated.rows[0].doctor_name} confirmed the appointment with ${updated.rows[0].patient_first_name} ${updated.rows[0].patient_last_name} on ${new Date(updated.rows[0].appointment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}.`,
+    });
+
     // Send confirmation email to patient
     sendAppointmentConfirmedEmail(updated.rows[0]).catch(e =>
       console.error('Confirmation email error:', e)
@@ -370,6 +393,14 @@ export const cancelAppointment = async (req, res) => {
       type: 'appointment_cancelled',
       title: 'Appointment Cancelled',
       message: `Your appointment with Dr. ${cancelledAppointment.rows[0].doctor_name} on ${new Date(cancelledAppointment.rows[0].appointment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })} has been cancelled.`,
+    });
+
+    // Notify admin — appointment cancelled
+    createNotification({
+      recipientType: 'admin',
+      type: 'appointment_cancelled',
+      title: 'Appointment Cancelled',
+      message: `Dr. ${cancelledAppointment.rows[0].doctor_name} cancelled the appointment with ${cancelledAppointment.rows[0].patient_first_name} ${cancelledAppointment.rows[0].patient_last_name} on ${new Date(cancelledAppointment.rows[0].appointment_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}.`,
     });
 
     res.json({ success: true, message: "Appointment cancelled successfully.", appointment: cancelledAppointment.rows[0] });
@@ -461,19 +492,21 @@ export const getDoctorPatients = async (req, res) => {
 
     const patients = await pool.query(
       `SELECT 
-        patient_id,
-        MAX(patient_first_name) as patient_first_name,
-        MAX(patient_last_name) as patient_last_name,
-        MAX(patient_email) as patient_email,
-        MAX(patient_phone) as patient_phone,
-        MAX(patient_date_of_birth) as patient_date_of_birth,
-        MAX(appointment_date) FILTER (WHERE status = 'completed') as last_visit,
-        COUNT(*) FILTER (WHERE status = 'completed') as total_sessions,
-        COUNT(*) FILTER (WHERE status IN ('confirmed','scheduled') AND appointment_date >= CURRENT_DATE) as upcoming_count
-      FROM appointments 
-      WHERE doctor_id = $1 AND status NOT IN ('cancelled', 'no_show')
-      GROUP BY patient_id
-      ORDER BY MAX(appointment_date) DESC`,
+        a.patient_id,
+        MAX(a.patient_first_name) as patient_first_name,
+        MAX(a.patient_last_name) as patient_last_name,
+        MAX(a.patient_email) as patient_email,
+        MAX(a.patient_phone) as patient_phone,
+        MAX(a.patient_date_of_birth) as patient_date_of_birth,
+        MAX(a.appointment_date) FILTER (WHERE a.status = 'completed') as last_visit,
+        COUNT(*) FILTER (WHERE a.status = 'completed') as total_sessions,
+        COUNT(*) FILTER (WHERE a.status IN ('confirmed','scheduled') AND a.appointment_date >= CURRENT_DATE) as upcoming_count,
+        MAX(p.profile_photo) as patient_photo
+      FROM appointments a
+      LEFT JOIN patients p ON p.id = a.patient_id
+      WHERE a.doctor_id = $1 AND a.status NOT IN ('cancelled', 'no_show')
+      GROUP BY a.patient_id
+      ORDER BY MAX(a.appointment_date) DESC`,
       [doctorId]
     );
 

@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 const AdminUsers = ({ patients, patientSearchTerm, setPatientSearchTerm, userFilter, setUserFilter, updatePatientStatus }) => {
   const [selectedPatient, setSelectedPatient] = useState(null);
   const [errorDialog, setErrorDialog] = useState(null);
+  const [deactivationModal, setDeactivationModal] = useState(null); // { patient: object, message: string }
 
   const filteredPatients = patients.filter(patient => {
     const matchesSearch = patient.full_name.toLowerCase().includes(patientSearchTerm.toLowerCase()) ||
@@ -105,10 +106,7 @@ const AdminUsers = ({ patients, patientSearchTerm, setPatientSearchTerm, userFil
                     {patient.status === 'deleted' ? (
                       <span className="px-3 py-1.5 text-xs font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">Removed</span>
                     ) : patient.status === 'active' ? (
-                      <button onClick={async () => {
-                        const result = await updatePatientStatus(patient.id, 'inactive');
-                        if (result?.error) setErrorDialog({ message: result.error });
-                      }} className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 hover:bg-red-200 rounded-lg transition-colors">Deactivate</button>
+                      <button onClick={() => setDeactivationModal({ patient, message: '' })} className="px-3 py-1.5 text-xs font-medium text-red-700 bg-red-100 hover:bg-red-200 rounded-lg transition-colors">Deactivate</button>
                     ) : (
                       <button onClick={async () => {
                         const result = await updatePatientStatus(patient.id, 'active');
@@ -128,7 +126,7 @@ const AdminUsers = ({ patients, patientSearchTerm, setPatientSearchTerm, userFil
 
       {/* Patient Detail Modal */}
       {selectedPatient && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 backdrop-blur-md bg-white/30 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden">
             <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
               <div className="flex items-center gap-3">
@@ -172,10 +170,9 @@ const AdminUsers = ({ patients, patientSearchTerm, setPatientSearchTerm, userFil
               {selectedPatient.status === 'deleted' ? (
                 <div className="flex-1 py-2.5 bg-gray-100 text-gray-400 rounded-xl font-medium text-sm text-center cursor-not-allowed">Account Deleted</div>
               ) : selectedPatient.status === 'active' ? (
-                <button onClick={async () => {
-                  const result = await updatePatientStatus(selectedPatient.id, 'inactive');
-                  if (!result?.error) setSelectedPatient(null);
-                  else setErrorDialog({ message: result.error });
+                <button onClick={() => {
+                  setDeactivationModal({ patient: selectedPatient, message: '' });
+                  setSelectedPatient(null);
                 }} className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-medium text-sm transition-colors">Deactivate Account</button>
               ) : (
                 <button onClick={async () => {
@@ -190,9 +187,65 @@ const AdminUsers = ({ patients, patientSearchTerm, setPatientSearchTerm, userFil
         </div>
       )}
 
+      {/* Deactivation Modal */}
+      {deactivationModal && (
+        <div className="fixed inset-0 backdrop-blur-md bg-white/30 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
+            <div className="flex items-start gap-3 mb-4">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <h3 className="text-base font-semibold text-gray-800 mb-1">Deactivate Patient Account</h3>
+                <p className="text-sm text-gray-600">{deactivationModal.patient.full_name} will be notified via email.</p>
+              </div>
+            </div>
+            
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Reason for Deactivation
+              </label>
+              <textarea
+                value={deactivationModal.message}
+                onChange={(e) => setDeactivationModal({ ...deactivationModal, message: e.target.value })}
+                placeholder="Explain why the account is being deactivated..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                rows={3}
+                required
+              />
+            </div>
+
+            <div className="flex gap-3">
+              <button 
+                onClick={() => setDeactivationModal(null)}
+                className="flex-1 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-xl text-sm font-semibold transition-colors">
+                Cancel
+              </button>
+              <button 
+                onClick={async () => {
+                  if (!deactivationModal.message.trim()) {
+                    alert('Please provide a reason for deactivation.');
+                    return;
+                  }
+                  const result = await updatePatientStatus(deactivationModal.patient.id, 'inactive', deactivationModal.message);
+                  if (result?.error) {
+                    setErrorDialog({ message: result.error });
+                  }
+                  setDeactivationModal(null);
+                }}
+                className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-semibold transition-colors">
+                Deactivate & Send Email
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Error Dialog */}
       {errorDialog && (
-        <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 backdrop-blur-md bg-white/30 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6">
             <div className="flex items-start gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">

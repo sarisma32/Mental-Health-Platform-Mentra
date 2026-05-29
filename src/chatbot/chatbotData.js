@@ -5,7 +5,7 @@
 
 export const BOT_NAME = 'Mentra Assistant';
 
-export const WELCOME_MESSAGE = `Hi! 👋 I'm the **Mentra Assistant**. I can help you with:
+export const WELCOME_MESSAGE = `Hi!  I'm the **Mentra Assistant**. I can help you with:
 
 • What is Mentra?
 • How to sign up
@@ -16,11 +16,11 @@ export const WELCOME_MESSAGE = `Hi! 👋 I'm the **Mentra Assistant**. I can hel
 What would you like to know?`;
 
 export const QUICK_REPLIES = [
-  { label: '🏥 What is Mentra?', value: 'what is mentra' },
-  { label: '📝 How to sign up', value: 'how to sign up' },
-  { label: '📅 How to book appointment', value: 'how to book appointment' },
-  { label: '🔍 How to find a doctor', value: 'how to find a doctor' },
-  { label: '📋 View my appointments', value: 'view my appointments' },
+  { label: ' What is Mentra?', value: 'what is mentra' },
+  { label: ' How to sign up', value: 'how to sign up' },
+  { label: ' How to book appointment', value: 'how to book appointment' },
+  { label: ' How to find a doctor', value: 'how to find a doctor' },
+  { label: ' View my appointments', value: 'view my appointments' },
 ];
 
 /**
@@ -32,7 +32,7 @@ export const RESPONSES = [
   // ── What is Mentra ──────────────────────────────────────────────────────────
   {
     keywords: ['what is mentra', 'about mentra', 'mentra system', 'what does mentra do', 'tell me about', 'overview', 'purpose', 'platform'],
-    response: `**Mentra** is a mental health platform that connects patients with licensed mental health professionals. 🏥
+    response: `**Mentra** is a mental health platform that connects patients with licensed mental health professionals. 
 
 Here's what you can do on Mentra:
 
@@ -40,7 +40,7 @@ Here's what you can do on Mentra:
 • **Book Appointments** — Schedule sessions with doctors online
 • **View Session Notes** — Access notes from your completed sessions
 • **Leave Reviews** — Share your experience with doctors
-• **AI Chatbot Support** — Get instant guidance (that's me! 😊)
+• **AI Chatbot Support** — Get instant guidance (that's me! )
 
 Mentra's goal is to make mental health care accessible and easy to navigate.
 
@@ -50,7 +50,7 @@ Is there anything specific you'd like to know more about?`
   // ── Sign Up ─────────────────────────────────────────────────────────────────
   {
     keywords: ['sign up', 'signup', 'register', 'create account', 'how to join', 'new account', 'registration'],
-    response: `Here's how to **sign up** on Mentra: 📝
+    response: `Here's how to **sign up** on Mentra: 
 
 **Step 1 — Go to Sign Up**
 Click the button below or the "Sign up" button in the top navigation bar.
@@ -70,7 +70,7 @@ Enter your email address and click **"Verify"**. A 6-digit code will be sent to 
 **Step 5 — Agree to terms and submit**
 Check the terms & privacy policy box and click **"Create Account"**.
 
-You'll be logged in automatically after registration! ✅
+You'll be logged in automatically after registration! 
 
 [→ Sign Up as Patient](/register-user)
 [→ Register as Professional](/register-professional)`,
@@ -79,10 +79,10 @@ You'll be logged in automatically after registration! ✅
   // ── Book Appointment ────────────────────────────────────────────────────────
   {
     keywords: ['book appointment', 'booking', 'schedule appointment', 'how to book', 'make appointment', 'appointment booking', 'book a session', 'schedule session'],
-    response: ({ isLoggedIn }) => `Here's how to **book an appointment** with a doctor: 📅
+    response: ({ isLoggedIn }) => `Here's how to **book an appointment** with a doctor: 
 
 **Step 1 — Log in**
-${isLoggedIn ? "You're already logged in. ✅" : "Make sure you're logged in as a patient."}
+${isLoggedIn ? "You're already logged in. " : "Make sure you're logged in as a patient."}
 
 **Step 2 — Find a Doctor**
 Browse all available doctors by specialization or location.
@@ -102,7 +102,7 @@ On the doctor's profile page, click the **"Book Appointment"** button.
 Provide your date of birth, emergency contact, reason for visit, and any relevant medical information.
 
 **Step 7 — Review & Confirm**
-Review all details and confirm your booking. You'll receive a confirmation email! 🎉
+Review all details and confirm your booking. You'll receive a confirmation email! 
 
 [→ Browse Doctors](/professionals)${isLoggedIn ? '' : '\n[→ Login to Book](/login)'}`,
   },
@@ -110,7 +110,7 @@ Review all details and confirm your booking. You'll receive a confirmation email
   // ── Find a Doctor ───────────────────────────────────────────────────────────
   {
     keywords: ['find doctor', 'search doctor', 'browse doctor', 'find therapist', 'search therapist', 'professionals', 'how to find'],
-    response: `Here's how to **find a doctor** on Mentra: 🔍
+    response: `Here's how to **find a doctor** on Mentra: 
 
 **Step 1 — Go to Professionals**
 Click the link below or "Professionals" in the navigation bar.
@@ -135,7 +135,7 @@ Click **"Book Appointment"** directly from their profile.
   // ── View Appointments ───────────────────────────────────────────────────────
   {
     keywords: ['view appointment', 'my appointment', 'see appointment', 'appointment history', 'upcoming appointment', 'past appointment', 'dashboard'],
-    response: `Here's how to **view your appointments**: 📋
+    response: `Here's how to **view your appointments**: 
 
 **Step 1 — Go to your Dashboard**
 After logging in, click your profile icon or go to your dashboard.
@@ -160,7 +160,7 @@ You can cancel up to **5 hours before** the scheduled time.
   // ── Session Notes ───────────────────────────────────────────────────────────
   {
     keywords: ['session notes', 'doctor notes', 'notes', 'after session', 'completed session'],
-    response: `**Session notes** are written by your doctor after a completed session. 📝
+    response: `**Session notes** are written by your doctor after a completed session. 
 
 Here's how to view them:
 
@@ -176,7 +176,7 @@ You'll also receive the session notes in your **email** automatically after the 
   // ── Reviews ─────────────────────────────────────────────────────────────────
   {
     keywords: ['review', 'leave review', 'rate doctor', 'feedback', 'rating'],
-    response: `Here's how to **leave a review** for a doctor: ⭐
+    response: `Here's how to **leave a review** for a doctor: 
 
 **Step 1** — Go to Dashboard → Appointments → Past tab
 **Step 2** — Find a completed appointment
@@ -195,7 +195,7 @@ Your review will appear on the doctor's public profile after **admin approval**.
   // ── Forgot Password ─────────────────────────────────────────────────────────
   {
     keywords: ['forgot password', 'reset password', 'change password', 'lost password', "can't login", 'cannot login'],
-    response: `Here's how to **reset your password**: 🔐
+    response: `Here's how to **reset your password**: 
 
 **Step 1** — Go to the Login page
 **Step 2** — Click **"Forgot password?"** below the password field
@@ -211,7 +211,7 @@ Your review will appear on the doctor's public profile after **admin approval**.
   // ── Doctor Registration ─────────────────────────────────────────────────────
   {
     keywords: ['doctor register', 'professional register', 'join as doctor', 'register as doctor', 'doctor signup', 'become a doctor'],
-    response: `Here's how to **register as a doctor/professional** on Mentra: 👨‍⚕️
+    response: `Here's how to **register as a doctor/professional** on Mentra: 
 
 **Step 1** — Click "Sign up" → Select **"Professional"**
 **Step 2** — Verify your email with OTP
@@ -231,7 +231,7 @@ Your profile will be **reviewed by admin within 24–72 hours**. You'll receive 
   // ── Fees ────────────────────────────────────────────────────────────────────
   {
     keywords: ['fee', 'price', 'cost', 'how much', 'session fee', 'payment', 'charge'],
-    response: `**Session fees** vary by doctor. 💰
+    response: `**Session fees** vary by doctor. 
 
 • **Initial Session** — First-time consultation (60 minutes)
 • **Follow-up Session** — Regular session (50 minutes)
@@ -246,9 +246,9 @@ Each doctor sets their own fees. You can see the fees on the doctor's card or fu
     keywords: ['contact', 'support', 'help', 'email support', 'customer service'],
     response: `For support, you can:
 
-• 📧 Email us at **support@mentra.com**
-• � Use this chatbot for instant answers
-• 📞 Call us at **(555) 123-4567** (available 24/7)
+•  Email us at **support@mentra.com**
+•  Use this chatbot for instant answers
+•  Call us at **(555) 123-4567** (available 24/7)
 
 Is there anything specific I can help you with right now?`,
   },
@@ -256,7 +256,7 @@ Is there anything specific I can help you with right now?`,
   // ── Greeting ────────────────────────────────────────────────────────────────
   {
     keywords: ['hello', 'hi', 'hey', 'good morning', 'good afternoon', 'good evening', 'greetings'],
-    response: `Hello! 👋 Welcome to Mentra!
+    response: `Hello!  Welcome to Mentra!
 
 I'm here to help you navigate the platform. You can ask me about:
 
@@ -272,7 +272,7 @@ What would you like to know?`
   // ── Thank you ───────────────────────────────────────────────────────────────
   {
     keywords: ['thank', 'thanks', 'thank you', 'helpful', 'great', 'awesome'],
-    response: `You're welcome! 😊 Happy to help!
+    response: `You're welcome!  Happy to help!
 
 If you have any more questions, feel free to ask. Is there anything else I can help you with?`
   },
@@ -280,9 +280,9 @@ If you have any more questions, feel free to ask. Is there anything else I can h
   // ── Goodbye ─────────────────────────────────────────────────────────────────
   {
     keywords: ['bye', 'goodbye', 'see you', 'exit', 'close', 'done'],
-    response: `Goodbye! 👋 Take care and have a great day!
+    response: `Goodbye!  Take care and have a great day!
 
-Remember, I'm always here if you need help navigating Mentra. 😊`
+Remember, I'm always here if you need help navigating Mentra. `
   },
 ];
 
@@ -307,7 +307,7 @@ export const getBotResponse = (userMessage, isLoggedIn = false) => {
   }
 
   // Default fallback
-  return `I'm not sure I understand that. 🤔
+  return `I'm not sure I understand that. 
 
 Here are some things I can help you with:
 • **What is Mentra?** — type "what is mentra"

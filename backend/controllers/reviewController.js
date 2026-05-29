@@ -43,7 +43,7 @@ export const submitReview = async (req, res) => {
        ratingProfessionalism || null, ratingCommunication || null, ratingWaitTime || null]
     );
 
-    res.status(201).json({ success: true, message: "Review submitted successfully. It will be visible after admin approval.", review: result.rows[0] });
+    res.status(201).json({ success: true, message: "Review submitted successfully.", review: result.rows[0] });
 
     // Notify admin about new review
     createNotification({
@@ -181,9 +181,11 @@ export const getDoctorReviews = async (req, res) => {
         r.created_at,
         a.patient_first_name,
         a.patient_last_name,
-        a.appointment_date
+        a.appointment_date,
+        p.profile_photo as patient_photo
       FROM reviews r
       JOIN appointments a ON r.appointment_id = a.id
+      LEFT JOIN patients p ON p.id = a.patient_id
       WHERE r.doctor_id = $1 AND r.is_visible = true
       ORDER BY r.created_at DESC
     `, [doctorId]);

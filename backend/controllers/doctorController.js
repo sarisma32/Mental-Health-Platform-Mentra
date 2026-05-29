@@ -31,7 +31,7 @@ export const registerDoctor = async (req, res) => {
       if (existing.email === email) {
         return res.status(400).json({
           success: false,
-          message: "Email already registered. Please use a different email address."
+          message: "This email is already registered. Please use a different email address."
         });
       }
       if (existing.license_number === licenseNumber) {
@@ -50,7 +50,7 @@ export const registerDoctor = async (req, res) => {
     if (existingPatient.rows.length > 0) {
       return res.status(400).json({
         success: false,
-        message: "This email is already registered as a patient account. Please use a different email address."
+        message: "This email is already registered. Please use a different email address."
       });
     }
 
@@ -634,13 +634,13 @@ export const sendDoctorEmailVerification = async (req, res) => {
     // Check if email already registered as a doctor
     const existing = await pool.query('SELECT id FROM doctors WHERE email = $1', [email]);
     if (existing.rows.length > 0) {
-      return res.status(400).json({ success: false, message: 'Email already registered. Please use a different email.' });
+      return res.status(400).json({ success: false, message: 'This email is already registered. Please use a different email address.' });
     }
 
     // Check if email is already used by a patient
     const existingPatient = await pool.query('SELECT id FROM patients WHERE email = $1', [email]);
     if (existingPatient.rows.length > 0) {
-      return res.status(400).json({ success: false, message: 'This email is already registered as a patient account. Please use a different email.' });
+      return res.status(400).json({ success: false, message: 'This email is already registered. Please use a different email address.' });
     }
 
     // Generate 6-digit OTP

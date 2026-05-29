@@ -20,7 +20,7 @@ const PatientOverview = ({ stats, appointments, loading, navigate, setActiveSect
         <div className="absolute bottom-0 right-24 w-32 h-32 bg-white/5 rounded-full translate-y-1/2" />
         <div className="relative z-10 flex items-center justify-between">
           <div>
-            <p className="text-white/80 text-sm font-medium">{greeting} 👋</p>
+            <p className="text-white/80 text-sm font-medium">{greeting}</p>
             <h2 className="text-2xl font-bold mt-1">{firstName}</h2>
             <p className="text-white/70 text-sm mt-1">
               {stats.upcoming > 0
@@ -82,8 +82,12 @@ const PatientOverview = ({ stats, appointments, loading, navigate, setActiveSect
             </div>
           ) : nextAppointment ? (
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-2xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
-                {nextAppointment.doctor_name?.charAt(0)}
+              <div className="w-14 h-14 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-2xl flex items-center justify-center text-white font-bold text-xl flex-shrink-0 overflow-hidden">
+                {nextAppointment.doctor_photo ? (
+                  <img src={nextAppointment.doctor_photo} alt={nextAppointment.doctor_name} className="w-full h-full object-cover" />
+                ) : (
+                  nextAppointment.doctor_name?.charAt(0)
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-gray-900">Dr. {nextAppointment.doctor_name}</p>
@@ -136,17 +140,37 @@ const PatientOverview = ({ stats, appointments, loading, navigate, setActiveSect
           <h3 className="text-base font-semibold text-gray-800 mb-4">Quick Actions</h3>
           <div className="space-y-2">
             {[
-              { label: 'Find Therapists', icon: '🔍', action: () => navigate('/professionals') },
-              { label: 'My Appointments', icon: '📅', action: () => setActiveSection('appointments') },
-              { label: 'AI Chatbot', icon: '🤖', action: () => navigate('/chatbot') },
-              { label: 'My Profile', icon: '👤', action: () => setActiveSection('profile') },
+              {
+                label: 'Find Therapists',
+                action: () => navigate('/professionals'),
+                svg: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
+              },
+              {
+                label: 'My Appointments',
+                action: () => setActiveSection('appointments'),
+                svg: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              },
+              {
+                label: 'AI Chatbot',
+                action: () => navigate('/chatbot'),
+                svg: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              },
+              {
+                label: 'My Profile',
+                action: () => setActiveSection('profile'),
+                svg: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              },
             ].map(item => (
               <button
                 key={item.label}
                 onClick={item.action}
                 className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl hover:bg-[#f0f7f4] text-left transition-colors group"
               >
-                <span className="text-lg">{item.icon}</span>
+                <div className="w-8 h-8 bg-[#f0f7f4] group-hover:bg-[#d0e8dc] rounded-lg flex items-center justify-center flex-shrink-0 transition-colors">
+                  <svg className="w-4 h-4 text-[#4A7C59]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    {item.svg}
+                  </svg>
+                </div>
                 <span className="text-sm font-medium text-gray-700 group-hover:text-[#4A7C59]">{item.label}</span>
                 <svg className="w-4 h-4 text-gray-300 group-hover:text-[#4A7C59] ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -193,8 +217,12 @@ const PatientOverview = ({ stats, appointments, loading, navigate, setActiveSect
           <div className="divide-y divide-gray-50">
             {appointments.slice(0, 4).map(apt => (
               <div key={apt.id} className="flex items-center gap-4 px-6 py-4 hover:bg-gray-50/50 transition-colors">
-                <div className="w-10 h-10 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-xl flex items-center justify-center text-white font-semibold text-sm flex-shrink-0">
-                  {apt.doctor_name?.charAt(0)}
+                <div className="w-10 h-10 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-xl flex items-center justify-center text-white font-semibold text-sm flex-shrink-0 overflow-hidden">
+                  {apt.doctor_photo ? (
+                    <img src={apt.doctor_photo} alt={apt.doctor_name} className="w-full h-full object-cover" />
+                  ) : (
+                    apt.doctor_name?.charAt(0)
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-semibold text-gray-900">Dr. {apt.doctor_name}</p>

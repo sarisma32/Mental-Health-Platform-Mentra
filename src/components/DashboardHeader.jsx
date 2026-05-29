@@ -19,6 +19,7 @@ const DashboardHeader = ({
   userEmail = '',
   userPrefix = '',
   userSub = '',
+  userPhoto = null,
   notifType,
   notifId,
   onNotifNavigate,
@@ -56,8 +57,12 @@ const DashboardHeader = ({
               <p className="text-sm font-medium text-gray-800">{displayName}</p>
               <p className="text-xs text-gray-500">{userSub || userEmail}</p>
             </div>
-            <div className="w-10 h-10 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-semibold shadow-md">
-              {initial}
+            <div className="w-10 h-10 bg-gradient-to-br from-[#4A7C59] to-[#3d6b4a] rounded-full flex items-center justify-center text-white font-semibold shadow-md overflow-hidden">
+              {userPhoto ? (
+                <img src={userPhoto} alt={userName} className="w-full h-full object-cover" />
+              ) : (
+                initial
+              )}
             </div>
           </div>
         </div>

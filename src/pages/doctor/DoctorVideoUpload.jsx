@@ -15,6 +15,8 @@ const DoctorVideoUpload = ({ doctorId }) => {
   const [videoFile, setVideoFile] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [deleteModal, setDeleteModal] = useState(null); // { video: object }
+  const [deleting, setDeleting] = useState(false); // Prevent double clicks
 
   
   const fetchVideos = async () => {
@@ -65,7 +67,9 @@ const DoctorVideoUpload = ({ doctorId }) => {
   };
 
   const handleDelete = async (videoId) => {
-    if (!window.confirm('Delete this video?')) return;
+    if (deleting) return; // Prevent double clicks
+    setDeleting(true);
+    
     try {
       const token = localStorage.getItem('token');
       const res = await fetch(buildApiUrl(`/api/doctors/videos/${videoId}`), {
@@ -73,9 +77,18 @@ const DoctorVideoUpload = ({ doctorId }) => {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await res.json();
-      if (data.success) { fetchVideos(); showMsg('success', 'Video deleted.'); }
-      else showMsg('error', data.message || 'Delete failed');
-    } catch { showMsg('error', 'Delete failed.'); }
+      if (data.success) { 
+        fetchVideos(); 
+        showMsg('success', 'Video deleted successfully.'); 
+        setDeleteModal(null);
+      } else {
+        showMsg('error', data.message || 'Delete failed');
+      }
+    } catch { 
+      showMsg('error', 'Delete failed. Please try again.'); 
+    } finally {
+      setDeleting(false);
+    }
   };
 
   return (
@@ -136,7 +149,7 @@ const DoctorVideoUpload = ({ doctorId }) => {
                       {v.description && <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">{v.description}</p>}
                       <p className="text-xs text-gray-400 mt-1">{new Date(v.created_at).toLocaleDateString()}</p>
                     </div>
-                    <button onClick={() => handleDelete(v.id)} className="text-red-500 hover:text-red-700 p-1 flex-shrink-0" title="Delete video">
+                    <button onClick={() => setDeleteModal({ video: v })} className="text-red-500 hover:text-red-700 p-1 flex-shrink-0" title="Delete video">
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
@@ -149,6 +162,64 @@ const DoctorVideoUpload = ({ doctorId }) => {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteModal && (
+        <div className="fixed inset-0 backdrop-blur-md bg-white/30 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+            <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
+              <h3 className="text-lg font-bold text-gray-900">Delete Video</h3>
+              <button 
+                onClick={() => setDeleteModal(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="px-6 py-5">
+              <div className="text-center mb-6">
+                <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">Delete "{deleteModal.video.title}"?</h4>
+                <p className="text-gray-600 text-sm">This action cannot be undone. The video will be permanently removed from your profile.</p>
+              </div>
+
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => setDeleteModal(null)}
+                  disabled={deleting}
+                  className="flex-1 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={() => handleDelete(deleteModal.video.id)}
+                  disabled={deleting}
+                  className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {deleting ? (
+                    <>
+                      <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                      </svg>
+                      Deleting...
+                    </>
+                  ) : (
+                    'Delete Video'
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
