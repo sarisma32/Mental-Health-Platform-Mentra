@@ -1,5 +1,7 @@
 // API Configuration
-export const API_BASE_URL = 'http://localhost:5002';
+// export const API_BASE_URL = 'http://localhost:5002';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5002';
+
 
 // API Endpoints
 export const API_ENDPOINTS = {
@@ -83,7 +85,7 @@ export const API_ENDPOINTS = {
 };
 
 // Helper function to build full URL
-export const buildApiUrl = (endpoint) => `${API_BASE_URL}${endpoint}`;
+export const buildApiUrl = (endpoint) => `${API_URL}${endpoint}`;
 
 // Enhanced fetch function with automatic logout on account status errors
 export const apiRequest = async (url, options = {}) => {
