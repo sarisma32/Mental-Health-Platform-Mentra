@@ -23,6 +23,7 @@ import systemReviewRoutes from "./routes/systemReviewRoutes.js";
 import { testConnection, initializeDatabase } from "./db/init.js";
 import { startAppointmentScheduler } from "./utils/appointmentScheduler.js";
 import addSampleData from "./add-sample-data.js";
+import updateDoctorsTable from "./update-doctors-table.js";
 
 
 // ES6 module compatibility
@@ -105,6 +106,24 @@ app.get("/api/health", (req, res) => {
     environment: process.env.NODE_ENV || 'development'
   });
 });//Health check endpoint is used to verify that the backend server is running properly.
+
+// Temporary route to update doctors table
+app.get("/api/update-doctors-table", async (req, res) => {
+  try {
+    await updateDoctorsTable();
+    res.json({
+      success: true,
+      message: "Doctors table updated successfully"
+    });
+  } catch (error) {
+    console.error('Error updating doctors table:', error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to update doctors table",
+      error: error.message
+    });
+  }
+});
 
 // Temporary route to add sample data
 app.get("/api/add-sample-data", async (req, res) => {
