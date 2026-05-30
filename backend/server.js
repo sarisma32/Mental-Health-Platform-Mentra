@@ -24,6 +24,7 @@ import { testConnection, initializeDatabase } from "./db/init.js";
 import { startAppointmentScheduler } from "./utils/appointmentScheduler.js";
 import addSampleData from "./add-sample-data.js";
 import updateDoctorsTable from "./update-doctors-table.js";
+import pool from "./db/index.js";
 
 
 // ES6 module compatibility
