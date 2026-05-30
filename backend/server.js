@@ -109,6 +109,34 @@ app.get("/api/health", (req, res) => {
   });
 });//Health check endpoint is used to verify that the backend server is running properly.
 
+// Temporary simple doctors endpoint
+app.get("/api/doctors-simple", async (req, res) => {
+  try {
+    const query = `
+      SELECT id, full_name, email, specialization, hospital_name, location,
+             experience, bio, session_fee, years_experience, phone_number
+      FROM doctors 
+      WHERE approval_status = 'approved' AND status = 'active'
+      ORDER BY created_at DESC
+      LIMIT 50
+    `;
+    
+    const result = await pool.query(query);
+
+    res.json({
+      success: true,
+      doctors: result.rows
+    });
+  } catch (error) {
+    console.error('Error fetching doctors:', error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch doctors.",
+      error: error.message
+    });
+  }
+});
+
 // Temporary route to update doctors table
 app.get("/api/update-doctors-table", async (req, res) => {
   try {
