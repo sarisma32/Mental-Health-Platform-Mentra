@@ -42,6 +42,8 @@ app.use(cors({
       callback(null, true);
     } else if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
       callback(null, true);
+    } else if (origin === 'https://mental-health-platform-mentra.vercel.app') {
+      callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
     }
