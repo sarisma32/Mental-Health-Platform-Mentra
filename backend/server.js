@@ -22,6 +22,7 @@ import chatHistoryRoutes from "./routes/chatHistoryRoutes.js";
 import systemReviewRoutes from "./routes/systemReviewRoutes.js";
 import { testConnection, initializeDatabase } from "./db/init.js";
 import { startAppointmentScheduler } from "./utils/appointmentScheduler.js";
+import addSampleData from "./add-sample-data.js";
 
 
 // ES6 module compatibility
@@ -104,6 +105,24 @@ app.get("/api/health", (req, res) => {
     environment: process.env.NODE_ENV || 'development'
   });
 });//Health check endpoint is used to verify that the backend server is running properly.
+
+// Temporary route to add sample data
+app.get("/api/add-sample-data", async (req, res) => {
+  try {
+    await addSampleData();
+    res.json({
+      success: true,
+      message: "Sample doctors added successfully"
+    });
+  } catch (error) {
+    console.error('Error adding sample data:', error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to add sample data",
+      error: error.message
+    });
+  }
+});
 
 // Default route
 app.get("/", (req, res) => {
