@@ -286,15 +286,13 @@ export const getApprovedDoctors = async (req, res) => {
              d.experience, d.bio, d.profile_photo, d.session_fee, d.initial_session_fee,
              d.followup_session_fee, d.years_experience, d.credentials, d.languages,
              d.availability_hours, d.phone_number, d.created_at,
-             COALESCE(ROUND(AVG(r.rating)::numeric, 1), 0) AS rating,
-             COUNT(r.id) AS review_count
+             0 AS rating,
+             0 AS review_count
       FROM doctors d
-      LEFT JOIN reviews r ON r.doctor_id = d.id AND r.is_visible = true
       WHERE d.approval_status = 'approved' AND d.status = 'active'${whereExtra}
-      GROUP BY d.id
       ORDER BY d.created_at DESC
-      LIMIT ${limitParam} OFFSET ${offsetParam}
-    `
+      LIMIT $${queryParams.length - 1} OFFSET $${queryParams.length}
+    `;
     const doctors = await pool.query(query, queryParams);
 
     // Get total count for pagination
