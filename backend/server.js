@@ -22,9 +22,6 @@ import chatHistoryRoutes from "./routes/chatHistoryRoutes.js";
 import systemReviewRoutes from "./routes/systemReviewRoutes.js";
 import { testConnection, initializeDatabase } from "./db/init.js";
 import { startAppointmentScheduler } from "./utils/appointmentScheduler.js";
-import addSampleData from "./add-sample-data.js";
-import updateDoctorsTable from "./update-doctors-table.js";
-import pool from "./db/index.js";
 
 
 // ES6 module compatibility
@@ -42,8 +39,6 @@ app.use(cors({
     if (!origin || origin.startsWith('http://localhost:')) {
       callback(null, true);
     } else if (process.env.FRONTEND_URL && origin === process.env.FRONTEND_URL) {
-      callback(null, true);
-    } else if (origin === 'https://mental-health-platform-mentra.vercel.app') {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
@@ -110,69 +105,15 @@ app.get("/api/health", (req, res) => {
   });
 });//Health check endpoint is used to verify that the backend server is running properly.
 
-// Temporary simple doctors endpoint
-app.get("/api/doctors-simple", async (req, res) => {
-  try {
-    const query = `
-      SELECT id, full_name, email, specialization, hospital_name, location,
-             experience, bio, session_fee, years_experience, phone_number
-      FROM doctors 
-      WHERE approval_status = 'approved' AND status = 'active'
-      ORDER BY created_at DESC
-      LIMIT 50
-    `;
-    
-    const result = await pool.query(query);
-
-    res.json({
-      success: true,
-      doctors: result.rows
-    });
-  } catch (error) {
-    console.error('Error fetching doctors:', error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to fetch doctors.",
-      error: error.message
-    });
-  }
-});
-
-// Temporary route to update doctors table
-app.get("/api/update-doctors-table", async (req, res) => {
-  try {
-    await updateDoctorsTable();
-    res.json({
-      success: true,
-      message: "Doctors table updated successfully"
-    });
-  } catch (error) {
-    console.error('Error updating doctors table:', error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to update doctors table",
-      error: error.message
-    });
-  }
-});
-
-// Temporary route to add sample data
-app.get("/api/add-sample-data", async (req, res) => {
-  try {
-    await addSampleData();
-    res.json({
-      success: true,
-      message: "Sample doctors added successfully"
-    });
-  } catch (error) {
-    console.error('Error adding sample data:', error);
-    res.status(500).json({
-      success: false,
-      message: "Failed to add sample data",
-      error: error.message
-    });
-  }
-});
+// Health check route
+app.get("/api/health", (req, res) => {
+  res.json({
+    success: true,
+    message: "Mentra Backend API is running...",
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});//Health check endpoint is used to verify that the backend server is running properly.
 
 // Default route
 app.get("/", (req, res) => {
